@@ -1,0 +1,4 @@
+name: ExyliaStaff
+version: '1.0-SNAPSHOT'
+main: net.exylia.exyliaStaff.ExyliaStaff
+api-version: '1.18'

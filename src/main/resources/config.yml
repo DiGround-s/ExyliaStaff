@@ -1,0 +1,11 @@
+debug: false
+database:
+  type: SQLITE
+  sqlite:
+    file_name: exylia_staff.db
+  mysql:
+    host: localhost
+    port: 3306
+    database: exylia_staff
+    username: exylia_staff
+    password: exylia_staff
