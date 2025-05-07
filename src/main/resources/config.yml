@@ -1,6 +1,11 @@
+# ExyliaStaff - Configuración Principal
+
+# Modo debug (mensajes extra en la consola)
 debug: false
+
+# Configuración de la base de datos
 database:
-  type: SQLITE
+  type: sqlite
   sqlite:
     file_name: exylia_staff.db
   mysql:
@@ -9,3 +14,59 @@ database:
     database: exylia_staff
     username: exylia_staff
     password: exylia_staff
+
+# Configuración del modo staff
+staff-mode:
+  # Modo de juego al entrar en modo staff
+  gamemode: CREATIVE
+  
+  # Permisos especiales en modo staff
+  can-break-blocks: false
+  can-place-blocks: false
+  can-damage-entities: false
+  
+  # Slots e ítems de modo staff (slot:item-key)
+  item-slots:
+    - "0:teleport"
+    - "1:vanish"
+    - "2:freeze"
+    - "3:inspect"
+    - "8:exit"
+
+# Configuración de los ítems de modo staff
+staff-items:
+  teleport:
+    material: COMPASS
+    display-name: "&6Teleport Tool"
+    lore:
+      - "&7Right-click to teleport to the target block"
+      - "&7Left-click on a player to teleport to them"
+    glow: false
+
+  vanish:
+    material: ENDER_EYE
+    display-name: "&bVanish Toggle"
+    lore:
+      - "&7Right-click to toggle vanish mode"
+    glow: true
+
+  freeze:
+    material: PACKED_ICE
+    display-name: "&9Freeze Player"
+    lore:
+      - "&7Right-click on a player to freeze/unfreeze them"
+    glow: false
+
+  inspect:
+    material: BOOK
+    display-name: "&aPlayer Inspector"
+    lore:
+      - "&7Right-click on a player to inspect their inventory"
+    glow: false
+
+  exit:
+    material: BARRIER
+    display-name: "&cExit Staff Mode"
+    lore:
+      - "&7Right-click to exit staff mode"
+    glow: false

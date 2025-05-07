@@ -1,0 +1,26 @@
+# ExyliaStaff - Mensajes
+
+# Prefijo del plugin
+prefix: "&8[&cExyliaStaff&8] "
+
+# Mensajes de errores generales
+command:
+  only-players: "%prefix%&cEste comando solo puede ser ejecutado por jugadores."
+  no-permission: "%prefix%&cNo tienes permiso para ejecutar este comando."
+  player-not-found: "%prefix%&cJugador &7%player% &cno encontrado."
+  specify-player: "%prefix%&cDebes especificar un jugador."
+  usage: "%prefix%&cUso: /staffmode [on|off|toggle] [jugador]"
+  reloaded: "%prefix%&aConfiguración recargada correctamente."
+
+# Mensajes de modo staff
+staff-mode:
+  enabled: "%prefix%&aModo staff &2habilitado&a."
+  disabled: "%prefix%&aModo staff &cdeshabilitado&a."
+  enabled-other: "%prefix%&aModo staff &2habilitado &apara &7%player%&a."
+  disabled-other: "%prefix%&aModo staff &cdeshabilitado &apara &7%player%&a."
+
+# Mensajes de vanish
+vanish:
+  enabled: "%prefix%&aAhora eres &7invisible &apara los demás jugadores."
+  disabled: "%prefix%&aAhora eres &evisible &apara todos los jugadores."
+  enabled-other: "%prefix%&7%player% &aahora es &7invisible&a."

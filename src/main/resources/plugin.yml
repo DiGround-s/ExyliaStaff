@@ -2,3 +2,13 @@ name: ExyliaStaff
 version: '1.0-SNAPSHOT'
 main: net.exylia.exyliaStaff.ExyliaStaff
 api-version: '1.18'
+
+commands:
+  staffmode:
+    permission: exyliastaff.staffmode
+    usage: /staffmode [on|off|toggle] [jugador]
+    description: Habilita o deshabilita el modo staff
+  vanish:
+    permission: exyliastaff.vanish
+    usage: /vanish [jugador]
+    description: Habilita o deshabilita el modo vanish

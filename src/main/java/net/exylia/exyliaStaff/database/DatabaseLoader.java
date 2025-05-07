@@ -52,6 +52,16 @@ public class DatabaseLoader {
         tables.add(new StaffPlayerTable(plugin));
     }
 
+    public StaffPlayerTable getStaffPlayerTable() {
+        for (DatabaseTable table : tables) {
+            if (table instanceof StaffPlayerTable) {
+                return (StaffPlayerTable) table;
+            }
+        }
+        return null;
+    }
+
+
     private void createTables() {
         for (DatabaseTable table : tables) {
             table.createTable();

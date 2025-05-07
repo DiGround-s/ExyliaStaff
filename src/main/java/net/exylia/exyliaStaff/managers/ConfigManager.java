@@ -1,5 +1,7 @@
 package net.exylia.exyliaStaff.managers;
 
+import net.exylia.exyliaStaff.utils.ColorUtils;
+import net.kyori.adventure.text.Component;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -33,12 +35,26 @@ public class ConfigManager {
         configs.put(fileName, config);
     }
 
-    public String getMessage(String path) {
+    public Component getMessage(String path, String... replacements) {
         String message = getConfig("messages").getString(path, "<#a33b53>" + path + " not found in messages.yml");
-        return applyPlaceholders(message);
+
+        for (int i = 0; i < replacements.length - 1; i += 2) {
+            message = message.replace(replacements[i], replacements[i + 1]);
+        }
+
+        message = applyPrefix(message);
+        return ColorUtils.translateColors(message);
     }
 
-    private String applyPlaceholders(String message) {
+
+    public Component getMessage(String path) {
+        String message = getConfig("messages").getString(path, "<#a33b53>" + path + " not found in messages.yml");
+        message = applyPrefix(message);
+        return ColorUtils.translateColors(message);
+    }
+
+
+    private String applyPrefix(String message) {
         return message.replace("%prefix%", prefix);
     }
 

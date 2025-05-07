@@ -18,7 +18,7 @@ repositories {
 dependencies {
     implementation 'com.zaxxer:HikariCP:5.1.0'
     implementation 'org.xerial:sqlite-jdbc:3.45.2.0'
-    implementation 'mysql:mysql-connector-java:8.4.0'
+    implementation 'mysql:mysql-connector-java:8.0.33'
     compileOnly 'io.papermc.paper:paper-api:1.19.4-R0.1-SNAPSHOT'
 }
 
