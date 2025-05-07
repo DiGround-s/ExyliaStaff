@@ -1,33 +1,37 @@
 package net.exylia.exyliaStaff;
 
+import net.exylia.commons.ExyliaCommons;
+import net.exylia.commons.config.ConfigManager;
+import net.exylia.commons.utils.DebugUtils;
 import net.exylia.exyliaStaff.commands.StaffModeCommand;
 import net.exylia.exyliaStaff.commands.VanishCommand;
 import net.exylia.exyliaStaff.database.DatabaseLoader;
 import net.exylia.exyliaStaff.listeners.StaffModeListener;
-import net.exylia.exyliaStaff.managers.ConfigManager;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
 
-import static net.exylia.exyliaStaff.utils.DebugUtils.sendMOTD;
-
 public final class ExyliaStaff extends JavaPlugin {
 
     private ConfigManager configManager;
     private DatabaseLoader databaseLoader;
     private StaffModeManager staffModeManager;
+    private boolean debugEnabled;
 
     @Override
     public void onEnable() {
-        sendMOTD();
+        DebugUtils.setPrefix(getName());
+        DebugUtils.sendPluginMOTD(getName());
+
         loadManagers();
         loadListeners();
         loadCommands();
 
         // Mensaje de habilitación
-        getLogger().info("¡Plugin habilitado correctamente!");
+        DebugUtils.logInfo("Plugin habilitado correctamente");
+        DebugUtils.logInfo("Usando ExyliaCommons v" + ExyliaCommons.getVersion());
     }
 
     @Override
@@ -60,6 +64,8 @@ public final class ExyliaStaff extends JavaPlugin {
 
         // Cargamos el manager de modo staff
         staffModeManager = new StaffModeManager(this);
+
+        debugEnabled = configManager.getConfig("config").getBoolean("debug", false);
     }
 
     private void loadCommands() {

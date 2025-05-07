@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id("xyz.jpenilla.run-paper") version "2.3.1"
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 group = 'net.exylia'
@@ -8,6 +9,7 @@ version = '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    mavenLocal()
     maven { url 'https://repo.papermc.io/repository/maven-public/' }
     maven {
         name = "sonatype"
@@ -16,13 +18,23 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.zaxxer:HikariCP:5.1.0'
-    implementation 'org.xerial:sqlite-jdbc:3.45.2.0'
-    implementation 'mysql:mysql-connector-java:8.0.33'
+    compileOnly 'com.zaxxer:HikariCP:5.1.0'
+    compileOnly 'org.xerial:sqlite-jdbc:3.45.2.0'
+    compileOnly 'mysql:mysql-connector-java:8.0.33'
+    implementation('net.exylia:exyliacommons:1.0.0') {
+        exclude group: 'com.zaxxer', module: 'HikariCP'
+        exclude group: 'org.xerial', module: 'sqlite-jdbc'
+        exclude group: 'mysql', module: 'mysql-connector-java'
+    }
+
     compileOnly 'io.papermc.paper:paper-api:1.19.4-R0.1-SNAPSHOT'
 }
 
 tasks {
+    build {
+        dependsOn shadowJar
+    }
+
     runServer {
         // Configure the Minecraft version for our task.
         // This is the only required configuration besides applying the plugin.
@@ -56,4 +68,10 @@ processResources {
     filesMatching('plugin.yml') {
         expand props
     }
+}
+
+shadowJar {
+    archiveClassifier.set('')
+    minimize()
+    relocate 'net.exylia.commons', 'net.exyliastaff.shadow.commons'
 }

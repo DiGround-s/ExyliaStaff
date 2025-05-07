@@ -8,11 +8,15 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static net.exylia.commons.utils.ColorUtils.sendPlayerMessage;
+import static net.exylia.commons.utils.ColorUtils.sendSenderMessage;
 
 public class StaffModeCommand implements CommandExecutor, TabCompleter {
 
@@ -25,19 +29,19 @@ public class StaffModeCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if (!(sender instanceof Player) && args.length == 0) {
-            sender.sendMessage(plugin.getConfigManager().getMessage("command.only-players"));
+            sendSenderMessage(sender, plugin.getConfigManager().getMessage("command.only-players"));
             return true;
+            
         }
 
         // /staffmode
         if (args.length == 0) {
-            if (!(sender instanceof Player)) return false;
             Player player = (Player) sender;
 
             if (!player.hasPermission("exyliastaff.staffmode")) {
-                player.sendMessage(plugin.getConfigManager().getMessage("command.no-permission"));
+                sendPlayerMessage(player, plugin.getConfigManager().getMessage("command.no-permission"));
                 return true;
             }
 
@@ -46,79 +50,76 @@ public class StaffModeCommand implements CommandExecutor, TabCompleter {
         }
 
         // /staffmode <on|off|toggle> [player]
-        if (args.length >= 1) {
-            String action = args[0].toLowerCase();
-            Player target;
+        String action = args[0].toLowerCase();
+        Player target;
 
-            if (args.length >= 2) {
-                // Con jugador específico (requiere permiso admin)
-                if (!sender.hasPermission("exyliastaff.staffmode.others")) {
-                    sender.sendMessage(plugin.getConfigManager().getMessage("command.no-permission"));
-                    return true;
-                }
-
-                target = Bukkit.getPlayer(args[1]);
-                if (target == null) {
-                    sender.sendMessage(plugin.getConfigManager().getMessage("command.player-not-found", "%player%", args[1]));
-                    return true;
-                }
-            } else {
-                // Sin jugador específico (solo para jugadores)
-                if (!(sender instanceof Player)) {
-                    sender.sendMessage(plugin.getConfigManager().getMessage("command.specify-player"));
-                    return true;
-                }
-
-                if (!sender.hasPermission("exyliastaff.staffmode")) {
-                    sender.sendMessage(plugin.getConfigManager().getMessage("command.no-permission"));
-                    return true;
-                }
-
-                target = (Player) sender;
+        if (args.length >= 2) {
+            // Con jugador específico (requiere permiso admin)
+            if (!sender.hasPermission("exyliastaff.staffmode.others")) {
+                sendSenderMessage(sender, plugin.getConfigManager().getMessage("command.no-permission"));
+                return true;
             }
 
-            // Procesar acción
-            switch (action) {
-                case "on":
-                    staffModeManager.enableStaffMode(target);
-                    if (sender != target) {
-                        sender.sendMessage(plugin.getConfigManager().getMessage("staff-mode.enabled-other", "%player%", target.getName()));
-                    }
-                    break;
-                case "off":
-                    staffModeManager.disableStaffMode(target);
-                    if (sender != target) {
-                        sender.sendMessage(plugin.getConfigManager().getMessage("staff-mode.disabled-other", "%player%", target.getName()));
-                    }
-                    break;
-                case "toggle":
-                    staffModeManager.toggleStaffMode(target);
-                    String status = staffModeManager.isInStaffMode(target) ? "enabled" : "disabled";
-                    if (sender != target) {
-                        sender.sendMessage(plugin.getConfigManager().getMessage("staff-mode." + status + "-other", "%player%", target.getName()));
-                    }
-                    break;
-                case "reload":
-                    if (!sender.hasPermission("exyliastaff.reload")) {
-                        sender.sendMessage(plugin.getConfigManager().getMessage("command.no-permission"));
-                        return true;
-                    }
-                    plugin.getConfigManager().reloadAllConfigs();
-                    sender.sendMessage(plugin.getConfigManager().getMessage("command.reloaded"));
-                    break;
-                default:
-                    sender.sendMessage(plugin.getConfigManager().getMessage("command.usage"));
-                    break;
+            target = Bukkit.getPlayer(args[1]);
+            if (target == null) {
+                sendSenderMessage(sender, plugin.getConfigManager().getMessage("command.player-not-found", "%player%", args[1]));
+                return true;
+            }
+        } else {
+            // Sin jugador específico (solo para jugadores)
+            if (!(sender instanceof Player)) {
+                sendSenderMessage(sender, plugin.getConfigManager().getMessage("command.specify-player"));
+                return true;
             }
 
-            return true;
+            if (!sender.hasPermission("exyliastaff.staffmode")) {
+                sendSenderMessage(sender, plugin.getConfigManager().getMessage("command.no-permission"));
+                return true;
+            }
+
+            target = (Player) sender;
         }
 
-        return false;
+        // Procesar acción
+        switch (action) {
+            case "on":
+                staffModeManager.enableStaffMode(target);
+                if (sender != target) {
+                    sendSenderMessage(sender, plugin.getConfigManager().getMessage("staff-mode.enabled-other", "%player%", target.getName()));
+                }
+                break;
+            case "off":
+                staffModeManager.disableStaffMode(target);
+                if (sender != target) {
+                    sendSenderMessage(sender, plugin.getConfigManager().getMessage("staff-mode.disabled-other", "%player%", target.getName()));
+                }
+                break;
+            case "toggle":
+                staffModeManager.toggleStaffMode(target);
+                String status = staffModeManager.isInStaffMode(target) ? "enabled" : "disabled";
+                if (sender != target) {
+                    sendSenderMessage(sender, plugin.getConfigManager().getMessage("staff-mode." + status + "-other", "%player%", target.getName()));
+                }
+                break;
+            case "reload":
+                if (!sender.hasPermission("exyliastaff.reload")) {
+                    sendSenderMessage(sender, plugin.getConfigManager().getMessage("command.no-permission"));
+                    return true;
+                }
+                plugin.getConfigManager().reloadAllConfigs();
+                sendSenderMessage(sender, plugin.getConfigManager().getMessage("command.reloaded"));
+                break;
+            default:
+                sendSenderMessage(sender, plugin.getConfigManager().getMessage("command.usage"));
+                break;
+        }
+
+        return true;
+
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
         List<String> completions = new ArrayList<>();
 
         if (args.length == 1) {

@@ -8,10 +8,14 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static net.exylia.commons.utils.ColorUtils.sendPlayerMessage;
+import static net.exylia.commons.utils.ColorUtils.sendSenderMessage;
 
 public class VanishCommand implements CommandExecutor, TabCompleter {
 
@@ -24,19 +28,18 @@ public class VanishCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if (!(sender instanceof Player) && args.length == 0) {
-            sender.sendMessage(plugin.getConfigManager().getMessage("command.only-players"));
+            sendSenderMessage(sender, plugin.getConfigManager().getMessage("command.only-players"));
             return true;
         }
 
         // /vanish
         if (args.length == 0) {
-            if (!(sender instanceof Player)) return false;
             Player player = (Player) sender;
 
             if (!player.hasPermission("exyliastaff.vanish")) {
-                player.sendMessage(plugin.getConfigManager().getMessage("command.no-permission"));
+                sendPlayerMessage(player, plugin.getConfigManager().getMessage("command.no-permission"));
                 return true;
             }
 
@@ -45,34 +48,31 @@ public class VanishCommand implements CommandExecutor, TabCompleter {
         }
 
         // /vanish <player>
-        if (args.length >= 1) {
-            if (!sender.hasPermission("exyliastaff.vanish.others")) {
-                sender.sendMessage(plugin.getConfigManager().getMessage("command.no-permission"));
-                return true;
-            }
-
-            Player target = Bukkit.getPlayer(args[0]);
-            if (target == null) {
-                sender.sendMessage(plugin.getConfigManager().getMessage("command.player-not-found", "%player%", args[0]));
-                return true;
-            }
-
-            staffModeManager.toggleVanish(target);
-            boolean isVanished = staffModeManager.isVanished(target);
-
-            String status = isVanished ? "enabled" : "disabled";
-            if (sender != target) {
-                sender.sendMessage(plugin.getConfigManager().getMessage("vanish." + status + "-other", "%player%", target.getName()));
-            }
-
+        if (!sender.hasPermission("exyliastaff.vanish.others")) {
+            sendSenderMessage(sender, plugin.getConfigManager().getMessage("command.no-permission"));
             return true;
         }
 
-        return false;
+        Player target = Bukkit.getPlayer(args[0]);
+        if (target == null) {
+            sendSenderMessage(sender, plugin.getConfigManager().getMessage("command.player-not-found", "%player%", args[0]));
+            return true;
+        }
+
+        staffModeManager.toggleVanish(target);
+        boolean isVanished = staffModeManager.isVanished(target);
+
+        String status = isVanished ? "enabled" : "disabled";
+        if (sender != target) {
+            sendSenderMessage(sender, plugin.getConfigManager().getMessage("vanish." + status + "-other", "%player%", target.getName()));
+        }
+
+        return true;
+
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
         List<String> completions = new ArrayList<>();
 
         if (args.length == 1 && sender.hasPermission("exyliastaff.vanish.others")) {
