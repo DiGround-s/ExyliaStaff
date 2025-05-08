@@ -7,6 +7,7 @@ import net.exylia.exyliaStaff.commands.StaffModeCommand;
 import net.exylia.exyliaStaff.commands.VanishCommand;
 import net.exylia.exyliaStaff.database.DatabaseLoader;
 import net.exylia.exyliaStaff.listeners.StaffModeListener;
+import net.exylia.exyliaStaff.managers.SilentChestManager;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -52,6 +53,7 @@ public final class ExyliaStaff extends JavaPlugin {
     private void loadListeners() {
         // Registramos los listeners
         getServer().getPluginManager().registerEvents(new StaffModeListener(this, staffModeManager), this);
+        getServer().getPluginManager().registerEvents(new SilentChestManager(this, staffModeManager), this);
     }
 
     private void loadManagers() {

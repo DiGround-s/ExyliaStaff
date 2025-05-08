@@ -18,9 +18,15 @@ staff-mode:
   disabled: "%prefix%&aModo staff &cdeshabilitado&a."
   enabled-other: "%prefix%&aModo staff &2habilitado &apara &7%player%&a."
   disabled-other: "%prefix%&aModo staff &cdeshabilitado &apara &7%player%&a."
+  silent-chest: "&7Has abierto un cofre silenciosamente."
+  block-creative-items: "&cNo puedes tomar objetos del inventario creativo mientras estás en modo staff."
 
 # Mensajes de vanish
 vanish:
   enabled: "%prefix%&aAhora eres &7invisible &apara los demás jugadores."
   disabled: "%prefix%&aAhora eres &evisible &apara todos los jugadores."
   enabled-other: "%prefix%&7%player% &aahora es &7invisible&a."
+
+staff-items:
+  freeze: "&aHas congelado a %player%"
+  inspect: "&aInspeccionando a %player%"

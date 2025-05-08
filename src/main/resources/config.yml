@@ -24,7 +24,11 @@ staff-mode:
   can-break-blocks: false
   can-place-blocks: false
   can-damage-entities: false
-  
+
+  silent-chest-feedback: true
+
+  block-creative-items-feedback: true
+
   # Slots e ítems de modo staff (slot:item-key)
   item-slots:
     - "0:teleport"

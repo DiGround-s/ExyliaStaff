@@ -15,16 +15,21 @@ repositories {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/groups/public/"
     }
+    maven { url = uri("https://repo.codemc.io/repository/maven-releases/") }
+
+    maven { url = uri("https://repo.codemc.io/repository/maven-snapshots/") }
 }
 
 dependencies {
     compileOnly 'com.zaxxer:HikariCP:5.1.0'
     compileOnly 'org.xerial:sqlite-jdbc:3.45.2.0'
     compileOnly 'mysql:mysql-connector-java:8.0.33'
+    compileOnly("com.github.retrooper:packetevents-spigot:2.7.0")
     implementation('net.exylia:exyliacommons:1.0.0') {
         exclude group: 'com.zaxxer', module: 'HikariCP'
         exclude group: 'org.xerial', module: 'sqlite-jdbc'
         exclude group: 'mysql', module: 'mysql-connector-java'
+        exclude group: 'com.github.retrooper', module: 'packetevents-spigot'
     }
 
     compileOnly 'io.papermc.paper:paper-api:1.19.4-R0.1-SNAPSHOT'

@@ -2,6 +2,10 @@ package net.exylia.exyliaStaff.listeners;
 
 import net.exylia.exyliaStaff.ExyliaStaff;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -52,16 +56,13 @@ public class StaffModeListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
-
         if (!staffModeManager.isInStaffMode(player)) return;
 
         ItemStack item = event.getItem();
         if (item == null) return;
-
         // Verificamos si es un ítem de staff y procesamos la acción según corresponda
         if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             staffModeManager.checkStaffItem(player, item);
-
             // Si es un ítem de staff, cancelamos el evento para evitar interacciones no deseadas
             if (staffModeManager.getStaffItems().isStaffItem(item)) {
                 event.setCancelled(true);
@@ -85,8 +86,7 @@ public class StaffModeListener implements Listener {
             String itemKey = staffModeManager.getStaffItems().getStaffItemKey(item);
             if (itemKey == null) return;
 
-            if (event.getRightClicked() instanceof Player) {
-                Player target = (Player) event.getRightClicked();
+            if (event.getRightClicked() instanceof Player target) {
 
                 switch (itemKey) {
                     case "freeze":
@@ -105,9 +105,7 @@ public class StaffModeListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player)) return;
-
-        Player player = (Player) event.getWhoClicked();
+        if (!(event.getWhoClicked() instanceof Player player)) return;
 
         if (!staffModeManager.isInStaffMode(player)) return;
 
@@ -135,9 +133,7 @@ public class StaffModeListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onItemPickup(EntityPickupItemEvent event) {
-        if (!(event.getEntity() instanceof Player)) return;
-
-        Player player = (Player) event.getEntity();
+        if (!(event.getEntity() instanceof Player player)) return;
 
         // Los jugadores en modo staff no recogen items
         if (staffModeManager.isInStaffMode(player)) {
@@ -169,9 +165,7 @@ public class StaffModeListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onEntityDamage(EntityDamageEvent event) {
-        if (!(event.getEntity() instanceof Player)) return;
-
-        Player player = (Player) event.getEntity();
+        if (!(event.getEntity() instanceof Player player)) return;
 
         // Los jugadores en modo staff no reciben daño
         if (staffModeManager.isInStaffMode(player)) {
@@ -181,9 +175,7 @@ public class StaffModeListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-        if (!(event.getDamager() instanceof Player)) return;
-
-        Player damager = (Player) event.getDamager();
+        if (!(event.getDamager() instanceof Player damager)) return;
 
         // Los jugadores en modo staff no pueden hacer daño a menos que se configure lo contrario
         if (staffModeManager.isInStaffMode(damager) &&
@@ -194,9 +186,7 @@ public class StaffModeListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onEntityTarget(EntityTargetEvent event) {
-        if (!(event.getTarget() instanceof Player)) return;
-
-        Player player = (Player) event.getTarget();
+        if (!(event.getTarget() instanceof Player player)) return;
 
         // Las entidades no atacan a jugadores en modo staff
         if (staffModeManager.isInStaffMode(player)) {
