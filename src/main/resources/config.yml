@@ -25,52 +25,118 @@ staff-mode:
   can-place-blocks: false
   can-damage-entities: false
 
-  silent-chest-feedback: true
-
-  block-creative-items-feedback: true
-
-  # Slots e ítems de modo staff (slot:item-key)
-  item-slots:
-    - "0:teleport"
-    - "1:vanish"
-    - "2:freeze"
-    - "3:inspect"
-    - "8:exit"
-
 # Configuración de los ítems de modo staff
 staff-items:
   teleport:
     material: COMPASS
-    display-name: "&6Teleport Tool"
+    display-name: "<#b48fd9>• <#8a51c4>ᴛᴇʟᴇᴛʀᴀɴsᴘᴏʀᴛᴇ"
     lore:
       - "&7Right-click to teleport to the target block"
       - "&7Left-click on a player to teleport to them"
     glow: false
+    action: teleport
+    slot: 0
 
   vanish:
-    material: ENDER_EYE
-    display-name: "&bVanish Toggle"
+    material: GRAY_DYE
+    display-name: "<#FF0000>❌ ɪɴᴠɪsɪʙɪʟɪᴅᴀᴅ"
     lore:
-      - "&7Right-click to toggle vanish mode"
+      - "&7Right-click to enable vanish mode"
     glow: true
+    action: vanish
+    slot: 1
+    un-vanish:
+      material: LIME_DYE
+      display-name: "<#8fffc1>✔ ɪɴᴠɪsɪʙɪʟɪᴅᴀᴅ"
+      lore:
+        - "&7Right-click to disable vanish mode"
+      glow: true
+      action: un_vanish
+      slot: 1
 
   freeze:
     material: PACKED_ICE
-    display-name: "&9Freeze Player"
+    display-name: "<#b48fd9>• <#8a51c4>ᴄᴏɴɢᴇʟᴀʀ ᴊᴜɢᴀᴅᴏʀ"
     lore:
       - "&7Right-click on a player to freeze/unfreeze them"
     glow: false
+    action: freeze
+    slot: 2
 
   inspect:
     material: BOOK
-    display-name: "&aPlayer Inspector"
+    display-name: "<#b48fd9>• <#8a51c4>ᴠᴇʀ ɪɴᴠᴇɴᴛᴀʀɪᴏ"
     lore:
       - "&7Right-click on a player to inspect their inventory"
     glow: false
+    action: inspect
+    slot: 3
 
   exit:
     material: BARRIER
-    display-name: "&cExit Staff Mode"
+    display-name: "<#b48fd9>• <#8a51c4>sᴀʟɪʀ"
     lore:
       - "&7Right-click to exit staff mode"
     glow: false
+    action: exit
+    slot: 4
+
+  player_command:
+    material: COMMAND_BLOCK
+    display-name: "<#b48fd9>• <#8a51c4>player command"
+    lore:
+      - "&7Right-click on a player to execute a command"
+    glow: false
+    action: player_command
+    slot: 5
+    commands:
+      - "/tp %staff% %player%"
+
+  console_command:
+    material: COMMAND_BLOCK
+    display-name: "<#b48fd9>• <#8a51c4>console command"
+    lore:
+      - "&7Right-click to execute a command"
+    glow: false
+    action: console_command
+    slot: 6
+    commands:
+      - "/tp %staff% %player%"
+
+  random_player_tp:
+    material: MUSIC_DISC_13
+    display-name: "<#b48fd9>• <#8a51c4>ᴛᴇʟᴇᴛʀᴀɴsᴘᴏʀᴛᴇ ᴀʟᴇᴀᴛᴏʀɪᴏ"
+    lore:
+      - "&7Right-click to teleport to a random player"
+    glow: false
+    action: random_player_tp
+    slot: 7
+
+  online_players:
+    material: LEVER
+    display-name: "<#b48fd9>• <#8a51c4>ᴛᴇʟᴇᴛʀᴀɴsᴘᴏʀᴛᴇ ᴀ ᴊᴜɢᴀᴅᴏʀ"
+    lore:
+      - "&7Right-click to see a list of online players"
+    glow: false
+    action: online_players
+    slot: 8
+
+staff-scoreboard:
+  enabled: true
+  title: "&6Staff Mode"
+  lines:
+    - "&7Players: %players%"
+    - "&7Commands: %commands%"
+
+staff-bossbars:
+  enabled: true
+  example:
+    title: "&6Staff Mode"
+    color: BLUE
+    progress: 0
+    style: PROGRESS
+
+staff-notifications:
+  block-break: true
+  block-break-blocks:
+    - DIAMOND_ORE

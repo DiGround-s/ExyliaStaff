@@ -11,12 +11,15 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 
+import static net.exylia.commons.utils.ColorUtils.sendPlayerMessage;
+
 public class StaffModeManager {
     private final ExyliaStaff plugin;
     private final StaffItems staffItems;
     private final Map<UUID, StaffPlayer> staffPlayers;
     private final Set<UUID> staffModeEnabled;
     private final Set<UUID> vanished;
+    private final Set<UUID> frozenPlayers;
 
     public StaffModeManager(ExyliaStaff plugin) {
         this.plugin = plugin;
@@ -24,6 +27,7 @@ public class StaffModeManager {
         this.staffPlayers = new HashMap<>();
         this.staffModeEnabled = new HashSet<>();
         this.vanished = new HashSet<>();
+        this.frozenPlayers = new HashSet<>();
     }
 
     public void loadPlayer(Player player) {
@@ -92,6 +96,7 @@ public class StaffModeManager {
         staffPlayers.remove(uuid);
         staffModeEnabled.remove(uuid);
         vanished.remove(uuid);
+        frozenPlayers.remove(uuid);
     }
 
     public void toggleStaffMode(Player player) {
@@ -210,6 +215,11 @@ public class StaffModeManager {
             }
         }
 
+        // Update the vanish item if player is in staff mode
+        if (staffPlayer.isInStaffMode()) {
+            updateVanishItem(player, true);
+        }
+
         player.sendMessage(plugin.getConfigManager().getMessage("vanish.enabled"));
         savePlayer(player);
     }
@@ -230,10 +240,83 @@ public class StaffModeManager {
             online.showPlayer(plugin, player);
         }
 
+        // Update the vanish item if player is in staff mode
+        if (staffPlayer.isInStaffMode()) {
+            updateVanishItem(player, false);
+        }
+
         player.sendMessage(plugin.getConfigManager().getMessage("vanish.disabled"));
         savePlayer(player);
     }
 
+    // New method to update the vanish item based on vanish state
+    private void updateVanishItem(Player player, boolean vanished) {
+        // Check if we have the vanish item and if it has alternative state
+        if (!staffItems.hasAlternateState("vanish")) return;
+
+        // Find the slot where the vanish item is supposed to be
+        int slot = staffItems.getSlot("vanish");
+        if (slot == -1) return;
+
+        // Get the appropriate item based on the vanish state
+        ItemStack vanishItem;
+        if (vanished) {
+            // If vanished, get the alternate state item (e.g., LIME_DYE)
+            vanishItem = staffItems.getAlternateStateItem("vanish");
+        } else {
+            // If not vanished, get the normal state item (e.g., GRAY_DYE)
+            vanishItem = staffItems.getItem("vanish");
+        }
+
+        if (vanishItem != null) {
+            player.getInventory().setItem(slot, vanishItem);
+            player.updateInventory();
+        }
+    }
+
+    public void toggleFreezePlayer(Player staffPlayer, Player targetPlayer) {
+        UUID targetUUID = targetPlayer.getUniqueId();
+
+        if (frozenPlayers.contains(targetUUID)) {
+            unfreezePlayer(staffPlayer, targetPlayer);
+        } else {
+            freezePlayer(staffPlayer, targetPlayer);
+        }
+    }
+
+    public void freezePlayer(Player staffPlayer, Player targetPlayer) {
+        UUID targetUUID = targetPlayer.getUniqueId();
+
+        if (frozenPlayers.contains(targetUUID)) return;
+
+        frozenPlayers.add(targetUUID);
+        targetPlayer.setWalkSpeed(0);
+        targetPlayer.setFlySpeed(0);
+        targetPlayer.setInvulnerable(true);
+
+        // Notificar al staff y al jugador congelado
+        sendPlayerMessage(targetPlayer, plugin.getConfigManager().getMessage("freeze.player-frozen", "%staff%", staffPlayer.getName()));
+        sendPlayerMessage(staffPlayer, plugin.getConfigManager().getMessage("freeze.target-frozen", "%player%", targetPlayer.getName()));
+    }
+
+    public void unfreezePlayer(Player staffPlayer, Player targetPlayer) {
+        UUID targetUUID = targetPlayer.getUniqueId();
+
+        if (!frozenPlayers.contains(targetUUID)) return;
+
+        frozenPlayers.remove(targetUUID);
+        targetPlayer.setWalkSpeed(0.2f); // Valor predeterminado
+        targetPlayer.setFlySpeed(0.1f);  // Valor predeterminado
+        targetPlayer.setInvulnerable(false);
+
+        // Notificar al staff y al jugador descongelado
+        sendPlayerMessage(targetPlayer, plugin.getConfigManager().getMessage("freeze.player-unfrozen", "%staff%", staffPlayer.getName()));
+        sendPlayerMessage(staffPlayer, plugin.getConfigManager().getMessage("freeze.target-unfrozen","%player%", targetPlayer.getName()));
+    }
+
+    public boolean isFrozen(Player player) {
+        return frozenPlayers.contains(player.getUniqueId());
+    }
 
     private void storePlayerInventory(Player player) {
         UUID uuid = player.getUniqueId();
@@ -285,30 +368,29 @@ public class StaffModeManager {
         }
         player.setGameMode(staffGameMode);
 
-        // Añadimos los ítems de staff
-        List<String> itemSlots = plugin.getConfigManager().getConfig("config").getStringList("staff-mode.item-slots");
-        if (itemSlots.isEmpty()) {
-            // Configuración por defecto si no hay slots definidos
-            player.getInventory().setItem(0, staffItems.getItem("teleport"));
-            player.getInventory().setItem(1, staffItems.getItem("vanish"));
-            player.getInventory().setItem(2, staffItems.getItem("freeze"));
-            player.getInventory().setItem(3, staffItems.getItem("inspect"));
-            player.getInventory().setItem(8, staffItems.getItem("exit"));
-        } else {
-            for (String itemSlot : itemSlots) {
-                String[] parts = itemSlot.split(":");
-                if (parts.length != 2) continue;
+        // Añadimos los ítems de staff usando los slots configurados
+        Map<String, Integer> itemSlots = staffItems.getItemSlots();
 
-                try {
-                    int slot = Integer.parseInt(parts[0]);
-                    String itemKey = parts[1];
-                    ItemStack item = staffItems.getItem(itemKey);
+        if (!itemSlots.isEmpty()) {
+            // Usamos los slots configurados en el sistema nuevo
+            for (Map.Entry<String, Integer> entry : itemSlots.entrySet()) {
+                String itemKey = entry.getKey();
+                int slot = entry.getValue();
 
-                    if (item != null) {
-                        player.getInventory().setItem(slot, item);
-                    }
-                } catch (NumberFormatException e) {
-                    plugin.getLogger().warning("Slot inválido en config.yml: " + parts[0]);
+                // Check if this is the vanish item and if the player is already vanished
+                UUID uuid = player.getUniqueId();
+                StaffPlayer staffPlayer = staffPlayers.get(uuid);
+                boolean isVanished = staffPlayer != null && staffPlayer.isVanished();
+
+                ItemStack item;
+                if (itemKey.equals("vanish") && isVanished && staffItems.hasAlternateState("vanish")) {
+                    item = staffItems.getAlternateStateItem("vanish");
+                } else {
+                    item = staffItems.getItem(itemKey);
+                }
+
+                if (item != null && slot >= 0 && slot <= 35) {
+                    player.getInventory().setItem(slot, item);
                 }
             }
         }
@@ -342,21 +424,158 @@ public class StaffModeManager {
         return staffItems;
     }
 
-    public void checkStaffItem(Player player, ItemStack item) {
+    public void executeStaffItemAction(Player staffPlayer, ItemStack item, Player targetPlayer) {
         if (item == null) return;
-        if (!isInStaffMode(player)) return;
+        if (!isInStaffMode(staffPlayer)) return;
+
+        if (!staffItems.isStaffItem(item)) return;
 
         String itemKey = staffItems.getStaffItemKey(item);
-        if (itemKey == null) return;
+        String action = staffItems.getItemAction(item);
 
-        switch (itemKey) {
+        if (itemKey == null || action == null) return;
+
+        switch (action) {
             case "exit":
-                disableStaffMode(player);
+                disableStaffMode(staffPlayer);
                 break;
             case "vanish":
-                toggleVanish(player);
+            case "un_vanish":  // Handle both vanish states
+                toggleVanish(staffPlayer);
                 break;
-            // Los demás ítems se manejarán con eventos específicos
+            case "freeze":
+                if (targetPlayer != null) {
+                    toggleFreezePlayer(staffPlayer, targetPlayer);
+                } else {
+                    staffPlayer.sendMessage(plugin.getConfigManager().getMessage("freeze.no-target"));
+                }
+                break;
+            case "inspect":
+                if (targetPlayer != null) {
+                    openInspectInventory(staffPlayer, targetPlayer);
+                } else {
+                    staffPlayer.sendMessage(plugin.getConfigManager().getMessage("inspect.no-target"));
+                }
+                break;
+            case "player_command":
+                if (staffItems.hasCommands(itemKey)) {
+                    executePlayerCommands(staffPlayer, targetPlayer, itemKey);
+                }
+                break;
+            case "console_command":
+                if (staffItems.hasCommands(itemKey)) {
+                    executeConsoleCommands(staffPlayer, targetPlayer, itemKey);
+                }
+                break;
+            case "random_player_tp":
+                teleportToRandomPlayer(staffPlayer);
+                break;
+            case "online_players":
+                openOnlinePlayersMenu(staffPlayer);
+                break;
+            // Otras acciones personalizadas aquí
+        }
+    }
+
+    private void openInspectInventory(Player staffPlayer, Player targetPlayer) {
+        // Implementación para abrir el inventario del jugador objetivo
+        sendPlayerMessage(staffPlayer, plugin.getConfigManager().getMessage("inspect.opened", "%player%", targetPlayer.getName()));
+
+        // Aquí deberías implementar la lógica para abrir un inventario con los items del jugador objetivo
+        // Por ejemplo, usando un sistema de GUI personalizado
+    }
+
+    private void executePlayerCommands(Player staffPlayer, Player targetPlayer, String itemKey) {
+        List<String> commands = staffItems.getItemCommands(itemKey);
+
+        for (String cmd : commands) {
+            // Reemplazar variables
+            String processedCmd = cmd
+                    .replace("%staff%", staffPlayer.getName())
+                    .replace("%player%", targetPlayer != null ? targetPlayer.getName() : "");
+
+            // Eliminar el / inicial si existe
+            if (processedCmd.startsWith("/")) {
+                processedCmd = processedCmd.substring(1);
+            }
+
+            // Ejecutar el comando como el jugador
+            staffPlayer.performCommand(processedCmd);
+        }
+    }
+
+    private void executeConsoleCommands(Player staffPlayer, Player targetPlayer, String itemKey) {
+        List<String> commands = staffItems.getItemCommands(itemKey);
+
+        for (String cmd : commands) {
+            // Reemplazar variables
+            String processedCmd = cmd
+                    .replace("%staff%", staffPlayer.getName())
+                    .replace("%player%", targetPlayer != null ? targetPlayer.getName() : "");
+
+            // Eliminar el / inicial si existe
+            if (processedCmd.startsWith("/")) {
+                processedCmd = processedCmd.substring(1);
+            }
+
+            // Ejecutar el comando como la consola
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), processedCmd);
+        }
+    }
+
+    private void teleportToRandomPlayer(Player staffPlayer) {
+        List<Player> availablePlayers = new ArrayList<>();
+
+        // Obtener jugadores que no estén en modo staff
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            if (!online.equals(staffPlayer) && !isInStaffMode(online)) {
+                availablePlayers.add(online);
+            }
+        }
+
+        if (availablePlayers.isEmpty()) {
+            staffPlayer.sendMessage(plugin.getConfigManager().getMessage("random-tp.no-players"));
+            return;
+        }
+
+        // Seleccionar un jugador aleatorio
+        Player randomPlayer = availablePlayers.get(new Random().nextInt(availablePlayers.size()));
+
+        // Teleportar al staff al jugador aleatorio
+        staffPlayer.teleport(randomPlayer.getLocation());
+        sendPlayerMessage(randomPlayer, plugin.getConfigManager().getMessage("random-tp.teleported", "%player%", staffPlayer.getName()));
+    }
+
+    private void openOnlinePlayersMenu(Player staffPlayer) {
+        // Aquí implementarías la lógica para mostrar un menú con los jugadores en línea
+        // Por ejemplo, usando un sistema de GUI personalizado
+
+        staffPlayer.sendMessage(plugin.getConfigManager().getMessage("online-players.opened"));
+
+        // Esta es una implementación simple que muestra los jugadores en el chat
+        StringBuilder playerList = new StringBuilder();
+        int count = 0;
+
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            if (!online.equals(staffPlayer)) {
+                count++;
+                playerList.append("\n").append(count).append(". ").append(online.getName());
+                if (isInStaffMode(online)) {
+                    playerList.append(" (Staff)");
+                }
+                if (isVanished(online)) {
+                    playerList.append(" (Vanished)");
+                }
+                if (isFrozen(online)) {
+                    playerList.append(" (Frozen)");
+                }
+            }
+        }
+
+        if (count > 0) {
+            sendPlayerMessage(staffPlayer, plugin.getConfigManager().getMessage("online-players.list", "%count%", String.valueOf(count), "%players%", playerList.toString()));
+        } else {
+            staffPlayer.sendMessage(plugin.getConfigManager().getMessage("online-players.no-players"));
         }
     }
 }

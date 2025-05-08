@@ -16,6 +16,8 @@ import java.sql.SQLException;
 import java.util.Base64;
 import java.util.UUID;
 
+import static net.exylia.commons.utils.DebugUtils.logError;
+
 public class StaffPlayerTable implements DatabaseTable {
 
     private final ExyliaStaff plugin;
@@ -41,7 +43,7 @@ public class StaffPlayerTable implements DatabaseTable {
                 )
             """);
         } catch (SQLException e) {
-            plugin.getLogger().severe("No se pudo crear la tabla 'staff_players': " + e.getMessage());
+            logError("No se pudo crear la tabla 'staff_players': " + e.getMessage());
         }
     }
 
@@ -73,7 +75,7 @@ public class StaffPlayerTable implements DatabaseTable {
                     player.getLevel()
             );
         } catch (Exception e) {
-            plugin.getLogger().severe("Error guardando StaffPlayer: " + e.getMessage());
+            logError("Error guardando StaffPlayer: " + e.getMessage());
         }
     }
 
@@ -108,7 +110,7 @@ public class StaffPlayerTable implements DatabaseTable {
                 return new StaffPlayer(uuid, vanished, staffMode, inventory, armor, offHandItem, exp, level);
             }
         } catch (Exception e) {
-            plugin.getLogger().severe("Error cargando StaffPlayer: " + e.getMessage());
+            logError("Error cargando StaffPlayer: " + e.getMessage());
         }
         return new StaffPlayer(uuid, false, false);
     }

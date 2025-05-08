@@ -2,10 +2,6 @@ package net.exylia.exyliaStaff.listeners;
 
 import net.exylia.exyliaStaff.ExyliaStaff;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -60,11 +56,12 @@ public class StaffModeListener implements Listener {
 
         ItemStack item = event.getItem();
         if (item == null) return;
-        // Verificamos si es un ítem de staff y procesamos la acción según corresponda
+
         if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            staffModeManager.checkStaffItem(player, item);
-            // Si es un ítem de staff, cancelamos el evento para evitar interacciones no deseadas
+            // Usamos el nuevo sistema para procesar las acciones de los ítems de staff
             if (staffModeManager.getStaffItems().isStaffItem(item)) {
+                // Ejecutamos la acción del ítem sin un jugador objetivo
+                staffModeManager.executeStaffItemAction(player, item, null);
                 event.setCancelled(true);
             }
         }
@@ -78,28 +75,10 @@ public class StaffModeListener implements Listener {
 
         ItemStack item = player.getInventory().getItemInMainHand();
 
-        // Si es un ítem de staff, permitimos que maneje la interacción pero cancelamos el evento
-        if (staffModeManager.getStaffItems().isStaffItem(item)) {
+        // Si es un ítem de staff y la entidad es un jugador, ejecutamos la acción
+        if (staffModeManager.getStaffItems().isStaffItem(item) && event.getRightClicked() instanceof Player targetPlayer) {
             event.setCancelled(true);
-
-            // Procesamiento específico según el ítem
-            String itemKey = staffModeManager.getStaffItems().getStaffItemKey(item);
-            if (itemKey == null) return;
-
-            if (event.getRightClicked() instanceof Player target) {
-
-                switch (itemKey) {
-                    case "freeze":
-                        handleFreezeAction(player, target);
-                        break;
-                    case "inspect":
-                        handleInspectAction(player, target);
-                        break;
-                    case "teleport":
-                        // El teleport se maneja con left-click, aquí no hacemos nada
-                        break;
-                }
-            }
+            staffModeManager.executeStaffItemAction(player, item, targetPlayer);
         }
     }
 
@@ -171,6 +150,11 @@ public class StaffModeListener implements Listener {
         if (staffModeManager.isInStaffMode(player)) {
             event.setCancelled(true);
         }
+
+        // Los jugadores congelados no reciben daño
+        if (staffModeManager.isFrozen(player)) {
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -182,29 +166,64 @@ public class StaffModeListener implements Listener {
                 !plugin.getConfigManager().getConfig("config").getBoolean("staff-mode.can-damage-entities", false)) {
             event.setCancelled(true);
         }
+
+        // Los jugadores congelados no pueden hacer daño
+        if (staffModeManager.isFrozen(damager)) {
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onEntityTarget(EntityTargetEvent event) {
         if (!(event.getTarget() instanceof Player player)) return;
 
-        // Las entidades no atacan a jugadores en modo staff
-        if (staffModeManager.isInStaffMode(player)) {
+        // Las entidades no atacan a jugadores en modo staff o congelados
+        if (staffModeManager.isInStaffMode(player) || staffModeManager.isFrozen(player)) {
             event.setCancelled(true);
         }
     }
 
-    // Métodos auxiliares para manejar acciones específicas de ítems
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onPlayerMove(PlayerMoveEvent event) {
+        Player player = event.getPlayer();
 
-    private void handleFreezeAction(Player staff, Player target) {
-        // Aquí implementarías la lógica para congelar/descongelar jugadores
-        // Esto podría ser parte de otro sistema o módulo
-        staff.sendMessage(plugin.getConfigManager().getMessage("staff-items.freeze", "%player%", target.getName()));
+        // Si el jugador está congelado, solo permitimos la rotación pero no el movimiento
+        if (staffModeManager.isFrozen(player)) {
+            // Permitimos rotación pero no movimiento
+            if (event.getFrom().getX() != event.getTo().getX() ||
+                    event.getFrom().getY() != event.getTo().getY() ||
+                    event.getFrom().getZ() != event.getTo().getZ()) {
+
+                // Cancelamos solo el movimiento, manteniendo la rotación
+                event.getTo().setX(event.getFrom().getX());
+                event.getTo().setY(event.getFrom().getY());
+                event.getTo().setZ(event.getFrom().getZ());
+            }
+        }
     }
 
-    private void handleInspectAction(Player staff, Player target) {
-        // Aquí implementarías la lógica para inspeccionar el inventario de otros jugadores
-        staff.sendMessage(plugin.getConfigManager().getMessage("staff-items.inspect", "%player%", target.getName()));
-        // Ejemplo: staff.openInventory(target.getInventory());
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
+        Player player = event.getPlayer();
+
+        // Bloqueamos comandos para jugadores congelados
+        if (staffModeManager.isFrozen(player)) {
+            // Podríamos permitir algunos comandos como /msg o similares
+            String command = event.getMessage().split(" ")[0].toLowerCase();
+
+            // Lista de comandos permitidos mientras está congelado
+            boolean allowed = false;
+            for (String allowedCmd : plugin.getConfigManager().getConfig("config").getStringList("freeze.allowed-commands")) {
+                if (command.equalsIgnoreCase("/" + allowedCmd)) {
+                    allowed = true;
+                    break;
+                }
+            }
+
+            if (!allowed) {
+                event.setCancelled(true);
+                player.sendMessage(plugin.getConfigManager().getMessage("freeze.commands-blocked"));
+            }
+        }
     }
 }

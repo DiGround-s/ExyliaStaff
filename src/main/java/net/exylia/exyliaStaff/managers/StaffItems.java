@@ -1,5 +1,6 @@
 package net.exylia.exyliaStaff.managers;
 
+import net.exylia.commons.utils.ColorUtils;
 import net.exylia.exyliaStaff.ExyliaStaff;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -16,12 +17,24 @@ import java.util.*;
 public class StaffItems {
     private final ExyliaStaff plugin;
     private final NamespacedKey STAFF_ITEM_KEY;
+    private final NamespacedKey STAFF_ITEM_ACTION;
+    private final NamespacedKey STAFF_ITEM_STATE;
     private final Map<String, ItemStack> staffItems;
+    private final Map<String, ItemStack> alternateStateItems; // For items with alternate states like vanish/un-vanish
+    private final Map<String, String> itemActions;
+    private final Map<String, List<String>> itemCommands;
+    private final Map<String, Integer> itemSlots;
 
     public StaffItems(ExyliaStaff plugin) {
         this.plugin = plugin;
         this.STAFF_ITEM_KEY = new NamespacedKey(plugin, "staff_item");
+        this.STAFF_ITEM_ACTION = new NamespacedKey(plugin, "staff_action");
+        this.STAFF_ITEM_STATE = new NamespacedKey(plugin, "staff_state");
         this.staffItems = new HashMap<>();
+        this.alternateStateItems = new HashMap<>();
+        this.itemActions = new HashMap<>();
+        this.itemCommands = new HashMap<>();
+        this.itemSlots = new HashMap<>();
         loadItems();
     }
 
@@ -29,7 +42,6 @@ public class StaffItems {
         ConfigurationSection itemsSection = plugin.getConfigManager().getConfig("config").getConfigurationSection("staff-items");
         if (itemsSection == null) {
             plugin.getLogger().warning("No se encontró la sección 'staff-items' en config.yml");
-            createDefaultItems();
             return;
         }
 
@@ -37,128 +49,134 @@ public class StaffItems {
             ConfigurationSection itemSection = itemsSection.getConfigurationSection(key);
             if (itemSection == null) continue;
 
-            String materialName = itemSection.getString("material", "COMPASS");
-            Material material = Material.getMaterial(materialName);
-            if (material == null) {
-                plugin.getLogger().warning("Material inválido: " + materialName + " para el ítem: " + key);
-                material = Material.COMPASS;
-            }
+            // Load the main item
+            loadItem(key, itemSection, false);
 
-            ItemStack item = new ItemStack(material);
-            ItemMeta meta = item.getItemMeta();
-
-            if (meta != null) {
-                String displayName = itemSection.getString("display-name", "&cStaff Item");
-                meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', displayName));
-
-                List<String> lore = itemSection.getStringList("lore");
-                if (!lore.isEmpty()) {
-                    List<String> coloredLore = new ArrayList<>();
-                    for (String line : lore) {
-                        coloredLore.add(ChatColor.translateAlternateColorCodes('&', line));
-                    }
-                    meta.setLore(coloredLore);
+            // Check for alternate state item (like un-vanish)
+            for (String subKey : itemSection.getKeys(false)) {
+                if (itemSection.isConfigurationSection(subKey)) {
+                    // This is a subsection, like "un-vanish"
+                    loadAlternateStateItem(key, subKey, itemSection.getConfigurationSection(subKey));
                 }
-
-                if (itemSection.getBoolean("glow", false)) {
-                    meta.addEnchant(Enchantment.DURABILITY, 1, true);
-                    meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-                }
-
-                meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-                meta.getPersistentDataContainer().set(STAFF_ITEM_KEY, PersistentDataType.STRING, key);
-
-                item.setItemMeta(meta);
             }
-
-            staffItems.put(key, item);
-        }
-
-        if (staffItems.isEmpty()) {
-            createDefaultItems();
         }
     }
 
-    private void createDefaultItems() {
-        // Teleport Tool
-        ItemStack teleportTool = new ItemStack(Material.COMPASS);
-        ItemMeta teleportMeta = teleportTool.getItemMeta();
-        if (teleportMeta != null) {
-            teleportMeta.setDisplayName(ChatColor.GOLD + "Teleport Tool");
-            teleportMeta.setLore(Arrays.asList(
-                    ChatColor.GRAY + "Right-click to teleport to the target block",
-                    ChatColor.GRAY + "Left-click on a player to teleport to them"
-            ));
-            teleportMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-            teleportMeta.getPersistentDataContainer().set(STAFF_ITEM_KEY, PersistentDataType.STRING, "teleport");
-            teleportTool.setItemMeta(teleportMeta);
+    private void loadItem(String key, ConfigurationSection itemSection, boolean isAlternateState) {
+        String materialName = itemSection.getString("material", "COMPASS");
+        Material material = Material.getMaterial(materialName);
+        if (material == null) {
+            plugin.getLogger().warning("Material inválido: " + materialName + " para el ítem: " + key);
+            material = Material.COMPASS;
         }
-        staffItems.put("teleport", teleportTool);
 
-        // Vanish Toggle
-        ItemStack vanishTool = new ItemStack(Material.ENDER_EYE);
-        ItemMeta vanishMeta = vanishTool.getItemMeta();
-        if (vanishMeta != null) {
-            vanishMeta.setDisplayName(ChatColor.AQUA + "Vanish Toggle");
-            vanishMeta.setLore(Collections.singletonList(
-                    ChatColor.GRAY + "Right-click to toggle vanish mode"
-            ));
-            vanishMeta.addEnchant(Enchantment.DURABILITY, 1, true);
-            vanishMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES);
-            vanishMeta.getPersistentDataContainer().set(STAFF_ITEM_KEY, PersistentDataType.STRING, "vanish");
-            vanishTool.setItemMeta(vanishMeta);
-        }
-        staffItems.put("vanish", vanishTool);
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
 
-        // Freeze Tool
-        ItemStack freezeTool = new ItemStack(Material.PACKED_ICE);
-        ItemMeta freezeMeta = freezeTool.getItemMeta();
-        if (freezeMeta != null) {
-            freezeMeta.setDisplayName(ChatColor.BLUE + "Freeze Player");
-            freezeMeta.setLore(Collections.singletonList(
-                    ChatColor.GRAY + "Right-click on a player to freeze/unfreeze them"
-            ));
-            freezeMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-            freezeMeta.getPersistentDataContainer().set(STAFF_ITEM_KEY, PersistentDataType.STRING, "freeze");
-            freezeTool.setItemMeta(freezeMeta);
-        }
-        staffItems.put("freeze", freezeTool);
+        if (meta != null) {
+            String displayName = itemSection.getString("display-name", "&cStaff Item");
+            meta.displayName(ColorUtils.translateColors(displayName));
 
-        // Inspection Tool
-        ItemStack inspectTool = new ItemStack(Material.BOOK);
-        ItemMeta inspectMeta = inspectTool.getItemMeta();
-        if (inspectMeta != null) {
-            inspectMeta.setDisplayName(ChatColor.GREEN + "Player Inspector");
-            inspectMeta.setLore(Collections.singletonList(
-                    ChatColor.GRAY + "Right-click on a player to inspect their inventory"
-            ));
-            inspectMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-            inspectMeta.getPersistentDataContainer().set(STAFF_ITEM_KEY, PersistentDataType.STRING, "inspect");
-            inspectTool.setItemMeta(inspectMeta);
-        }
-        staffItems.put("inspect", inspectTool);
+            List<String> lore = itemSection.getStringList("lore");
+            if (!lore.isEmpty()) {
+                meta.lore(ColorUtils.translateColors(lore));
+            }
 
-        // Exit Staff Mode
-        ItemStack exitTool = new ItemStack(Material.BARRIER);
-        ItemMeta exitMeta = exitTool.getItemMeta();
-        if (exitMeta != null) {
-            exitMeta.setDisplayName(ChatColor.RED + "Exit Staff Mode");
-            exitMeta.setLore(Collections.singletonList(
-                    ChatColor.GRAY + "Right-click to exit staff mode"
-            ));
-            exitMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-            exitMeta.getPersistentDataContainer().set(STAFF_ITEM_KEY, PersistentDataType.STRING, "exit");
-            exitTool.setItemMeta(exitMeta);
+            if (itemSection.getBoolean("glow", false)) {
+                meta.addEnchant(Enchantment.DURABILITY, 1, true);
+                meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            }
+
+            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+            meta.getPersistentDataContainer().set(STAFF_ITEM_KEY, PersistentDataType.STRING, key);
+
+            // Almacenar la acción asociada al ítem
+            String action = itemSection.getString("action", key);
+            meta.getPersistentDataContainer().set(STAFF_ITEM_ACTION, PersistentDataType.STRING, action);
+
+            // Store state if this is an alternate state item
+            if (isAlternateState) {
+                meta.getPersistentDataContainer().set(STAFF_ITEM_STATE, PersistentDataType.STRING, "alternate");
+            }
+
+            // Store the action mapping
+            itemActions.put(key, action);
+
+            // Almacenar comandos si existen
+            if (itemSection.contains("commands")) {
+                List<String> commands = itemSection.getStringList("commands");
+                itemCommands.put(key, commands);
+            }
+
+            // Almacenar slot configurado
+            if (itemSection.contains("slot")) {
+                int slot = itemSection.getInt("slot", -1);
+                if (slot >= 0 && slot <= 8) {
+                    itemSlots.put(key, slot);
+                } else {
+                    plugin.getLogger().warning("Slot inválido para el ítem " + key + ": " + slot);
+                }
+            }
+
+            item.setItemMeta(meta);
         }
-        staffItems.put("exit", exitTool);
+
+        if (isAlternateState) {
+            alternateStateItems.put(key, item);
+        } else {
+            staffItems.put(key, item);
+        }
+    }
+
+    private void loadAlternateStateItem(String parentKey, String stateKey, ConfigurationSection stateSection) {
+        loadItem(parentKey, stateSection, true);
+    }
+
+    private ItemStack createDefaultItem(Material material, String displayName, List<String> lore, boolean glow, String action, int slot) {
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+
+        if (meta != null) {
+            meta.displayName(ColorUtils.translateColors(displayName));
+
+            meta.lore(ColorUtils.translateColors(lore));
+
+            if (glow) {
+                meta.addEnchant(Enchantment.DURABILITY, 1, true);
+                meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            }
+
+            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+            meta.getPersistentDataContainer().set(STAFF_ITEM_KEY, PersistentDataType.STRING, action);
+            meta.getPersistentDataContainer().set(STAFF_ITEM_ACTION, PersistentDataType.STRING, action);
+            item.setItemMeta(meta);
+        }
+
+        return item;
     }
 
     public ItemStack getItem(String key) {
         return staffItems.getOrDefault(key, null);
     }
 
+    public ItemStack getAlternateStateItem(String key) {
+        return alternateStateItems.getOrDefault(key, null);
+    }
+
+    public boolean hasAlternateState(String key) {
+        return alternateStateItems.containsKey(key);
+    }
+
     public List<ItemStack> getAllItems() {
         return new ArrayList<>(staffItems.values());
+    }
+
+    public Map<String, Integer> getItemSlots() {
+        return itemSlots;
+    }
+
+    public int getSlot(String key) {
+        return itemSlots.getOrDefault(key, -1);
     }
 
     public boolean isStaffItem(ItemStack item) {
@@ -175,5 +193,35 @@ public class StaffItems {
         if (meta == null) return null;
 
         return meta.getPersistentDataContainer().get(STAFF_ITEM_KEY, PersistentDataType.STRING);
+    }
+
+    public String getItemAction(ItemStack item) {
+        if (!isStaffItem(item)) return null;
+
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return null;
+
+        return meta.getPersistentDataContainer().get(STAFF_ITEM_ACTION, PersistentDataType.STRING);
+    }
+
+    public boolean isAlternateState(ItemStack item) {
+        if (!isStaffItem(item)) return false;
+
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return false;
+
+        return meta.getPersistentDataContainer().has(STAFF_ITEM_STATE, PersistentDataType.STRING);
+    }
+
+    public String getItemAction(String key) {
+        return itemActions.getOrDefault(key, key);
+    }
+
+    public List<String> getItemCommands(String key) {
+        return itemCommands.getOrDefault(key, Collections.emptyList());
+    }
+
+    public boolean hasCommands(String key) {
+        return itemCommands.containsKey(key) && !itemCommands.get(key).isEmpty();
     }
 }

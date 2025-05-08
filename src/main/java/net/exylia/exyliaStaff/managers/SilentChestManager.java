@@ -112,7 +112,7 @@ public class SilentChestManager extends PacketListenerAbstract implements Listen
 
         // Verificamos si es un ítem de staff y procesamos la acción según corresponda
         if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            staffModeManager.checkStaffItem(player, item);
+//            staffModeManager.checkStaffItem(player, item);
             // Si es un ítem de staff, cancelamos el evento para evitar interacciones no deseadas
             if (staffModeManager.getStaffItems().isStaffItem(item)) {
                 event.setCancelled(true);
