@@ -1,32 +1,48 @@
 # ExyliaStaff - Mensajes
 
 # Prefijo del plugin
-prefix: "&8[&cExyliaStaff&8] "
+prefix: "<#8a51c4>&lSTAFF &8•&r"
 
-# Mensajes de errores generales
-command:
-  only-players: "%prefix%&cEste comando solo puede ser ejecutado por jugadores."
-  no-permission: "%prefix%&cNo tienes permiso para ejecutar este comando."
-  player-not-found: "%prefix%&cJugador &7%player% &cno encontrado."
-  specify-player: "%prefix%&cDebes especificar un jugador."
-  usage: "%prefix%&cUso: /staffmode [on|off|toggle] [jugador]"
-  reloaded: "%prefix%&aConfiguración recargada correctamente."
+system:
+  reloaded: "%prefix% <#8fffc1>El plugin ha sido recargado."
+  no-players: "%prefix% <#a33b53>No hay jugadores en línea."
+  no-target: "%prefix% <#a33b53>No se ha seleccionado ningún jugador."
+  only-players: "%prefix% <#a33b53>Este comando solo puede ser usado por jugadores."
+  no-permission: "%prefix% <#a33b53>No tienes permiso para usar este comando."
+  player-not-found: "%prefix% <#a33b53>No se ha encontrado al jugador %target%."
+  specify-player: "%prefix% <#a33b53>Debes especificar un jugador."
 
-# Mensajes de modo staff
-staff-mode:
-  enabled: "%prefix%&aModo staff &2habilitado&a."
-  disabled: "%prefix%&aModo staff &cdeshabilitado&a."
-  enabled-other: "%prefix%&aModo staff &2habilitado &apara &7%player%&a."
-  disabled-other: "%prefix%&aModo staff &cdeshabilitado &apara &7%player%&a."
-  silent-chest: "&7Has abierto un cofre silenciosamente."
-  block-creative-items: "&cNo puedes tomar objetos del inventario creativo mientras estás en modo staff."
-
-# Mensajes de vanish
-vanish:
-  enabled: "%prefix%&aAhora eres &7invisible &apara los demás jugadores."
-  disabled: "%prefix%&aAhora eres &evisible &apara todos los jugadores."
-  enabled-other: "%prefix%&7%player% &aahora es &7invisible&a."
-
-staff-items:
-  freeze: "&aHas congelado a %player%"
-  inspect: "&aInspeccionando a %player%"
+actions:
+  staff-mode:
+    enabled: "%prefix% <#8fffc1>Modo staff activado."
+    disabled: "%prefix% <#a33b53>Modo staff desactivado."
+    enabled-other: "%prefix% <#8fffc1>Modo staff activado para %player%."
+    disabled-other: "%prefix% <#a33b53>Modo staff desactivado para %player%."
+  vanish:
+    enabled: "%prefix% <#8fffc1>Ahora eres invisible para los jugadores."
+    disabled: "%prefix% <#a33b53>Ahora eres visible para los jugadores."
+    enabled-other: "%prefix% <#8fffc1>Ahora %player% es invisible para los jugadores."
+    disabled-other: "%prefix% <#a33b53>Ahora %player% es visible para los jugadores."
+  inspect:
+    opened: "%prefix% <#8fffc1>Abriendo el inventario de %target%"
+  freeze:
+    frozen: "%prefix% <#8fffc1>Haz sido congelado por %staff%."
+    un-frozen: "%prefix% <#8fffc1>Haz sido des-congelado por %staff%."
+    frozen-staff: "%prefix% <#8fffc1>%player% ha sido congelado."
+    un-frozen-staff: "%prefix% <#8fffc1>%player% ha sido des-congelado."
+    repetitive-to-target: |-
+      &r
+      <#ffc58f>&lESTÁS BAJO REVISIÓN
+      <#59a4ff>Sigue las indicaciones de %staff%
+      &r
+      <#a33b53>No te desconectes o serás sancionado automáticamente.
+      &r
+    commands-blocked: "%prefix% <#a33b53>No puedes usar este comando mientras estás congelado."
+  phase:
+    teleported: "%prefix% <#8fffc1>Has sido teletransportado correctamente."
+    phased-through: "%prefix% <#8fffc1>Has traspasado los bloques."
+    no-ground: "%prefix% <#a33b53>No se encontró el suelo."
+    no-safe-location: "%prefix% <#a33b53>No se encontró una ubicación segura."
+    no-block-in-sight: "%prefix% <#a33b53>No hay un bloque en la vista."
+  random-tp:
+    teleported: "%prefix% <#8fffc1>Has sido teletransportado a %player%."

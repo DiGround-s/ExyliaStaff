@@ -40,6 +40,7 @@ public final class ExyliaStaff extends JavaPlugin {
         // Guarda el estado de todos los jugadores
         if (staffModeManager != null) {
             staffModeManager.saveAllPlayers();
+            staffModeManager.disableAllStaffMode();
         }
 
         // Cierra la conexión a la base de datos

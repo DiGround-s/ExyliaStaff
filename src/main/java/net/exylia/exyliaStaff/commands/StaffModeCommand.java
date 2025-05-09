@@ -31,7 +31,7 @@ public class StaffModeCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if (!(sender instanceof Player) && args.length == 0) {
-            sendSenderMessage(sender, plugin.getConfigManager().getMessage("command.only-players"));
+            sendSenderMessage(sender, plugin.getConfigManager().getMessage("system.only-players"));
             return true;
             
         }
@@ -41,7 +41,7 @@ public class StaffModeCommand implements CommandExecutor, TabCompleter {
             Player player = (Player) sender;
 
             if (!player.hasPermission("exyliastaff.staffmode")) {
-                sendPlayerMessage(player, plugin.getConfigManager().getMessage("command.no-permission"));
+                sendPlayerMessage(player, plugin.getConfigManager().getMessage("system.no-permission"));
                 return true;
             }
 
@@ -56,24 +56,24 @@ public class StaffModeCommand implements CommandExecutor, TabCompleter {
         if (args.length >= 2) {
             // Con jugador específico (requiere permiso admin)
             if (!sender.hasPermission("exyliastaff.staffmode.others")) {
-                sendSenderMessage(sender, plugin.getConfigManager().getMessage("command.no-permission"));
+                sendSenderMessage(sender, plugin.getConfigManager().getMessage("system.no-permission"));
                 return true;
             }
 
             target = Bukkit.getPlayer(args[1]);
             if (target == null) {
-                sendSenderMessage(sender, plugin.getConfigManager().getMessage("command.player-not-found", "%player%", args[1]));
+                sendSenderMessage(sender, plugin.getConfigManager().getMessage("system.player-not-found", "%player%", args[1]));
                 return true;
             }
         } else {
             // Sin jugador específico (solo para jugadores)
             if (!(sender instanceof Player)) {
-                sendSenderMessage(sender, plugin.getConfigManager().getMessage("command.specify-player"));
+                sendSenderMessage(sender, plugin.getConfigManager().getMessage("system.specify-player"));
                 return true;
             }
 
             if (!sender.hasPermission("exyliastaff.staffmode")) {
-                sendSenderMessage(sender, plugin.getConfigManager().getMessage("command.no-permission"));
+                sendSenderMessage(sender, plugin.getConfigManager().getMessage("system.no-permission"));
                 return true;
             }
 
@@ -85,32 +85,32 @@ public class StaffModeCommand implements CommandExecutor, TabCompleter {
             case "on":
                 staffModeManager.enableStaffMode(target);
                 if (sender != target) {
-                    sendSenderMessage(sender, plugin.getConfigManager().getMessage("staff-mode.enabled-other", "%player%", target.getName()));
+                    sendSenderMessage(sender, plugin.getConfigManager().getMessage("actions.staff-mode.enabled-other", "%player%", target.getName()));
                 }
                 break;
             case "off":
                 staffModeManager.disableStaffMode(target);
                 if (sender != target) {
-                    sendSenderMessage(sender, plugin.getConfigManager().getMessage("staff-mode.disabled-other", "%player%", target.getName()));
+                    sendSenderMessage(sender, plugin.getConfigManager().getMessage("actions.staff-mode.enabled-other", "%player%", target.getName()));
                 }
                 break;
             case "toggle":
                 staffModeManager.toggleStaffMode(target);
                 String status = staffModeManager.isInStaffMode(target) ? "enabled" : "disabled";
                 if (sender != target) {
-                    sendSenderMessage(sender, plugin.getConfigManager().getMessage("staff-mode." + status + "-other", "%player%", target.getName()));
+                    sendSenderMessage(sender, plugin.getConfigManager().getMessage("actions.staff-mode." + status + "-other", "%player%", target.getName()));
                 }
                 break;
             case "reload":
                 if (!sender.hasPermission("exyliastaff.reload")) {
-                    sendSenderMessage(sender, plugin.getConfigManager().getMessage("command.no-permission"));
+                    sendSenderMessage(sender, plugin.getConfigManager().getMessage("system.no-permission"));
                     return true;
                 }
                 plugin.getConfigManager().reloadAllConfigs();
-                sendSenderMessage(sender, plugin.getConfigManager().getMessage("command.reloaded"));
+                sendSenderMessage(sender, plugin.getConfigManager().getMessage("system.reloaded"));
                 break;
             default:
-                sendSenderMessage(sender, plugin.getConfigManager().getMessage("command.usage"));
+                sendSenderMessage(sender, plugin.getConfigManager().getMessage("system.usage"));
                 break;
         }
 

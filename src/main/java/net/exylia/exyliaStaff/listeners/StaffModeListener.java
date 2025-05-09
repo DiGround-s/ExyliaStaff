@@ -2,6 +2,8 @@ package net.exylia.exyliaStaff.listeners;
 
 import net.exylia.exyliaStaff.ExyliaStaff;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
+import org.bukkit.Bukkit;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -16,6 +18,10 @@ import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class StaffModeListener implements Listener {
 
@@ -49,6 +55,8 @@ public class StaffModeListener implements Listener {
         staffModeManager.unloadPlayer(player);
     }
 
+    private final Map<UUID, Long> lastUse = new HashMap<>();
+
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
@@ -57,15 +65,20 @@ public class StaffModeListener implements Listener {
         ItemStack item = event.getItem();
         if (item == null) return;
 
-        if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            // Usamos el nuevo sistema para procesar las acciones de los ítems de staff
-            if (staffModeManager.getStaffItems().isStaffItem(item)) {
-                // Ejecutamos la acción del ítem sin un jugador objetivo
-                staffModeManager.executeStaffItemAction(player, item, null);
-                event.setCancelled(true);
-            }
+        Action action = event.getAction();
+
+        if (staffModeManager.getStaffItems().isStaffItem(item)) {
+            long now = System.currentTimeMillis();
+            long last = lastUse.getOrDefault(player.getUniqueId(), 0L);
+            if (now - last < 200) return;
+
+            lastUse.put(player.getUniqueId(), now);
+            event.setCancelled(true);
+            staffModeManager.executeStaffItemAction(player, item, null, action);
         }
     }
+
+
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
@@ -74,32 +87,33 @@ public class StaffModeListener implements Listener {
         if (!staffModeManager.isInStaffMode(player)) return;
 
         ItemStack item = player.getInventory().getItemInMainHand();
+        if (!staffModeManager.getStaffItems().isStaffItem(item)) return;
 
-        // Si es un ítem de staff y la entidad es un jugador, ejecutamos la acción
-        if (staffModeManager.getStaffItems().isStaffItem(item) && event.getRightClicked() instanceof Player targetPlayer) {
-            event.setCancelled(true);
-            staffModeManager.executeStaffItemAction(player, item, targetPlayer);
-        }
+        if (!(event.getRightClicked() instanceof Player targetPlayer)) return;
+
+        long now = System.currentTimeMillis();
+        long last = lastUse.getOrDefault(player.getUniqueId(), 0L);
+        if (now - last < 200) return;
+
+        lastUse.put(player.getUniqueId(), now);
+        event.setCancelled(true);
+        staffModeManager.executeStaffItemAction(player, item, targetPlayer, null);
     }
+
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
 
         if (!staffModeManager.isInStaffMode(player)) return;
-
-        ItemStack clicked = event.getCurrentItem();
-
-        // Evitamos modificaciones al inventario de staff
-        if (clicked != null && staffModeManager.getStaffItems().isStaffItem(clicked)) {
-            event.setCancelled(true);
-        }
+        event.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onItemDrop(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
 
+        if (staffModeManager.isFrozen(player)) event.setCancelled(true);
         if (!staffModeManager.isInStaffMode(player)) return;
 
         ItemStack dropped = event.getItemDrop().getItemStack();
@@ -114,6 +128,7 @@ public class StaffModeListener implements Listener {
     public void onItemPickup(EntityPickupItemEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
 
+        if (staffModeManager.isFrozen(player)) event.setCancelled(true);
         // Los jugadores en modo staff no recogen items
         if (staffModeManager.isInStaffMode(player)) {
             event.setCancelled(true);
@@ -124,6 +139,7 @@ public class StaffModeListener implements Listener {
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
 
+        if (staffModeManager.isFrozen(player)) event.setCancelled(true);
         // Si está configurado para no permitir romper bloques en modo staff
         if (staffModeManager.isInStaffMode(player) &&
                 !plugin.getConfigManager().getConfig("config").getBoolean("staff-mode.can-break-blocks", false)) {
@@ -135,6 +151,7 @@ public class StaffModeListener implements Listener {
     public void onBlockPlace(BlockPlaceEvent event) {
         Player player = event.getPlayer();
 
+        if (staffModeManager.isFrozen(player)) event.setCancelled(true);
         // Si está configurado para no permitir colocar bloques en modo staff
         if (staffModeManager.isInStaffMode(player) &&
                 !plugin.getConfigManager().getConfig("config").getBoolean("staff-mode.can-place-blocks", false)) {
@@ -213,7 +230,7 @@ public class StaffModeListener implements Listener {
 
             // Lista de comandos permitidos mientras está congelado
             boolean allowed = false;
-            for (String allowedCmd : plugin.getConfigManager().getConfig("config").getStringList("freeze.allowed-commands")) {
+            for (String allowedCmd : plugin.getConfigManager().getConfig("config").getStringList("frozen.allowed-commands")) {
                 if (command.equalsIgnoreCase("/" + allowedCmd)) {
                     allowed = true;
                     break;
@@ -224,6 +241,13 @@ public class StaffModeListener implements Listener {
                 event.setCancelled(true);
                 player.sendMessage(plugin.getConfigManager().getMessage("freeze.commands-blocked"));
             }
+        }
+    }
+
+    @EventHandler
+    public void onPlayerTeleport(PlayerTeleportEvent event) {
+        if (staffModeManager.isFrozen(event.getPlayer()) && !event.getCause().equals(PlayerTeleportEvent.TeleportCause.PLUGIN)) {
+            event.setCancelled(true);
         }
     }
 }

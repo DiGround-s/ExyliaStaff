@@ -1,0 +1,56 @@
+title: "Inventario de %target%"
+slots:
+  helmet: 0
+  chestplate: 1
+  leggings: 2
+  boots: 3
+  offhand: 4
+
+items:
+  ender_chest:
+    slot: 5
+    display-name: "Ver enderchest"
+    material: ENDER_CHEST
+    lore:
+      - "&7Haz click para ver el enderchest de %target%"
+    glow: false
+    action: ender_chest
+
+  info:
+    slot: 6
+    display-name: "Información"
+    material: NAME_TAG
+    lore:
+      - "&7Haz click para ver la información de %target%"
+    glow: false
+    action: console_command
+    commands:
+      - "/staff info %target%"
+
+  player_command:
+    slot: 7
+    display-name: "Comando de jugador"
+    material: COMMAND_BLOCK
+    lore:
+      - "&7Haz click para ejecutar un comando en %target%"
+    glow: false
+    action: player_command
+    commands:
+      - "/staff info %target%"
+
+  freeze:
+    slot: 8
+    display-name: "Congelar"
+    material: PACKED_ICE
+    lore:
+      - "&7Haz click para congelar a %target%"
+    glow: false
+    action: freeze
+
+  decoration:
+    slots: 9-17
+    display-name: ""
+    material: GRAY_STAINED_GLASS_PANE
+    lore:
+      - "&7"
+    glow: false

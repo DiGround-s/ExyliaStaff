@@ -30,7 +30,7 @@ public class VanishCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if (!(sender instanceof Player) && args.length == 0) {
-            sendSenderMessage(sender, plugin.getConfigManager().getMessage("command.only-players"));
+            sendSenderMessage(sender, plugin.getConfigManager().getMessage("system.only-players"));
             return true;
         }
 
@@ -39,7 +39,7 @@ public class VanishCommand implements CommandExecutor, TabCompleter {
             Player player = (Player) sender;
 
             if (!player.hasPermission("exyliastaff.vanish")) {
-                sendPlayerMessage(player, plugin.getConfigManager().getMessage("command.no-permission"));
+                sendPlayerMessage(player, plugin.getConfigManager().getMessage("system.no-permission"));
                 return true;
             }
 
@@ -49,13 +49,13 @@ public class VanishCommand implements CommandExecutor, TabCompleter {
 
         // /vanish <player>
         if (!sender.hasPermission("exyliastaff.vanish.others")) {
-            sendSenderMessage(sender, plugin.getConfigManager().getMessage("command.no-permission"));
+            sendSenderMessage(sender, plugin.getConfigManager().getMessage("system.no-permission"));
             return true;
         }
 
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
-            sendSenderMessage(sender, plugin.getConfigManager().getMessage("command.player-not-found", "%player%", args[0]));
+            sendSenderMessage(sender, plugin.getConfigManager().getMessage("system.player-not-found", "%player%", args[0]));
             return true;
         }
 
@@ -64,7 +64,7 @@ public class VanishCommand implements CommandExecutor, TabCompleter {
 
         String status = isVanished ? "enabled" : "disabled";
         if (sender != target) {
-            sendSenderMessage(sender, plugin.getConfigManager().getMessage("vanish." + status + "-other", "%player%", target.getName()));
+            sendSenderMessage(sender, plugin.getConfigManager().getMessage("actions.vanish." + status + "-other", "%player%", target.getName()));
         }
 
         return true;

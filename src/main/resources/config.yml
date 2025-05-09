@@ -25,16 +25,40 @@ staff-mode:
   can-place-blocks: false
   can-damage-entities: false
 
+  phase-distance: 100
+
+frozen:
+  allowed-commands:
+    - /msg
+    - /r
+    - /tell
+  task_delay: 100 # in ticks
+  sound:
+    enabled: true
+    sound: BLOCK_NOTE_BLOCK_CHIME|1.0|1.0
+  effects:
+    enabled: true
+    effects:
+      - GLOWING|1|100
+      - BLINDNESS|1|100
+      - DARKNESS|1|100
+  commands-on-disconnect:
+    enabled: true
+    console_commands:
+      - "/say %player% disconnected in frozen mode"
+    staff_commands:
+      - "/ban %player% 14d Desconectarse en SS"
+
 # Configuración de los ítems de modo staff
 staff-items:
   teleport:
-    material: COMPASS
+    material: CLOCK
     display-name: "<#b48fd9>• <#8a51c4>ᴛᴇʟᴇᴛʀᴀɴsᴘᴏʀᴛᴇ"
     lore:
       - "&7Right-click to teleport to the target block"
       - "&7Left-click on a player to teleport to them"
     glow: false
-    action: teleport
+    action: phase
     slot: 0
 
   vanish:
