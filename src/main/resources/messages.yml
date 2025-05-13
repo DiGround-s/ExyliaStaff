@@ -46,3 +46,11 @@ actions:
     no-block-in-sight: "%prefix% <#a33b53>No hay un bloque en la vista."
   random-tp:
     teleported: "%prefix% <#8fffc1>Has sido teletransportado a %player%."
+
+extras:
+  no-helmet: "<#a33b53>Sin casco"
+  no-chestplate: "<#a33b53>Sin chaleco"
+  no-leggings: "<#a33b53>Sin pantalones"
+  no-boots: "<#a33b53>Sin botas"
+  no-hand: "<#a33b53>Sin mano"
+  no-offhand: "<#a33b53>Sin mano secundaria"

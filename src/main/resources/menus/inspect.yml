@@ -1,60 +1,40 @@
 title: "Inventario de %target%"
+rows: 6
 slots:
   helmet: 0
   chest_plate: 1
   leggings: 2
   boots: 3
-  offhand: 4
+  hand: 7
+  offhand: 8
+  hot_bar: 45-53
+  inventory: 18-44
 
-filler:
-  display-name: " "
-  material: BLACK_STAINED_GLASS_PANE
+enderchest:
+  slot: 5
+  name: "#8a51c4&lCOFRE DEL END"
+  material: ENDER_CHEST
+  lore:
+    - "&8| #e7cfffEntra al cofre del end de #59a4ff%player_name%"
+  glow: true
 
 items:
-  ender_chest:
-    slot: 5
-    display-name: "Ver enderchest"
-    material: ENDER_CHEST
-    lore:
-      - "&7Haz click para ver el enderchest de %target%"
-    glow: false
-    action: ender_chest
-
   info:
     slot: 6
-    display-name: "Información"
-    material: NAME_TAG
+    amount: 1
+    material: CHEST
+    name: "#8a51c4&lBÓVEDAS"
     lore:
-      - "&7Haz click para ver la información de %target%"
-    glow: false
-    action: console_command
-    commands:
-      - "/staff info %target%"
-
-  player_command:
-    slot: 7
-    display-name: "Comando de jugador"
-    material: COMMAND_BLOCK
-    lore:
-      - "&7Haz click para ejecutar un comando en %target%"
-    glow: false
+      - "&8| #e7cfffEntra a las bóvedas de #59a4ff%player_name%"
+    glowing: true
+    hide_attributes: true
+    use_placeholders: true
     action: player_command
     commands:
-      - "/staff info %target%"
-
-  freeze:
-    slot: 8
-    display-name: "Congelar"
-    material: PACKED_ICE
-    lore:
-      - "&7Haz click para congelar a %target%"
-    glow: false
-    action: freeze
+      - "/playerinv check %target%"
 
   decoration:
-    slots: 9-17
-    display-name: ""
+    slots: 4,9-17
+    name: "&7 "
     material: GRAY_STAINED_GLASS_PANE
-    lore:
-      - "&7"
     glow: false

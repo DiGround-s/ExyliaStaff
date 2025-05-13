@@ -61,7 +61,7 @@ public final class ExyliaStaff extends JavaPlugin {
     private void loadManagers() {
         MenuManager.initialize(this);
         // Cargamos la configuración
-        configManager = new ConfigManager(this, List.of("config", "messages"));
+        configManager = new ConfigManager(this, List.of("config", "messages", "menus/inspect"));
 
         // Cargamos la base de datos
         databaseLoader = new DatabaseLoader(this);

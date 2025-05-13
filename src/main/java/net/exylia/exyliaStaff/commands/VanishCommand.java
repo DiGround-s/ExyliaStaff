@@ -43,7 +43,7 @@ public class VanishCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
 
-            staffModeManager.toggleVanish(player);
+            staffModeManager.getVanishManager().toggleVanish(player);
             return true;
         }
 
@@ -59,7 +59,7 @@ public class VanishCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        staffModeManager.toggleVanish(target);
+        staffModeManager.getVanishManager().toggleVanish(target);
         boolean isVanished = staffModeManager.isVanished(target);
 
         String status = isVanished ? "enabled" : "disabled";

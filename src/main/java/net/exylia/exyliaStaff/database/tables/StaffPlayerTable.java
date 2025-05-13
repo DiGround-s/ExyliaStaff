@@ -32,7 +32,7 @@ public class StaffPlayerTable implements DatabaseTable {
             SQLExecutor executor = new SQLExecutor(conn);
             executor.update("""
                 CREATE TABLE IF NOT EXISTS staff_players (
-                    uuid TEXT PRIMARY KEY,
+                    uuid VARCHAR(36) PRIMARY KEY,
                     vanished INTEGER NOT NULL,
                     staff_mode INTEGER NOT NULL,
                     inventory TEXT,
@@ -62,8 +62,16 @@ public class StaffPlayerTable implements DatabaseTable {
             }
 
             executor.update("""
-                INSERT OR REPLACE INTO staff_players (uuid, vanished, staff_mode, inventory, armor, offhand, exp, level)
+                INSERT INTO staff_players (uuid, vanished, staff_mode, inventory, armor, offhand, exp, level)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE
+                    vanished = VALUES(vanished),
+                    staff_mode = VALUES(staff_mode),
+                    inventory = VALUES(inventory),
+                    armor = VALUES(armor),
+                    offhand = VALUES(offhand),
+                    exp = VALUES(exp),
+                    level = VALUES(level)
             """,
                     player.getUuid().toString(),
                     player.isVanished() ? 1 : 0,
@@ -74,6 +82,7 @@ public class StaffPlayerTable implements DatabaseTable {
                     player.getExp(),
                     player.getLevel()
             );
+
         } catch (Exception e) {
             logError("Error guardando StaffPlayer: " + e.getMessage());
         }

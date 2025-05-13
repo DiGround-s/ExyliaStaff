@@ -113,7 +113,7 @@ public class StaffModeListener implements Listener {
     public void onItemDrop(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
 
-        if (staffModeManager.isFrozen(player)) event.setCancelled(true);
+        if (staffModeManager.getFreezeManager().isFrozen((player))) event.setCancelled(true);
         if (!staffModeManager.isInStaffMode(player)) return;
 
         ItemStack dropped = event.getItemDrop().getItemStack();
@@ -128,7 +128,7 @@ public class StaffModeListener implements Listener {
     public void onItemPickup(EntityPickupItemEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
 
-        if (staffModeManager.isFrozen(player)) event.setCancelled(true);
+        if (staffModeManager.getFreezeManager().isFrozen((player))) event.setCancelled(true);
         // Los jugadores en modo staff no recogen items
         if (staffModeManager.isInStaffMode(player)) {
             event.setCancelled(true);
@@ -139,7 +139,7 @@ public class StaffModeListener implements Listener {
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
 
-        if (staffModeManager.isFrozen(player)) event.setCancelled(true);
+        if (staffModeManager.getFreezeManager().isFrozen((player))) event.setCancelled(true);
         // Si está configurado para no permitir romper bloques en modo staff
         if (staffModeManager.isInStaffMode(player) &&
                 !plugin.getConfigManager().getConfig("config").getBoolean("staff-mode.can-break-blocks", false)) {
@@ -151,7 +151,7 @@ public class StaffModeListener implements Listener {
     public void onBlockPlace(BlockPlaceEvent event) {
         Player player = event.getPlayer();
 
-        if (staffModeManager.isFrozen(player)) event.setCancelled(true);
+        if (staffModeManager.getFreezeManager().isFrozen((player))) event.setCancelled(true);
         // Si está configurado para no permitir colocar bloques en modo staff
         if (staffModeManager.isInStaffMode(player) &&
                 !plugin.getConfigManager().getConfig("config").getBoolean("staff-mode.can-place-blocks", false)) {
@@ -169,7 +169,7 @@ public class StaffModeListener implements Listener {
         }
 
         // Los jugadores congelados no reciben daño
-        if (staffModeManager.isFrozen(player)) {
+        if (staffModeManager.getFreezeManager().isFrozen((player))) {
             event.setCancelled(true);
         }
     }
@@ -185,7 +185,7 @@ public class StaffModeListener implements Listener {
         }
 
         // Los jugadores congelados no pueden hacer daño
-        if (staffModeManager.isFrozen(damager)) {
+        if (staffModeManager.getFreezeManager().isFrozen((damager))) {
             event.setCancelled(true);
         }
     }
@@ -195,7 +195,7 @@ public class StaffModeListener implements Listener {
         if (!(event.getTarget() instanceof Player player)) return;
 
         // Las entidades no atacan a jugadores en modo staff o congelados
-        if (staffModeManager.isInStaffMode(player) || staffModeManager.isFrozen(player)) {
+        if (staffModeManager.isInStaffMode(player) || staffModeManager.getFreezeManager().isFrozen((player))) {
             event.setCancelled(true);
         }
     }
@@ -205,7 +205,7 @@ public class StaffModeListener implements Listener {
         Player player = event.getPlayer();
 
         // Si el jugador está congelado, solo permitimos la rotación pero no el movimiento
-        if (staffModeManager.isFrozen(player)) {
+        if (staffModeManager.getFreezeManager().isFrozen((player))) {
             // Permitimos rotación pero no movimiento
             if (event.getFrom().getX() != event.getTo().getX() ||
                     event.getFrom().getY() != event.getTo().getY() ||
@@ -224,7 +224,7 @@ public class StaffModeListener implements Listener {
         Player player = event.getPlayer();
 
         // Bloqueamos comandos para jugadores congelados
-        if (staffModeManager.isFrozen(player)) {
+        if (staffModeManager.getFreezeManager().isFrozen((player))) {
             // Podríamos permitir algunos comandos como /msg o similares
             String command = event.getMessage().split(" ")[0].toLowerCase();
 
@@ -246,8 +246,11 @@ public class StaffModeListener implements Listener {
 
     @EventHandler
     public void onPlayerTeleport(PlayerTeleportEvent event) {
-        if (staffModeManager.isFrozen(event.getPlayer()) && !event.getCause().equals(PlayerTeleportEvent.TeleportCause.PLUGIN)) {
+        Player player = event.getPlayer();
+        if (staffModeManager.getFreezeManager().isFrozen(player)
+                && !event.getCause().equals(PlayerTeleportEvent.TeleportCause.PLUGIN)) {
             event.setCancelled(true);
         }
     }
+
 }
