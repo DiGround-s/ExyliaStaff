@@ -1,13 +1,18 @@
 package net.exylia.exyliaStaff.managers;
 
+import net.exylia.commons.menu.Menu;
+import net.exylia.commons.menu.MenuItem;
+import net.exylia.commons.menu.PaginationMenu;
 import net.exylia.exyliaStaff.ExyliaStaff;
 import net.exylia.exyliaStaff.database.tables.StaffPlayerTable;
 import net.exylia.exyliaStaff.models.StaffPlayer;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.type.EnderChest;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -827,10 +832,46 @@ public class StaffModeManager {
 
     private void openInspectInventory(Player staffPlayer, Player targetPlayer) {
         // Implementación para abrir el inventario del jugador objetivo
-        sendPlayerMessage(staffPlayer, plugin.getConfigManager().getMessage("actions.inspect.opened", "%player%", targetPlayer.getName()));
+        sendPlayerMessage(staffPlayer, plugin.getConfigManager().getMessage("actions.inspect.opened", "%target%", targetPlayer.getName()));
 
-        // Aquí deberías implementar la lógica para abrir un inventario con los items del jugador objetivo
-        // Por ejemplo, usando un sistema de GUI personalizado
+        Menu inspectMenu = new Menu(plugin.getConfigManager().getConfig("menus/inspect").getString("title"), 6);
+
+        configureFillerItem(inspectMenu);
+        ItemStack playerHelmet = targetPlayer.getInventory().getHelmet() != null ? targetPlayer.getInventory().getHelmet().clone() : new ItemStack(Material.CHAINMAIL_HELMET);
+        inspectMenu.setItem(plugin.getConfigManager().getConfig("menus/inspect").getInt("slots.helmet", 0), new MenuItem(playerHelmet));
+        ItemStack playerChestplate = targetPlayer.getInventory().getChestplate() != null ? targetPlayer.getInventory().getChestplate().clone() : new ItemStack(Material.CHAINMAIL_CHESTPLATE);
+        inspectMenu.setItem(plugin.getConfigManager().getConfig("menus/inspect").getInt("slots.chestplate", 1), new MenuItem(playerChestplate));
+        ItemStack playerLeggings = targetPlayer.getInventory().getLeggings() != null ? targetPlayer.getInventory().getLeggings().clone() : new ItemStack(Material.CHAINMAIL_LEGGINGS);
+        inspectMenu.setItem(plugin.getConfigManager().getConfig("menus/inspect").getInt("slots.leggings", 2), new MenuItem(playerLeggings));
+        ItemStack playerBoots = targetPlayer.getInventory().getBoots() != null ? targetPlayer.getInventory().getBoots().clone() : new ItemStack(Material.CHAINMAIL_BOOTS);
+        inspectMenu.setItem(plugin.getConfigManager().getConfig("menus/inspect").getInt("slots.boots", 3), new MenuItem(playerBoots));
+        ItemStack playerOffhand = targetPlayer.getInventory().getItemInOffHand().clone();
+        inspectMenu.setItem(plugin.getConfigManager().getConfig("menus/inspect").getInt("slots.offhand", 4), new MenuItem(playerOffhand));
+
+        ItemStack enderChestItem = new ItemStack(Material.ENDER_CHEST);
+        inspectMenu.setItem(plugin.getConfigManager().getConfig("menus/inspect").getInt("slots.enderchest", 5), new MenuItem(enderChestItem)
+                .setName(plugin.getConfigManager().getConfig("menus/inspect").getString("items.enderchest.name", "Ver enderchest"))
+                .setLoreFromList(plugin.getConfigManager().getConfig("menus/inspect").getStringList("items.enderchest.lore"))
+                .setGlowing(false)
+                .setClickHandler((e) -> {
+                    // Implementación para abrir el enderchest del jugador objetivo
+                    Inventory enderChest = targetPlayer.getEnderChest();
+                    staffPlayer.openInventory(enderChest);
+                }));
+    }
+
+    private void configureFillerItem(Menu menu) {
+        if (!plugin.getConfigManager().getConfig("menus/inspect").contains("near.items.filler")) {
+            return;
+        }
+
+        Material fillerMaterial = Material.valueOf(plugin.getConfigManager().getConfig("menus/inspect").getString("filler.material", "BLACK_STAINED_GLASS_PANE"));
+        String fillerName = plugin.getConfigManager().getConfig("menus/inspect").getString("filler.name", " ");
+
+        MenuItem fillerItem = new MenuItem(fillerMaterial)
+                .setName(fillerName);
+
+        menu.fillEmptySlots(fillerItem);
     }
 
     private void executePlayerCommands(Player staffPlayer, Player targetPlayer, String itemKey) {

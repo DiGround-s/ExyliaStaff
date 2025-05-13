@@ -1,10 +1,14 @@
 title: "Inventario de %target%"
 slots:
   helmet: 0
-  chestplate: 1
+  chest_plate: 1
   leggings: 2
   boots: 3
   offhand: 4
+
+filler:
+  display-name: " "
+  material: BLACK_STAINED_GLASS_PANE
 
 items:
   ender_chest:

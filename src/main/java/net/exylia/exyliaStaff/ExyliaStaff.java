@@ -2,6 +2,7 @@ package net.exylia.exyliaStaff;
 
 import net.exylia.commons.ExyliaCommons;
 import net.exylia.commons.config.ConfigManager;
+import net.exylia.commons.menu.MenuManager;
 import net.exylia.commons.utils.DebugUtils;
 import net.exylia.exyliaStaff.commands.StaffModeCommand;
 import net.exylia.exyliaStaff.commands.VanishCommand;
@@ -58,6 +59,7 @@ public final class ExyliaStaff extends JavaPlugin {
     }
 
     private void loadManagers() {
+        MenuManager.initialize(this);
         // Cargamos la configuración
         configManager = new ConfigManager(this, List.of("config", "messages"));
 
