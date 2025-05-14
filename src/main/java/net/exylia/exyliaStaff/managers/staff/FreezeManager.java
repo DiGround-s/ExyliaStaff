@@ -25,7 +25,6 @@ public class FreezeManager {
     private final StaffModeManager staffModeManager;
     private final Set<UUID> frozenPlayers;
 
-    // Para las tareas individuales de jugadores congelados
     private final Map<UUID, BukkitTask> frozenPlayerTasks;
     private final Map<UUID, Location> frozenPlayerLocations;
     private final Map<UUID, ItemStack> frozenPlayerHelmets;
@@ -75,20 +74,17 @@ public class FreezeManager {
         if (!frozenPlayers.contains(targetUUID)) return;
 
         frozenPlayers.remove(targetUUID);
-        targetPlayer.setWalkSpeed(0.2f); // Valor predeterminado
-        targetPlayer.setFlySpeed(0.1f);  // Valor predeterminado
+        targetPlayer.setWalkSpeed(0.2f);
+        targetPlayer.setFlySpeed(0.1f);
         targetPlayer.setInvulnerable(false);
 
         stopFrozenPlayerTask(targetUUID);
 
-        // Notificar al staff y al jugador descongelado
         sendPlayerMessage(targetPlayer, plugin.getConfigManager().getMessage("actions.freeze.un-frozen", "%staff%", staffPlayer.getName()));
         sendPlayerMessage(staffPlayer, plugin.getConfigManager().getMessage("actions.freeze.un-frozen-staff", "%player%", targetPlayer.getName()));
 
         ItemStack helmet = frozenPlayerHelmets.get(targetUUID);
-        if (helmet != null) {
-            targetPlayer.getInventory().setHelmet(helmet);
-        }
+        targetPlayer.getInventory().setHelmet(helmet);
 
         frozenPlayerHelmets.remove(targetUUID);
     }
@@ -99,7 +95,7 @@ public class FreezeManager {
 
         // Guardamos la ubicación inicial
         Location loc = targetPlayer.getLocation();
-        frozenPlayerLocations.put(targetUUID, new Location(loc.getWorld(), loc.getX(), loc.getY(), loc.getZ()));
+        frozenPlayerLocations.put(targetUUID, new Location(loc.getWorld(), loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch()));
 
         // Cancelamos cualquier tarea existente para este jugador
         if (frozenPlayerTasks.containsKey(targetUUID)) {
