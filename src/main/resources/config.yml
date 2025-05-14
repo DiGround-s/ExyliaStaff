@@ -1,9 +1,6 @@
 # ExyliaStaff - Configuración Principal
 
-# Modo debug (mensajes extra en la consola)
 debug: false
-
-# Configuración de la base de datos
 database:
   type: sqlite
   sqlite:
@@ -15,12 +12,12 @@ database:
     username: exylia_staff
     password: exylia_staff
 
-# Configuración del modo staff
+aliases:
+  staff_mode: ["staffmode", "staff", "mod"]
+  vanish: ["vanish", "v"]
+
 staff-mode:
-  # Modo de juego al entrar en modo staff
   gamemode: CREATIVE
-  
-  # Permisos especiales en modo staff
   can-break-blocks: false
   can-place-blocks: false
   can-damage-entities: false

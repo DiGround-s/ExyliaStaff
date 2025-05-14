@@ -10,17 +10,23 @@ import net.exylia.exyliaStaff.database.DatabaseLoader;
 import net.exylia.exyliaStaff.listeners.StaffModeListener;
 import net.exylia.exyliaStaff.managers.SilentChestManager;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
+import org.bukkit.Bukkit;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+
+import static net.exylia.commons.utils.DebugUtils.logDebug;
 
 public final class ExyliaStaff extends JavaPlugin {
 
     private ConfigManager configManager;
     private DatabaseLoader databaseLoader;
     private StaffModeManager staffModeManager;
-    private boolean debugEnabled;
 
     @Override
     public void onEnable() {
@@ -28,8 +34,8 @@ public final class ExyliaStaff extends JavaPlugin {
         DebugUtils.sendPluginMOTD(getName());
 
         loadManagers();
-        loadListeners();
         loadCommands();
+        loadListeners();
 
         // Mensaje de habilitación
         DebugUtils.logInfo("Plugin habilitado correctamente");
@@ -41,7 +47,7 @@ public final class ExyliaStaff extends JavaPlugin {
         // Guarda el estado de todos los jugadores
         if (staffModeManager != null) {
             staffModeManager.saveAllPlayers();
-            staffModeManager.disableAllStaffMode();
+            staffModeManager.disableAllStaffMode(false);
         }
 
         // Cierra la conexión a la base de datos
@@ -49,7 +55,7 @@ public final class ExyliaStaff extends JavaPlugin {
             databaseLoader.getDatabaseManager().close();
         }
 
-        getLogger().info("¡Plugin deshabilitado correctamente!");
+        DebugUtils.logInfo("¡Plugin deshabilitado correctamente!");
     }
 
     private void loadListeners() {
@@ -69,25 +75,54 @@ public final class ExyliaStaff extends JavaPlugin {
 
         // Cargamos el manager de modo staff
         staffModeManager = new StaffModeManager(this);
-
-        debugEnabled = configManager.getConfig("config").getBoolean("debug", false);
     }
 
     private void loadCommands() {
-        // Comando de modo staff
-        PluginCommand staffModeCmd = getCommand("staffmode");
-        if (staffModeCmd != null) {
-            StaffModeCommand staffModeCommand = new StaffModeCommand(this, staffModeManager);
-            staffModeCmd.setExecutor(staffModeCommand);
-            staffModeCmd.setTabCompleter(staffModeCommand);
-        }
+        // Comando StaffMode
+        StaffModeCommand staffModeCommand = new StaffModeCommand(this, staffModeManager);
+        List<String> staffAliases = getConfigManager().getConfig("config").getStringList("aliases.staff_mode");
+        registerCommand("staffmode", staffAliases, staffModeCommand, staffModeCommand);
 
-        // Comando de vanish
-        PluginCommand vanishCmd = getCommand("vanish");
-        if (vanishCmd != null) {
-            VanishCommand vanishCommand = new VanishCommand(this, staffModeManager);
-            vanishCmd.setExecutor(vanishCommand);
-            vanishCmd.setTabCompleter(vanishCommand);
+        // Comando Vanish
+        VanishCommand vanishCommand = new VanishCommand(this, staffModeManager);
+        List<String> vanishAliases = getConfigManager().getConfig("config").getStringList("aliases.vanish");
+        registerCommand("vanish", vanishAliases, vanishCommand, vanishCommand);
+    }
+
+    /**
+     * Registra un comando con sus alias en el servidor
+     *
+     * @param name El nombre principal del comando
+     * @param aliases La lista de alias para el comando
+     * @param executor El ejecutor del comando
+     * @param tabCompleter El completador de tabulación (puede ser null)
+     */
+    public void registerCommand(String name, List<String> aliases, CommandExecutor executor, TabCompleter tabCompleter) {
+        try {
+            // Crear una instancia de PluginCommand usando reflexión
+            Constructor<PluginCommand> constructor = PluginCommand.class.getDeclaredConstructor(String.class, org.bukkit.plugin.Plugin.class);
+            constructor.setAccessible(true);
+            PluginCommand command = constructor.newInstance(name, this);
+
+            // Configurar el comando
+            command.setExecutor(executor);
+            if (tabCompleter != null) {
+                command.setTabCompleter(tabCompleter);
+            }
+
+            // Si hay alias, los agregamos
+            if (aliases != null && !aliases.isEmpty()) {
+                command.setAliases(aliases);
+                logDebug(isDebugMode(), "Se cargaron " + aliases.size() + " alias para el comando /" + name + " -> " + aliases);
+            }
+
+            // Registrar el comando en el CommandMap de Bukkit
+            Bukkit.getCommandMap().register(getName().toLowerCase(), command);
+
+        } catch (NoSuchMethodException | SecurityException | InstantiationException |
+                 IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            getLogger().severe("Error al registrar el comando " + name + ": " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

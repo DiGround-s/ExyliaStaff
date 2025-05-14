@@ -58,6 +58,10 @@ public class VanishManager {
     }
 
     public void disableVanish(Player player) {
+        disableVanish(player, true);
+    }
+
+    public void disableVanish(Player player, boolean async) {
         UUID uuid = player.getUniqueId();
         StaffPlayer staffPlayer = staffModeManager.getStaffPlayer(uuid);
 
@@ -74,7 +78,7 @@ public class VanishManager {
         updateVanishItem(player, false);
 
         player.sendMessage(plugin.getConfigManager().getMessage("actions.vanish.disabled"));
-        staffModeManager.savePlayer(player);
+        staffModeManager.savePlayer(player, async);
     }
 
     public void applyVanishEffect(UUID uuid, Player player) {

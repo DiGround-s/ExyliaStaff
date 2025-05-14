@@ -84,16 +84,26 @@ public class StaffModeManager {
     }
 
     public void savePlayer(Player player) {
+        savePlayer(player, true); // Por defecto, usar modo asíncrono
+    }
+
+    public void savePlayer(Player player, boolean async) {
         UUID uuid = player.getUniqueId();
         if (!staffPlayers.containsKey(uuid)) return;
 
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                StaffPlayerTable staffPlayerTable = plugin.getDatabaseLoader().getStaffPlayerTable();
-                staffPlayerTable.saveStaffPlayer(staffPlayers.get(uuid));
-            }
-        }.runTaskAsynchronously(plugin);
+        if (async) {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    StaffPlayerTable staffPlayerTable = plugin.getDatabaseLoader().getStaffPlayerTable();
+                    staffPlayerTable.saveStaffPlayer(staffPlayers.get(uuid));
+                }
+            }.runTaskAsynchronously(plugin);
+        } else {
+            // Versión síncrona para usar durante onDisable
+            StaffPlayerTable staffPlayerTable = plugin.getDatabaseLoader().getStaffPlayerTable();
+            staffPlayerTable.saveStaffPlayer(staffPlayers.get(uuid));
+        }
     }
 
     public void saveAllPlayersAsync() {
@@ -116,10 +126,14 @@ public class StaffModeManager {
     }
 
     public void disableAllStaffMode() {
+        disableAllStaffMode(true); // Por defecto, usar modo asíncrono
+    }
+
+    public void disableAllStaffMode(boolean async) {
         for (UUID uuid : new HashSet<>(staffModeEnabled)) {
             Player player = Bukkit.getPlayer(uuid);
             if (player != null) {
-                disableStaffMode(player);
+                disableStaffMode(player, async);
             }
         }
     }
@@ -176,6 +190,10 @@ public class StaffModeManager {
     }
 
     public void disableStaffMode(Player player) {
+        disableStaffMode(player, true); // Por defecto, usar modo asíncrono
+    }
+
+    public void disableStaffMode(Player player, boolean async) {
         UUID uuid = player.getUniqueId();
 
         if (!staffPlayers.containsKey(uuid)) return;
@@ -190,7 +208,7 @@ public class StaffModeManager {
 
         // Si estaba vanished, lo desvanecemos
         if (staffPlayer.isVanished()) {
-            vanishManager.disableVanish(player);
+            vanishManager.disableVanish(player, async);
         }
 
         // Notificamos y guardamos en DB
@@ -205,7 +223,7 @@ public class StaffModeManager {
         staffPlayer.setOffHandItem(null);
 
         // Guardamos en DB
-        savePlayer(player);
+        savePlayer(player, async);
         player.setGameMode(GameMode.SURVIVAL);
     }
 

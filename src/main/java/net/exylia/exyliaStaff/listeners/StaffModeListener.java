@@ -114,12 +114,7 @@ public class StaffModeListener implements Listener {
         Player player = event.getPlayer();
 
         if (staffModeManager.getFreezeManager().isFrozen((player))) event.setCancelled(true);
-        if (!staffModeManager.isInStaffMode(player)) return;
-
-        ItemStack dropped = event.getItemDrop().getItemStack();
-
-        // Evitamos que se tiren ítems de staff
-        if (staffModeManager.getStaffItems().isStaffItem(dropped)) {
+        if (staffModeManager.isInStaffMode(player)) {
             event.setCancelled(true);
         }
     }

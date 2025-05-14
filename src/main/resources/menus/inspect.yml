@@ -29,9 +29,8 @@ items:
     glowing: true
     hide_attributes: true
     use_placeholders: true
-    action: player_command
     commands:
-      - "/playerinv check %target%"
+      - "player: playerinv check %player_name%"
 
   decoration:
     slots: 4,9-17

@@ -25,7 +25,7 @@ public class DatabaseManager {
         config.setIdleTimeout(60000);
         config.setConnectionTimeout(30000);
         config.setLeakDetectionThreshold(15000);
-        config.setPoolName("Exylia-HikariPool");
+        config.setPoolName("ExyliaStaff-HikariPool");
 
         if (credentials.getType() == DatabaseType.SQLITE) {
             config.setDriverClassName("org.sqlite.JDBC");
