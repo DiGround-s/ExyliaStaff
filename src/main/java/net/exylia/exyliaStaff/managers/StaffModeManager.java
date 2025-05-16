@@ -32,6 +32,8 @@ public class StaffModeManager {
     private final InspectionManager inspectionManager;
     private final MovementManager movementManager;
     private final CommandManager commandManager;
+    private final MinerHubManager minerHubManager;
+    private final BlockBreakNotifier blockBreakNotifier;
 
     public StaffModeManager(ExyliaStaff plugin) {
         this.plugin = plugin;
@@ -45,6 +47,8 @@ public class StaffModeManager {
         this.inspectionManager = new InspectionManager(plugin, this);
         this.movementManager = new MovementManager(plugin, this);
         this.commandManager = new CommandManager(plugin, this);
+        this.minerHubManager = new MinerHubManager(plugin);
+        this.blockBreakNotifier = new BlockBreakNotifier(plugin);
     }
 
     public void loadPlayer(Player player) {
@@ -365,6 +369,9 @@ public class StaffModeManager {
             case "random_player_tp":
                 movementManager.teleportToRandomPlayer(staffPlayer);
                 break;
+            case "miner_hub":
+                minerHubManager.openMinerHubInventory(staffPlayer);
+                break;
             case "online_players":
                 inspectionManager.openOnlinePlayersMenu(staffPlayer);
                 break;
@@ -411,5 +418,13 @@ public class StaffModeManager {
 
     public CommandManager getCommandManager() {
         return commandManager;
+    }
+
+    public MinerHubManager getMinerHubManager() {
+        return minerHubManager;
+    }
+
+    public BlockBreakNotifier getBlockBreakNotifier() {
+        return blockBreakNotifier;
     }
 }

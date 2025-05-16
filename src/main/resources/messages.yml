@@ -38,6 +38,7 @@ actions:
       <#a33b53>No te desconectes o serás sancionado automáticamente.
       &r
     commands-blocked: "%prefix% <#a33b53>No puedes usar este comando mientras estás congelado."
+    cannot-freeze-staff: "%prefix% <#a33b53>No puedes congelar a otro staff."
   phase:
     teleported: "%prefix% <#8fffc1>Has sido teletransportado correctamente."
     phased-through: "%prefix% <#8fffc1>Has traspasado los bloques."
@@ -46,6 +47,10 @@ actions:
     no-block-in-sight: "%prefix% <#a33b53>No hay un bloque en la vista."
   random-tp:
     teleported: "%prefix% <#8fffc1>Has sido teletransportado a %player%."
+
+notifications:
+  block-break: "<click:run_command:/tp %player%>%prefix% <#ffc58f>%player% <#e7cfff>ha minado %color%%block%.</click>"
+
 
 extras:
   no-helmet: "<#a33b53>Sin casco"

@@ -1,0 +1,31 @@
+title: "<#8a51c4>&lCENTRO MINERO"
+rows: 4
+prev_button:
+  slot: 27
+  material: ARROW
+  name: "<#ffd2a8>« <#ffc58f>Anterior"
+  lore:
+    - "&8| <#e7cfff>Pulsa para ver jugadores anteriores."
+  use_placeholders: false
+  hide_attributes: true
+next_button:
+  slot: 35
+  material: ARROW
+  name: "<#8fffc1>Siguiente <#a1ffc3>»"
+  lore:
+    - "&8| <#e7cfff>Pulsa para ver más jugadores."
+  use_placeholders: false
+  hide_attributes: true
+filler:
+  material: BLACK_STAINED_GLASS_PANE
+players:
+  slots: 0-26
+  material: PLAYER_HEAD
+  name: "<#8a51c4>%player_name%"
+  lore:
+    - "&8| #e7cfffAltura: #59a4ff%player_y%"
+    - "&8| #e7cfffMundo: #59a4ff%player_world%"
+    - "&f"
+    - "&8| #e7cfffTeletransportate a #59a4ff%player_name%"
+  use_placeholders: true
+  hide_attributes: true

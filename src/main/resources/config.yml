@@ -21,8 +21,15 @@ staff-mode:
   can-break-blocks: false
   can-place-blocks: false
   can-damage-entities: false
-
   phase-distance: 100
+
+miner-hub:
+  min-height: 10
+
+prefixes:
+  staff-mode: "<#ffc58f>Staff <dark_gray><bold>•<reset> <#ffd2a8>"
+  frozen: "<#ffc58f>SS <dark_gray><bold>•<reset> <#ffd2a8>"
+  vanish: "<#ffc58f>V <dark_gray><bold>•<reset> <#ffd2a8>"
 
 frozen:
   allowed-commands:
@@ -58,23 +65,6 @@ staff-items:
     action: phase
     slot: 0
 
-  vanish:
-    material: GRAY_DYE
-    display-name: "<#FF0000>❌ ɪɴᴠɪsɪʙɪʟɪᴅᴀᴅ"
-    lore:
-      - "&7Right-click to enable vanish mode"
-    glow: true
-    action: vanish
-    slot: 1
-    un-vanish:
-      material: LIME_DYE
-      display-name: "<#8fffc1>✔ ɪɴᴠɪsɪʙɪʟɪᴅᴀᴅ"
-      lore:
-        - "&7Right-click to disable vanish mode"
-      glow: true
-      action: un_vanish
-      slot: 1
-
   freeze:
     material: PACKED_ICE
     display-name: "<#b48fd9>• <#8a51c4>ᴄᴏɴɢᴇʟᴀʀ ᴊᴜɢᴀᴅᴏʀ"
@@ -82,7 +72,7 @@ staff-items:
       - "&7Right-click on a player to freeze/unfreeze them"
     glow: false
     action: freeze
-    slot: 2
+    slot: 1
 
   inspect:
     material: BOOK
@@ -91,38 +81,16 @@ staff-items:
       - "&7Right-click on a player to inspect their inventory"
     glow: false
     action: inspect
-    slot: 3
-
-  exit:
-    material: BARRIER
-    display-name: "<#b48fd9>• <#8a51c4>sᴀʟɪʀ"
-    lore:
-      - "&7Right-click to exit staff mode"
-    glow: false
-    action: exit
     slot: 4
 
-  player_command:
-    material: COMMAND_BLOCK
-    display-name: "<#b48fd9>• <#8a51c4>player command"
+  miner_hub:
+    material: GOLDEN_PICKAXE
+    display-name: "<#b48fd9>• <#8a51c4>ᴄᴇɴᴛʀᴏ ᴍɪɴᴇʀᴏ"
     lore:
-      - "&7Right-click on a player to execute a command"
+      - "&7Right-click to open the miner hub"
     glow: false
-    action: player_command
-    slot: 5
-    commands:
-      - "/tp %staff% %player%"
-
-  console_command:
-    material: COMMAND_BLOCK
-    display-name: "<#b48fd9>• <#8a51c4>console command"
-    lore:
-      - "&7Right-click to execute a command"
-    glow: false
-    action: console_command
+    action: miner_hub
     slot: 6
-    commands:
-      - "/tp %staff% %player%"
 
   random_player_tp:
     material: MUSIC_DISC_13
@@ -133,14 +101,22 @@ staff-items:
     action: random_player_tp
     slot: 7
 
-  online_players:
-    material: LEVER
-    display-name: "<#b48fd9>• <#8a51c4>ᴛᴇʟᴇᴛʀᴀɴsᴘᴏʀᴛᴇ ᴀ ᴊᴜɢᴀᴅᴏʀ"
+  vanish:
+    material: GRAY_DYE
+    display-name: "<#FF0000>❌ ɪɴᴠɪsɪʙɪʟɪᴅᴀᴅ"
     lore:
-      - "&7Right-click to see a list of online players"
-    glow: false
-    action: online_players
+      - "&7Right-click to enable vanish mode"
+    glow: true
+    action: vanish
     slot: 8
+    un-vanish:
+      material: LIME_DYE
+      display-name: "<#8fffc1>✔ ɪɴᴠɪsɪʙɪʟɪᴅᴀᴅ"
+      lore:
+        - "&7Right-click to disable vanish mode"
+      glow: true
+      action: un_vanish
+      slot: 8
 
 staff-scoreboard:
   enabled: true
@@ -158,6 +134,10 @@ staff-bossbars:
     style: PROGRESS
 
 staff-notifications:
-  block-break: true
-  block-break-blocks:
-    - DIAMOND_ORE
+  block-break:
+    enabled: true
+    sound: BLOCK_AMETHYST_CLUSTER_BREAK|0.5|1.0
+    blocks:
+      - DIAMOND_ORE|&#7db7ff
+      - DEEPSLATE_DIAMOND_ORE|&#59a4ff
+      - ANCIENT_DEBRIS|&#ffc58f

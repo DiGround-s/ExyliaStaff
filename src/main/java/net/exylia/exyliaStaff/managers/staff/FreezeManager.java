@@ -51,6 +51,11 @@ public class FreezeManager {
     public void freezePlayer(Player staffPlayer, Player targetPlayer) {
         UUID targetUUID = targetPlayer.getUniqueId();
 
+        if (staffModeManager.isInStaffMode(targetPlayer) || targetPlayer.hasPermission("exyliastaff.staff")) {
+            sendPlayerMessage(staffPlayer, plugin.getConfigManager().getMessage("actions.freeze.cannot-freeze-staff", "%player%", targetPlayer.getName()));
+            return;
+        }
+
         if (frozenPlayers.contains(targetUUID)) return;
 
         frozenPlayers.add(targetUUID);

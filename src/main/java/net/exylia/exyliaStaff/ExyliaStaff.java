@@ -7,6 +7,7 @@ import net.exylia.commons.utils.DebugUtils;
 import net.exylia.exyliaStaff.commands.StaffModeCommand;
 import net.exylia.exyliaStaff.commands.VanishCommand;
 import net.exylia.exyliaStaff.database.DatabaseLoader;
+import net.exylia.exyliaStaff.extensions.PlaceholderAPI;
 import net.exylia.exyliaStaff.listeners.StaffModeListener;
 import net.exylia.exyliaStaff.managers.SilentChestManager;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
@@ -36,6 +37,8 @@ public final class ExyliaStaff extends JavaPlugin {
         loadManagers();
         loadCommands();
         loadListeners();
+
+        loadExtensions();
 
         // Mensaje de habilitación
         DebugUtils.logInfo("Plugin habilitado correctamente");
@@ -67,7 +70,7 @@ public final class ExyliaStaff extends JavaPlugin {
     private void loadManagers() {
         MenuManager.initialize(this);
         // Cargamos la configuración
-        configManager = new ConfigManager(this, List.of("config", "messages", "menus/inspect"));
+        configManager = new ConfigManager(this, List.of("config", "messages", "menus/inspect", "menus/miner_hub"));
 
         // Cargamos la base de datos
         databaseLoader = new DatabaseLoader(this);
@@ -87,6 +90,13 @@ public final class ExyliaStaff extends JavaPlugin {
         VanishCommand vanishCommand = new VanishCommand(this, staffModeManager);
         List<String> vanishAliases = getConfigManager().getConfig("config").getStringList("aliases.vanish");
         registerCommand("vanish", vanishAliases, vanishCommand, vanishCommand);
+    }
+
+    private void loadExtensions() {
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            getLogger().info("PlaceholderAPI encontrado, registrando expansión...");
+            new PlaceholderAPI(this).register();
+        }
     }
 
     /**

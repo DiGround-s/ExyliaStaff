@@ -35,14 +35,11 @@ public class MovementManager {
     public void phasePlayer(Player staffPlayer, @Nullable Action action) {
         if (action == null) return;
 
-        // Maximum distance for the raytracing
         int maxDistance = plugin.getConfigManager().getConfig("config").getInt("staff-mode.phase-distance", 100);
 
         if (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK) {
-            // Left-click: Teleport to the top of the block being looked at
             teleportToTargetBlock(staffPlayer, maxDistance);
         } else if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
-            // Right-click: Phase through blocks until finding an open space
             phaseThrough(staffPlayer, maxDistance);
         }
     }
@@ -60,7 +57,6 @@ public class MovementManager {
         int x = baseLocation.getBlockX();
         int z = baseLocation.getBlockZ();
 
-        // Buscar hacia arriba desde la posición del bloque objetivo
         int worldMaxY = world.getMaxHeight();
 
         for (int y = baseLocation.getBlockY(); y <= worldMaxY - 2; y++) {
@@ -85,32 +81,25 @@ public class MovementManager {
         Location eyeLocation = player.getEyeLocation();
         Vector direction = eyeLocation.getDirection().normalize();
 
-        // Start from current location and move in the player's looking direction
         Location checkLoc = eyeLocation.clone();
         boolean foundSafeLocation = false;
         Location safeLocation = null;
 
-        // Increment step for better precision
         double step = 0.5;
         int iterations = (int) Math.ceil(maxDistance / step);
 
-        // Start checking a bit forward from the player to avoid self-collision
         checkLoc.add(direction.clone().multiply(0.5));
 
-        // Phase through blocks until we find an open space
         for (int i = 0; i < iterations; i++) {
             checkLoc.add(direction.clone().multiply(step));
 
-            // Skip if we're outside the world
             if (checkLoc.getBlockY() < player.getWorld().getMinHeight() ||
                     checkLoc.getBlockY() > player.getWorld().getMaxHeight()) {
                 continue;
             }
 
-            // Check if current position is in a solid block
             boolean inSolid = checkLoc.getBlock().getType().isSolid();
 
-            // Check if we have two air blocks for the player to stand in
             Block feetBlock = checkLoc.getBlock();
             Block headBlock = checkLoc.getBlock().getRelative(BlockFace.UP);
             Block groundBlock = checkLoc.getBlock().getRelative(BlockFace.DOWN);
@@ -118,38 +107,26 @@ public class MovementManager {
             boolean hasTwoAirBlocks = (!feetBlock.getType().isSolid() && !headBlock.getType().isSolid());
             boolean hasGround = groundBlock.getType().isSolid();
 
-            // Logic for finding a safe teleport location:
-            // - If we're transitioning from solid to air AND
-            // - We have room for the player (two air blocks vertically) AND
-            // - There's a solid block below
             if (inSolid && i > 0) {
-                // We're in a solid, keep going
                 continue;
             } else if (!inSolid && hasTwoAirBlocks) {
-                // Found potential safe spot (non-solid area)
                 if (hasGround) {
-                    // Found safe spot with ground
                     safeLocation = groundBlock.getLocation().clone().add(0.5, 1, 0.5);
                     foundSafeLocation = true;
                     break;
                 } else if (safeLocation == null) {
-                    // Remember this location but keep looking for one with ground
                     safeLocation = checkLoc.clone();
                 }
             }
         }
 
-        // If we found a safe location, teleport the player there
         if (foundSafeLocation && safeLocation != null) {
-            // Preserve pitch and yaw
             safeLocation.setPitch(player.getLocation().getPitch());
             safeLocation.setYaw(player.getLocation().getYaw());
 
             player.teleport(safeLocation);
             player.sendMessage(plugin.getConfigManager().getMessage("actions.phase.phased-through"));
         } else if (safeLocation != null) {
-            // Didn't find a "safe" location with ground, but did find air blocks
-            // We'll teleport anyway, but warn about no ground
             safeLocation.setPitch(player.getLocation().getPitch());
             safeLocation.setYaw(player.getLocation().getYaw());
 
@@ -178,7 +155,6 @@ public class MovementManager {
                 return;
             }
 
-            // Shuffle the candidates for randomness
             Collections.shuffle(candidates);
             queue.addAll(candidates);
         }
@@ -190,7 +166,6 @@ public class MovementManager {
             staffPlayer.teleport(target.getLocation());
             sendPlayerMessage(staffPlayer, plugin.getConfigManager().getMessage("actions.random-tp.teleported", "%player%", target.getName()));
         } else {
-            // If the target player is no longer available, try again
             teleportToRandomPlayer(staffPlayer);
         }
     }

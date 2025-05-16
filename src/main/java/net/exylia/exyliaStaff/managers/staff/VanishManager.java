@@ -51,7 +51,10 @@ public class VanishManager {
         vanished.add(uuid);
 
         applyVanishEffect(uuid, player);
-        updateVanishItem(player, true);
+
+        if (staffModeManager.isInStaffMode(player)) {
+            updateVanishItem(player, true);
+        }
 
         player.sendMessage(plugin.getConfigManager().getMessage("actions.vanish.enabled"));
         staffModeManager.savePlayer(player);
@@ -75,7 +78,9 @@ public class VanishManager {
             online.showPlayer(plugin, player);
         }
 
-        updateVanishItem(player, false);
+        if (staffModeManager.isInStaffMode(player)) {
+            updateVanishItem(player, false);
+        }
 
         player.sendMessage(plugin.getConfigManager().getMessage("actions.vanish.disabled"));
         staffModeManager.savePlayer(player, async);
