@@ -6,7 +6,7 @@ import net.exylia.commons.menu.MenuManager;
 import net.exylia.commons.utils.DebugUtils;
 import net.exylia.exyliaStaff.commands.StaffModeCommand;
 import net.exylia.exyliaStaff.commands.VanishCommand;
-import net.exylia.exyliaStaff.database.DatabaseLoader;
+import net.exylia.exyliaStaff.database.StaffDatabaseLoader;
 import net.exylia.exyliaStaff.extensions.PlaceholderAPI;
 import net.exylia.exyliaStaff.listeners.StaffModeListener;
 import net.exylia.exyliaStaff.managers.SilentChestManager;
@@ -26,7 +26,7 @@ import static net.exylia.commons.utils.DebugUtils.logDebug;
 public final class ExyliaStaff extends JavaPlugin {
 
     private ConfigManager configManager;
-    private DatabaseLoader databaseLoader;
+    private StaffDatabaseLoader databaseLoader;
     private StaffModeManager staffModeManager;
 
     @Override
@@ -54,8 +54,9 @@ public final class ExyliaStaff extends JavaPlugin {
         }
 
         // Cierra la conexión a la base de datos
-        if (databaseLoader.getDatabaseManager() != null) {
-            databaseLoader.getDatabaseManager().close();
+        if (databaseLoader != null) {
+            databaseLoader.close();
+            DebugUtils.logInfo("Conexiones de base de datos cerradas correctamente");
         }
 
         DebugUtils.logInfo("¡Plugin deshabilitado correctamente!");
@@ -72,9 +73,13 @@ public final class ExyliaStaff extends JavaPlugin {
         // Cargamos la configuración
         configManager = new ConfigManager(this, List.of("config", "messages", "menus/inspect", "menus/miner_hub"));
 
-        // Cargamos la base de datos
-        databaseLoader = new DatabaseLoader(this);
+        // Cargamos la base de datos con el nuevo sistema de ExyliaCommons
+        databaseLoader = new StaffDatabaseLoader(this);
         databaseLoader.load();
+
+        if (isDebugMode()) {
+            DebugUtils.logDebug(true, "Base de datos inicializada usando: " + databaseLoader.getDatabaseType());
+        }
 
         // Cargamos el manager de modo staff
         staffModeManager = new StaffModeManager(this);
@@ -144,7 +149,7 @@ public final class ExyliaStaff extends JavaPlugin {
         return configManager;
     }
 
-    public DatabaseLoader getDatabaseLoader() {
+    public StaffDatabaseLoader getDatabaseLoader() {
         return databaseLoader;
     }
 
