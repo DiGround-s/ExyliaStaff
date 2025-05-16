@@ -37,10 +37,8 @@ public class StaffModeListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
 
-        // Cargamos el staff player
         staffModeManager.loadPlayer(player);
 
-        // Ocultamos a los jugadores vanished
         for (Player online : plugin.getServer().getOnlinePlayers()) {
             if (staffModeManager.isVanished(online) && !player.hasPermission("exyliastaff.see-vanished")) {
                 player.hidePlayer(plugin, online);
@@ -293,12 +291,9 @@ public class StaffModeListener implements Listener {
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
         Player player = event.getPlayer();
 
-        // Bloqueamos comandos para jugadores congelados
         if (staffModeManager.getFreezeManager().isFrozen((player))) {
-            // Podríamos permitir algunos comandos como /msg o similares
             String command = event.getMessage().split(" ")[0].toLowerCase();
 
-            // Lista de comandos permitidos mientras está congelado
             boolean allowed = false;
             for (String allowedCmd : plugin.getConfigManager().getConfig("config").getStringList("frozen.allowed-commands")) {
                 if (command.equalsIgnoreCase("/" + allowedCmd)) {

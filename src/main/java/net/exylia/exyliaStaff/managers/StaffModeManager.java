@@ -14,8 +14,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import javax.annotation.Nullable;
 import java.util.*;
 
-import static net.exylia.commons.utils.ColorUtils.sendPlayerMessage;
-
 /**
  * Main manager for Staff Mode functionality.
  * Acts as a facade for different staff mode sub-systems.
@@ -26,7 +24,6 @@ public class StaffModeManager {
     private final Map<UUID, StaffPlayer> staffPlayers;
     private final Set<UUID> staffModeEnabled;
 
-    // Sub-managers for specific functionality
     private final VanishManager vanishManager;
     private final FreezeManager freezeManager;
     private final InspectionManager inspectionManager;
@@ -41,7 +38,6 @@ public class StaffModeManager {
         this.staffPlayers = new HashMap<>();
         this.staffModeEnabled = new HashSet<>();
 
-        // Initialize sub-managers
         this.vanishManager = new VanishManager(plugin, this);
         this.freezeManager = new FreezeManager(plugin, this);
         this.inspectionManager = new InspectionManager(plugin, this);
@@ -71,7 +67,6 @@ public class StaffModeManager {
                         vanishManager.addVanishedPlayer(uuid);
                     }
 
-                    // Si el jugador estaba en modo staff al desconectarse, restauramos su estado
                     if (staffPlayer.isInStaffMode() && staffPlayer.hasStoredInventory()) {
                         new BukkitRunnable() {
                             @Override
@@ -88,7 +83,7 @@ public class StaffModeManager {
     }
 
     public void savePlayer(Player player) {
-        savePlayer(player, true); // Por defecto, usar modo asíncrono
+        savePlayer(player, true);
     }
 
     public void savePlayer(Player player, boolean async) {
@@ -104,7 +99,6 @@ public class StaffModeManager {
                 }
             }.runTaskAsynchronously(plugin);
         } else {
-            // Versión síncrona para usar durante onDisable
             StaffPlayerTable staffPlayerTable = plugin.getDatabaseLoader().getStaffPlayerTable();
             staffPlayerTable.saveStaffPlayer(staffPlayers.get(uuid));
         }
@@ -130,7 +124,7 @@ public class StaffModeManager {
     }
 
     public void disableAllStaffMode() {
-        disableAllStaffMode(true); // Por defecto, usar modo asíncrono
+        disableAllStaffMode(true);
     }
 
     public void disableAllStaffMode(boolean async) {
@@ -177,24 +171,20 @@ public class StaffModeManager {
 
         if (staffPlayer.isInStaffMode()) return;
 
-        // Guardamos el inventario del jugador
         storePlayerInventory(player);
 
-        // Aplicamos el modo staff
         staffPlayer.setInStaffMode(true);
         staffModeEnabled.add(uuid);
         vanishManager.enableVanish(player);
 
-        // Notificamos y guardamos en DB
         player.sendMessage(plugin.getConfigManager().getMessage("actions.staff-mode.enabled"));
         savePlayer(player);
 
-        // Aplicamos los cambios en el inventario
         applyStaffMode(player);
     }
 
     public void disableStaffMode(Player player) {
-        disableStaffMode(player, true); // Por defecto, usar modo asíncrono
+        disableStaffMode(player, true);
     }
 
     public void disableStaffMode(Player player, boolean async) {
@@ -206,27 +196,21 @@ public class StaffModeManager {
 
         if (!staffPlayer.isInStaffMode()) return;
 
-        // Actualizamos el estado
         staffPlayer.setInStaffMode(false);
         staffModeEnabled.remove(uuid);
 
-        // Si estaba vanished, lo desvanecemos
         if (staffPlayer.isVanished()) {
             vanishManager.disableVanish(player, async);
         }
 
-        // Notificamos y guardamos en DB
         player.sendMessage(plugin.getConfigManager().getMessage("actions.staff-mode.disabled"));
 
-        // Restauramos el inventario original
         restorePlayerInventory(player);
 
-        // Eliminamos el inventario almacenado
         staffPlayer.setInventory(null);
         staffPlayer.setArmor(null);
         staffPlayer.setOffHandItem(null);
 
-        // Guardamos en DB
         savePlayer(player, async);
         player.setGameMode(GameMode.SURVIVAL);
     }
@@ -235,7 +219,6 @@ public class StaffModeManager {
         UUID uuid = player.getUniqueId();
         StaffPlayer staffPlayer = staffPlayers.get(uuid);
 
-        // Guardamos el inventario
         staffPlayer.setInventory(player.getInventory().getContents());
         staffPlayer.setArmor(player.getInventory().getArmorContents());
         staffPlayer.setOffHandItem(player.getInventory().getItemInOffHand());
@@ -249,29 +232,24 @@ public class StaffModeManager {
 
         if (!staffPlayer.hasStoredInventory()) return;
 
-        // Limpiamos el inventario actual
         player.getInventory().clear();
         player.getInventory().setArmorContents(null);
         player.getInventory().setItemInOffHand(null);
 
-        // Restauramos el inventario guardado
         player.getInventory().setContents(staffPlayer.getInventory());
         player.getInventory().setArmorContents(staffPlayer.getArmor());
         player.getInventory().setItemInOffHand(staffPlayer.getOffHandItem());
         player.setExp(staffPlayer.getExp());
         player.setLevel(staffPlayer.getLevel());
 
-        // Actualizamos el inventario
         player.updateInventory();
     }
 
     private void applyStaffMode(Player player) {
-        // Limpiamos el inventario
         player.getInventory().clear();
         player.getInventory().setArmorContents(null);
         player.getInventory().setItemInOffHand(null);
 
-        // Configuramos el modo de juego
         GameMode staffGameMode = GameMode.CREATIVE;
         String gameModeStr = plugin.getConfigManager().getConfig("config").getString("staff-mode.gamemode", "CREATIVE");
         try {
@@ -281,11 +259,9 @@ public class StaffModeManager {
         }
         player.setGameMode(staffGameMode);
 
-        // Añadimos los ítems de staff usando los slots configurados
         Map<String, Integer> itemSlots = staffItems.getItemSlots();
 
         if (!itemSlots.isEmpty()) {
-            // Usamos los slots configurados en el sistema nuevo
             for (Map.Entry<String, Integer> entry : itemSlots.entrySet()) {
                 String itemKey = entry.getKey();
                 int slot = entry.getValue();
@@ -308,10 +284,8 @@ public class StaffModeManager {
             }
         }
 
-        // Actualizamos el inventario
         player.updateInventory();
 
-        // Aplicamos vanish si es necesario
         UUID uuid = player.getUniqueId();
         StaffPlayer staffPlayer = staffPlayers.get(uuid);
 
@@ -375,11 +349,9 @@ public class StaffModeManager {
             case "online_players":
                 inspectionManager.openOnlinePlayersMenu(staffPlayer);
                 break;
-            // Otras acciones personalizadas aquí
         }
     }
 
-    // Getters para los componentes y estado
     public boolean isInStaffMode(Player player) {
         return staffModeEnabled.contains(player.getUniqueId());
     }

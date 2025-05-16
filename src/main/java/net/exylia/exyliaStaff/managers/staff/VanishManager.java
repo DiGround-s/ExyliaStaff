@@ -96,20 +96,15 @@ public class VanishManager {
     }
 
     private void updateVanishItem(Player player, boolean vanished) {
-        // Check if we have the vanish item and if it has alternative state
         if (!staffModeManager.getStaffItems().hasAlternateState("vanish")) return;
 
-        // Find the slot where the vanish item is supposed to be
         int slot = staffModeManager.getStaffItems().getSlot("vanish");
         if (slot == -1) return;
 
-        // Get the appropriate item based on the vanish state
         ItemStack vanishItem;
         if (vanished) {
-            // If vanished, get the alternate state item (e.g., LIME_DYE)
             vanishItem = staffModeManager.getStaffItems().getAlternateStateItem("vanish");
         } else {
-            // If not vanished, get the normal state item (e.g., GRAY_DYE)
             vanishItem = staffModeManager.getStaffItems().getItem("vanish");
         }
 

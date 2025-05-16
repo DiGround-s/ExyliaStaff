@@ -17,13 +17,12 @@ import java.util.*;
 import static net.exylia.commons.utils.ColorUtils.sendPlayerMessage;
 
 /**
- * Handles staff player movement features like phasing and teleportation
+ * Handles staff player movement features like phasing and teleportation and also the teleport queue
  */
 public class MovementManager {
     private final ExyliaStaff plugin;
     private final StaffModeManager staffModeManager;
 
-    // Para las colas de teletransporte aleatorio
     private final Map<UUID, Queue<UUID>> playerTeleportQueues;
 
     public MovementManager(ExyliaStaff plugin, StaffModeManager staffModeManager) {

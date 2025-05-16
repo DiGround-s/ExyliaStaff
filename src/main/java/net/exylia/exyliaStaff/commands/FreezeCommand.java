@@ -1,4 +1,6 @@
 package net.exylia.exyliaStaff.commands;
 
 public class FreezeCommand {
+
+    // TODO
 }

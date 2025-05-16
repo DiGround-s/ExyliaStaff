@@ -9,7 +9,6 @@ import net.exylia.exyliaStaff.commands.VanishCommand;
 import net.exylia.exyliaStaff.database.StaffDatabaseLoader;
 import net.exylia.exyliaStaff.extensions.PlaceholderAPI;
 import net.exylia.exyliaStaff.listeners.StaffModeListener;
-import net.exylia.exyliaStaff.managers.SilentChestManager;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
@@ -40,20 +39,17 @@ public final class ExyliaStaff extends JavaPlugin {
 
         loadExtensions();
 
-        // Mensaje de habilitación
         DebugUtils.logInfo("Plugin habilitado correctamente");
         DebugUtils.logInfo("Usando ExyliaCommons v" + ExyliaCommons.getVersion());
     }
 
     @Override
     public void onDisable() {
-        // Guarda el estado de todos los jugadores
         if (staffModeManager != null) {
             staffModeManager.saveAllPlayers();
             staffModeManager.disableAllStaffMode(false);
         }
 
-        // Cierra la conexión a la base de datos
         if (databaseLoader != null) {
             databaseLoader.close();
             DebugUtils.logInfo("Conexiones de base de datos cerradas correctamente");
@@ -63,17 +59,13 @@ public final class ExyliaStaff extends JavaPlugin {
     }
 
     private void loadListeners() {
-        // Registramos los listeners
         getServer().getPluginManager().registerEvents(new StaffModeListener(this, staffModeManager), this);
-        getServer().getPluginManager().registerEvents(new SilentChestManager(this, staffModeManager), this);
     }
 
     private void loadManagers() {
         MenuManager.initialize(this);
-        // Cargamos la configuración
         configManager = new ConfigManager(this, List.of("config", "messages", "menus/inspect", "menus/miner_hub"));
 
-        // Cargamos la base de datos con el nuevo sistema de ExyliaCommons
         databaseLoader = new StaffDatabaseLoader(this);
         databaseLoader.load();
 
@@ -81,17 +73,14 @@ public final class ExyliaStaff extends JavaPlugin {
             DebugUtils.logDebug(true, "Base de datos inicializada usando: " + databaseLoader.getDatabaseType());
         }
 
-        // Cargamos el manager de modo staff
         staffModeManager = new StaffModeManager(this);
     }
 
     private void loadCommands() {
-        // Comando StaffMode
         StaffModeCommand staffModeCommand = new StaffModeCommand(this, staffModeManager);
         List<String> staffAliases = getConfigManager().getConfig("config").getStringList("aliases.staff_mode");
         registerCommand("staffmode", staffAliases, staffModeCommand, staffModeCommand);
 
-        // Comando Vanish
         VanishCommand vanishCommand = new VanishCommand(this, staffModeManager);
         List<String> vanishAliases = getConfigManager().getConfig("config").getStringList("aliases.vanish");
         registerCommand("vanish", vanishAliases, vanishCommand, vanishCommand);
@@ -114,24 +103,20 @@ public final class ExyliaStaff extends JavaPlugin {
      */
     public void registerCommand(String name, List<String> aliases, CommandExecutor executor, TabCompleter tabCompleter) {
         try {
-            // Crear una instancia de PluginCommand usando reflexión
             Constructor<PluginCommand> constructor = PluginCommand.class.getDeclaredConstructor(String.class, org.bukkit.plugin.Plugin.class);
             constructor.setAccessible(true);
             PluginCommand command = constructor.newInstance(name, this);
 
-            // Configurar el comando
             command.setExecutor(executor);
             if (tabCompleter != null) {
                 command.setTabCompleter(tabCompleter);
             }
 
-            // Si hay alias, los agregamos
             if (aliases != null && !aliases.isEmpty()) {
                 command.setAliases(aliases);
                 logDebug(isDebugMode(), "Se cargaron " + aliases.size() + " alias para el comando /" + name + " -> " + aliases);
             }
 
-            // Registrar el comando en el CommandMap de Bukkit
             Bukkit.getCommandMap().register(getName().toLowerCase(), command);
 
         } catch (NoSuchMethodException | SecurityException | InstantiationException |

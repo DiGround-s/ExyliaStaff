@@ -54,7 +54,6 @@ public class StaffModeCommand implements CommandExecutor, TabCompleter {
         Player target;
 
         if (args.length >= 2) {
-            // Con jugador específico (requiere permiso admin)
             if (!sender.hasPermission("exyliastaff.staffmode.others")) {
                 sendSenderMessage(sender, plugin.getConfigManager().getMessage("system.no-permission"));
                 return true;
@@ -66,7 +65,6 @@ public class StaffModeCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
         } else {
-            // Sin jugador específico (solo para jugadores)
             if (!(sender instanceof Player)) {
                 sendSenderMessage(sender, plugin.getConfigManager().getMessage("system.specify-player"));
                 return true;
@@ -80,7 +78,6 @@ public class StaffModeCommand implements CommandExecutor, TabCompleter {
             target = (Player) sender;
         }
 
-        // Procesar acción
         switch (action) {
             case "on":
                 staffModeManager.enableStaffMode(target);

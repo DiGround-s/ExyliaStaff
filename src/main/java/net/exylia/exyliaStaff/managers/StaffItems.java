@@ -90,25 +90,20 @@ public class StaffItems {
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
             meta.getPersistentDataContainer().set(STAFF_ITEM_KEY, PersistentDataType.STRING, key);
 
-            // Almacenar la acción asociada al ítem
             String action = itemSection.getString("action", key);
             meta.getPersistentDataContainer().set(STAFF_ITEM_ACTION, PersistentDataType.STRING, action);
 
-            // Store state if this is an alternate state item
             if (isAlternateState) {
                 meta.getPersistentDataContainer().set(STAFF_ITEM_STATE, PersistentDataType.STRING, "alternate");
             }
 
-            // Store the action mapping
             itemActions.put(key, action);
 
-            // Almacenar comandos si existen
             if (itemSection.contains("commands")) {
                 List<String> commands = itemSection.getStringList("commands");
                 itemCommands.put(key, commands);
             }
 
-            // Almacenar slot configurado
             if (itemSection.contains("slot")) {
                 int slot = itemSection.getInt("slot", -1);
                 if (slot >= 0 && slot <= 8) {

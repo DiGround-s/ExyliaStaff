@@ -28,7 +28,6 @@ public class InspectionManager {
     }
 
     public void openInspectInventory(Player staffPlayer, Player targetPlayer) {
-        // Registramos el placeholder %target% para que devuelva el nombre del jugador objetivo
         CustomPlaceholderManager.register("target", context -> {
             if (context instanceof Player) {
                 return ((Player) context).getName();
@@ -42,20 +41,13 @@ public class InspectionManager {
         MenuBuilder menuBuilder = new MenuBuilder(plugin);
         Menu inspectMenu = menuBuilder.buildMenu(config, targetPlayer, targetPlayer);
 
-        // Activar placeholders en el título y establecer el contexto
         inspectMenu.usePlaceholdersInTitle(true)
                 .setTitlePlaceholderContext(targetPlayer);
 
-        // Set armor items
+        // default items
         setupArmorItems(inspectMenu, config, targetPlayer);
-
-        // Set hand items
         setupHandItems(inspectMenu, config, targetPlayer);
-
-        // Setup inventory contents
         setupInventoryContents(inspectMenu, config, targetPlayer);
-
-        // Setup enderchest view button
         setupEnderChestButton(inspectMenu, config, staffPlayer, targetPlayer);
 
         // Open the menu
@@ -163,8 +155,6 @@ public class InspectionManager {
     }
 
     public void openOnlinePlayersMenu(Player staffPlayer) {
-        // Esta es una implementación simple que muestra los jugadores en el chat
-        // En una implementación más avanzada, aquí crearías un menú GUI
         staffPlayer.sendMessage(plugin.getConfigManager().getMessage("online-players.opened"));
 
         StringBuilder playerList = new StringBuilder();

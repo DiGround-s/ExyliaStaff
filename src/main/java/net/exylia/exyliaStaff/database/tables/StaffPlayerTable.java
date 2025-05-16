@@ -13,38 +13,25 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 
-/**
- * Database table for storing staff player data.
- */
 public class StaffPlayerTable implements DatabaseTable {
     private static final Logger LOGGER = Logger.getLogger(StaffPlayerTable.class.getName());
     private static final String TABLE_NAME = "staff_players";
 
     private final ExyliaStaff plugin;
 
-    /**
-     * Creates a new staff player table.
-     *
-     * @param plugin The ExyliaStaff plugin instance
-     */
     public StaffPlayerTable(ExyliaStaff plugin) {
         this.plugin = plugin;
     }
 
-    /**
-     * Creates the staff players table if it doesn't exist.
-     */
     @Override
     public void createTable() {
         try (Connection conn = plugin.getDatabaseLoader().getDatabaseManager().getConnection();
              SQLExecutor executor = new SQLExecutor(conn)) {
 
-            // Primero, creamos la tabla si no existe con la estructura básica
             executor.update("""
                 CREATE TABLE IF NOT EXISTS %s (
                     uuid VARCHAR(36) PRIMARY KEY,
@@ -58,12 +45,9 @@ public class StaffPlayerTable implements DatabaseTable {
                 )
             """.formatted(TABLE_NAME));
 
-            // Luego, verificamos y añadimos las columnas de timestamp si no existen
-            // Este enfoque es compatible con MySQL y SQLite
             if (plugin.getDatabaseLoader().getDatabaseType() == net.exylia.commons.database.enums.DatabaseType.MYSQL ||
                     plugin.getDatabaseLoader().getDatabaseType() == net.exylia.commons.database.enums.DatabaseType.MARIADB) {
 
-                // Para MySQL/MariaDB, verificamos si las columnas existen y las añadimos si no
                 ResultSet rs = executor.query("""
                     SELECT COUNT(*) 
                     FROM information_schema.columns 
@@ -72,7 +56,6 @@ public class StaffPlayerTable implements DatabaseTable {
                 """.formatted(TABLE_NAME));
 
                 if (rs.next() && rs.getInt(1) == 0) {
-                    // La columna created_at no existe, la añadimos
                     executor.update("ALTER TABLE %s ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP".formatted(TABLE_NAME));
                 }
 
@@ -86,13 +69,11 @@ public class StaffPlayerTable implements DatabaseTable {
                 """.formatted(TABLE_NAME));
 
                 if (rs.next() && rs.getInt(1) == 0) {
-                    // La columna updated_at no existe, la añadimos
                     executor.update("ALTER TABLE %s ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP".formatted(TABLE_NAME));
                 }
 
                 rs.close();
             } else if (plugin.getDatabaseLoader().getDatabaseType() == net.exylia.commons.database.enums.DatabaseType.SQLITE) {
-                // Para SQLite, es más sencillo porque PRAGMA table_info no devuelve error si la tabla no existe
                 ResultSet rs = executor.query("PRAGMA table_info(%s)".formatted(TABLE_NAME));
 
                 boolean hasCreatedAt = false;
@@ -147,22 +128,18 @@ public class StaffPlayerTable implements DatabaseTable {
             String armorBase64 = null;
             String offhandBase64 = null;
 
-            // Serialize inventory, armor, and offhand item if they exist
             if (player.getInventory() != null) {
                 inventoryBase64 = SerializationUtil.itemStackArrayToBase64(player.getInventory());
                 armorBase64 = SerializationUtil.itemStackArrayToBase64(player.getArmor());
                 offhandBase64 = SerializationUtil.itemStackToBase64(player.getOffHandItem());
             }
 
-            // Verificamos si tenemos las columnas de timestamp antes de usarlas
             boolean hasTimestampColumns = hasTimestampColumns(executor);
 
-            // Primero verificamos si el jugador ya existe
             boolean playerExists = executor.exists("SELECT 1 FROM %s WHERE uuid = ?".formatted(TABLE_NAME), player.getUuid().toString());
 
             int rows;
 
-            // Si el jugador existe, actualizamos sus datos
             if (playerExists) {
                 if (hasTimestampColumns) {
                     rows = executor.update("""
@@ -209,7 +186,6 @@ public class StaffPlayerTable implements DatabaseTable {
                     );
                 }
             }
-            // Si no existe, lo insertamos
             else {
                 if (hasTimestampColumns) {
                     rows = executor.update("""
@@ -339,18 +315,15 @@ public class StaffPlayerTable implements DatabaseTable {
                 ItemStack[] armor = null;
                 ItemStack offHandItem = null;
 
-                // Deserialize inventory, armor, and offhand item if they exist
                 if (inventoryBase64 != null) {
                     inventory = SerializationUtil.base64ToItemStackArray(inventoryBase64);
                     armor = SerializationUtil.base64ToItemStackArray(armorBase64);
                     offHandItem = SerializationUtil.base64ToItemStack(offhandBase64);
                 }
 
-                // Create and return the staff player with the loaded data
                 return new StaffPlayer(uuid, vanished, staffMode, inventory, armor, offHandItem, exp, level);
             }
 
-            // If no player was found, return a new one with default values
             return new StaffPlayer(uuid, false, false);
 
         } catch (SQLException e) {
@@ -359,22 +332,10 @@ public class StaffPlayerTable implements DatabaseTable {
         }
     }
 
-    /**
-     * Loads a staff player from the database asynchronously.
-     *
-     * @param uuid The UUID of the player to load
-     * @return A CompletableFuture that will be completed with the loaded staff player
-     */
     public CompletableFuture<StaffPlayer> loadStaffPlayerAsync(UUID uuid) {
         return CompletableFuture.supplyAsync(() -> loadStaffPlayer(uuid));
     }
 
-    /**
-     * Deletes a staff player from the database.
-     *
-     * @param uuid The UUID of the player to delete
-     * @return true if the delete was successful, false otherwise
-     */
     public boolean deleteStaffPlayer(UUID uuid) {
         try (Connection conn = plugin.getDatabaseLoader().getDatabaseManager().getConnection();
              SQLExecutor executor = new SQLExecutor(conn)) {

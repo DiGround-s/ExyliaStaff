@@ -65,7 +65,6 @@ public class FreezeManager {
 
         startFrozenPlayerTask(targetPlayer, staffPlayer);
 
-        // Notificar al staff y al jugador congelado
         sendPlayerMessage(targetPlayer, plugin.getConfigManager().getMessage("actions.freeze.frozen", "%staff%", staffPlayer.getName()));
         sendPlayerMessage(staffPlayer, plugin.getConfigManager().getMessage("actions.freeze.frozen-staff", "%player%", targetPlayer.getName()));
 
@@ -98,32 +97,25 @@ public class FreezeManager {
         UUID targetUUID = targetPlayer.getUniqueId();
         String staffName = staffPlayer.getName();
 
-        // Guardamos la ubicación inicial
         Location loc = targetPlayer.getLocation();
         frozenPlayerLocations.put(targetUUID, new Location(loc.getWorld(), loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch()));
 
-        // Cancelamos cualquier tarea existente para este jugador
         if (frozenPlayerTasks.containsKey(targetUUID)) {
             frozenPlayerTasks.get(targetUUID).cancel();
         }
 
-        // Obtenemos la frecuencia de la tarea desde la configuración
         int taskDelay = plugin.getConfigManager().getConfig("config").getInt("frozen.task_delay", 100);
 
-        // Creamos la nueva tarea para este jugador
         BukkitTask task = new BukkitRunnable() {
             @Override
             public void run() {
                 Player player = Bukkit.getPlayer(targetUUID);
 
-                // Si el jugador no está en línea, ejecutar comandos de desconexión
                 if (player == null) {
-                    // Ejecutar comandos configurados para desconexión
                     if (plugin.getConfigManager().getConfig("config").getBoolean("frozen.commands-on-disconnect.enabled", true)) {
                         handlePlayerDisconnectWhileFrozen(targetUUID);
                     }
 
-                    // Limpiar las referencias
                     frozenPlayers.remove(targetUUID);
                     frozenPlayerLocations.remove(targetUUID);
                     frozenPlayerTasks.remove(targetUUID);
@@ -131,28 +123,23 @@ public class FreezeManager {
                     return;
                 }
 
-                // Verificar que el jugador no se ha movido
                 Location savedLocation = frozenPlayerLocations.get(targetUUID);
                 if (savedLocation != null) {
                     player.teleport(savedLocation);
                 }
 
-                // Aplicar efectos de sonido
                 if (plugin.getConfigManager().getConfig("config").getBoolean("frozen.sound.enabled", true)) {
                     applySoundToFrozenPlayer(player);
                 }
 
-                // Aplicar efectos de poción
                 if (plugin.getConfigManager().getConfig("config").getBoolean("frozen.effects.enabled", true)) {
                     applyEffectsToFrozenPlayer(player);
                 }
 
-                // Enviar mensaje recordatorio
                 sendPlayerMessage(player, plugin.getConfigManager().getMessage("actions.freeze.repetitive-to-target", "%staff%", staffName));
             }
-        }.runTaskTimer(plugin, 1, taskDelay); // Inicia rápidamente (1 tick) y luego sigue con el intervalo configurado
+        }.runTaskTimer(plugin, 1, taskDelay);
 
-        // Guardamos la referencia a la tarea
         frozenPlayerTasks.put(targetUUID, task);
     }
 
@@ -164,9 +151,6 @@ public class FreezeManager {
         frozenPlayerLocations.remove(targetUUID);
     }
 
-    /**
-     * Aplica efectos de sonido al jugador congelado
-     */
     private void applySoundToFrozenPlayer(Player player) {
         String soundConfig = plugin.getConfigManager().getConfig("config").getString("frozen.sound.sound", "BLOCK_NOTE_BLOCK_CHIME|1.0|1.0");
 
@@ -179,19 +163,14 @@ public class FreezeManager {
 
                 player.playSound(player.getLocation(), sound, volume, pitch);
             } else {
-                // Fallback si el formato no es correcto
                 player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.0f);
             }
         } catch (Exception e) {
             plugin.getLogger().warning("Error al reproducir sonido para jugador congelado: " + e.getMessage());
-            // Fallback con un sonido predeterminado
             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.0f);
         }
     }
 
-    /**
-     * Aplica efectos de poción al jugador congelado
-     */
     private void applyEffectsToFrozenPlayer(Player player) {
         List<String> effectsList = plugin.getConfigManager().getConfig("config").getStringList("frozen.effects.effects");
 
@@ -214,21 +193,16 @@ public class FreezeManager {
         }
     }
 
-    /**
-     * Maneja la desconexión de un jugador mientras está congelado
-     */
     private void handlePlayerDisconnectWhileFrozen(UUID playerUUID) {
         String playerName = Bukkit.getOfflinePlayer(playerUUID).getName();
         if (playerName == null) playerName = playerUUID.toString();
 
-        // Ejecutar comandos de consola
         if (plugin.getConfigManager().getConfig("config").getBoolean("frozen.commands-on-disconnect.enabled", true)) {
             List<String> consoleCommands = plugin.getConfigManager().getConfig("config").getStringList("frozen.commands-on-disconnect.console_commands");
 
             for (String cmd : consoleCommands) {
                 String processedCmd = cmd.replace("%player%", playerName);
 
-                // Quitar el slash inicial si existe
                 if (processedCmd.startsWith("/")) {
                     processedCmd = processedCmd.substring(1);
                 }
@@ -236,18 +210,15 @@ public class FreezeManager {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), processedCmd);
             }
 
-            // Notificar a todos los staff y ejecutar comandos como staff
             List<String> staffCommands = plugin.getConfigManager().getConfig("config").getStringList("frozen.commands-on-disconnect.staff_commands");
 
             for (Player staffPlayer : Bukkit.getOnlinePlayers()) {
                 if (staffPlayer.hasPermission("exyliastaff.notify")) {
                     sendPlayerMessage(staffPlayer, plugin.getConfigManager().getMessage("actions.freeze.disconnect", "%player%", playerName));
 
-                    // Ejecutar comandos como cada miembro del staff
                     for (String cmd : staffCommands) {
                         String processedCmd = cmd.replace("%player%", playerName);
 
-                        // Quitar el slash inicial si existe
                         if (processedCmd.startsWith("/")) {
                             processedCmd = processedCmd.substring(1);
                         }
