@@ -90,17 +90,20 @@ public class StaffModeManager {
         UUID uuid = player.getUniqueId();
         if (!staffPlayers.containsKey(uuid)) return;
 
+        StaffPlayer staffPlayer = staffPlayers.get(uuid);
+        if (staffPlayer == null) return;
+
         if (async) {
             new BukkitRunnable() {
                 @Override
                 public void run() {
                     StaffPlayerTable staffPlayerTable = plugin.getDatabaseLoader().getStaffPlayerTable();
-                    staffPlayerTable.saveStaffPlayer(staffPlayers.get(uuid));
+                    staffPlayerTable.saveStaffPlayer(staffPlayer);
                 }
             }.runTaskAsynchronously(plugin);
         } else {
             StaffPlayerTable staffPlayerTable = plugin.getDatabaseLoader().getStaffPlayerTable();
-            staffPlayerTable.saveStaffPlayer(staffPlayers.get(uuid));
+            staffPlayerTable.saveStaffPlayer(staffPlayer);
         }
     }
 
@@ -110,7 +113,9 @@ public class StaffModeManager {
             public void run() {
                 StaffPlayerTable staffPlayerTable = plugin.getDatabaseLoader().getStaffPlayerTable();
                 for (StaffPlayer staffPlayer : staffPlayers.values()) {
-                    staffPlayerTable.saveStaffPlayer(staffPlayer);
+                    if (staffPlayer != null) {
+                        staffPlayerTable.saveStaffPlayer(staffPlayer);
+                    }
                 }
             }
         }.runTaskAsynchronously(plugin);

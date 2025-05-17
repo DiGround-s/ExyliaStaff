@@ -121,6 +121,10 @@ public class StaffPlayerTable implements DatabaseTable {
      * @return true if the save was successful, false otherwise
      */
     public boolean saveStaffPlayer(StaffPlayer player) {
+        if (player == null) {
+            return false;
+        }
+
         try (Connection conn = plugin.getDatabaseLoader().getDatabaseManager().getConnection();
              SQLExecutor executor = new SQLExecutor(conn)) {
 
