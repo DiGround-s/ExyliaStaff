@@ -12,6 +12,7 @@ public class StaffPlayer {
     private ItemStack offHandItem;
     private float exp;
     private int level;
+    private boolean notifications;
 
     public StaffPlayer(UUID uuid, boolean vanished, boolean inStaffMode) {
         this.uuid = uuid;
@@ -22,6 +23,7 @@ public class StaffPlayer {
         this.offHandItem = null;
         this.exp = 0;
         this.level = 0;
+        this.notifications = true;
     }
 
     public StaffPlayer(UUID uuid, boolean vanished, boolean inStaffMode,
@@ -35,6 +37,21 @@ public class StaffPlayer {
         this.offHandItem = offHandItem;
         this.exp = exp;
         this.level = level;
+        this.notifications = true;
+    }
+
+    public StaffPlayer(UUID uuid, boolean vanished, boolean inStaffMode,
+                       ItemStack[] inventory, ItemStack[] armor, ItemStack offHandItem,
+                       float exp, int level, boolean notifications) {
+        this.uuid = uuid;
+        this.vanished = vanished;
+        this.inStaffMode = inStaffMode;
+        this.inventory = inventory;
+        this.armor = armor;
+        this.offHandItem = offHandItem;
+        this.exp = exp;
+        this.level = level;
+        this.notifications = notifications;
     }
 
     public UUID getUuid() {
@@ -103,5 +120,17 @@ public class StaffPlayer {
 
     public boolean hasStoredInventory() {
         return inventory != null;
+    }
+
+    public boolean hasNotificationsEnabled() {
+        return notifications;
+    }
+
+    public void setNotifications(boolean notifications) {
+        this.notifications = notifications;
+    }
+
+    public void toggleNotifications() {
+        this.notifications = !this.notifications;
     }
 }

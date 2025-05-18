@@ -1,5 +1,6 @@
 package net.exylia.exyliaStaff.managers;
 
+import net.exylia.commons.scoreboard.ExyliaScoreboardManager;
 import net.exylia.exyliaStaff.ExyliaStaff;
 import net.exylia.exyliaStaff.database.tables.StaffPlayerTable;
 import net.exylia.exyliaStaff.managers.staff.*;
@@ -13,6 +14,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import javax.annotation.Nullable;
 import java.util.*;
+
+import static net.exylia.commons.utils.DebugUtils.logWarn;
 
 /**
  * Main manager for Staff Mode functionality.
@@ -31,6 +34,7 @@ public class StaffModeManager {
     private final CommandManager commandManager;
     private final MinerHubManager minerHubManager;
     private final BlockBreakNotifier blockBreakNotifier;
+    private final ScoreboardManager scoreboardManager;
 
     public StaffModeManager(ExyliaStaff plugin) {
         this.plugin = plugin;
@@ -45,6 +49,8 @@ public class StaffModeManager {
         this.commandManager = new CommandManager(plugin, this);
         this.minerHubManager = new MinerHubManager(plugin);
         this.blockBreakNotifier = new BlockBreakNotifier(plugin);
+        this.scoreboardManager = new ScoreboardManager(plugin, new ExyliaScoreboardManager(plugin));
+
     }
 
     public void loadPlayer(Player player) {
@@ -147,6 +153,7 @@ public class StaffModeManager {
         staffModeEnabled.remove(uuid);
         vanishManager.removeVanishedPlayer(uuid);
         freezeManager.removeFromFrozenPlayers(uuid);
+        scoreboardManager.hideStaffScoreboard(player);
     }
 
     public void toggleStaffMode(Player player) {
@@ -212,6 +219,8 @@ public class StaffModeManager {
 
         restorePlayerInventory(player);
 
+        scoreboardManager.hideStaffScoreboard(player);
+
         staffPlayer.setInventory(null);
         staffPlayer.setArmor(null);
         staffPlayer.setOffHandItem(null);
@@ -260,7 +269,7 @@ public class StaffModeManager {
         try {
             staffGameMode = GameMode.valueOf(gameModeStr.toUpperCase());
         } catch (IllegalArgumentException e) {
-            plugin.getLogger().warning("GameMode inválido en config.yml: " + gameModeStr);
+            logWarn("GameMode inválido en config.yml: " + gameModeStr);
         }
         player.setGameMode(staffGameMode);
 
@@ -297,6 +306,8 @@ public class StaffModeManager {
         if (staffPlayer.isVanished()) {
             vanishManager.applyVanishEffect(uuid, player);
         }
+
+        scoreboardManager.showStaffScoreboard(player);
     }
 
     public void executeStaffItemAction(Player staffPlayer, ItemStack item, @Nullable Player targetPlayer, @Nullable Action action) {
@@ -403,5 +414,9 @@ public class StaffModeManager {
 
     public BlockBreakNotifier getBlockBreakNotifier() {
         return blockBreakNotifier;
+    }
+
+    public ScoreboardManager getScoreboardManager() {
+        return scoreboardManager;
     }
 }

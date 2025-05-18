@@ -14,6 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import static net.exylia.commons.utils.ColorUtils.sendPlayerMessage;
+import static net.exylia.commons.utils.DebugUtils.logWarn;
 
 /**
  * Handles player inspection functionality for staff members
@@ -150,7 +151,7 @@ public class InspectionManager {
                 menu.setItem(i, new MenuItem(item.clone()));
             }
         } catch (NumberFormatException e) {
-            plugin.getLogger().warning("Error al parsear rango de slots para " + configPath + ": " + rangeStr);
+            logWarn("Error al parsear rango de slots para " + configPath + ": " + rangeStr);
         }
     }
 

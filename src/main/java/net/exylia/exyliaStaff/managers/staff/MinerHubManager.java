@@ -28,7 +28,7 @@ public class MinerHubManager {
         if (minerHubMenu != null) {
             minerHubMenu.open(player);
         } else {
-            player.sendMessage(plugin.getConfigManager().getMessage("miner-hub.no-players"));
+            player.sendMessage(plugin.getConfigManager().getMessage("actions.miner-hub.no-players", "%height%", String.valueOf(plugin.getConfigManager().getConfig().getInt("miner-hub.min-height", 10))));
         }
     }
 

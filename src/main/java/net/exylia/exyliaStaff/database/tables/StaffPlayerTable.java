@@ -52,50 +52,31 @@ public class StaffPlayerTable implements DatabaseTable {
                     SELECT COUNT(*) 
                     FROM information_schema.columns 
                     WHERE table_name = '%s' 
-                    AND column_name = 'created_at'
+                    AND column_name = 'notifications'
                 """.formatted(TABLE_NAME));
 
                 if (rs.next() && rs.getInt(1) == 0) {
-                    executor.update("ALTER TABLE %s ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP".formatted(TABLE_NAME));
-                }
-
-                rs.close();
-
-                rs = executor.query("""
-                    SELECT COUNT(*) 
-                    FROM information_schema.columns 
-                    WHERE table_name = '%s' 
-                    AND column_name = 'updated_at'
-                """.formatted(TABLE_NAME));
-
-                if (rs.next() && rs.getInt(1) == 0) {
-                    executor.update("ALTER TABLE %s ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP".formatted(TABLE_NAME));
+                    executor.update("ALTER TABLE %s ADD COLUMN notifications INTEGER NOT NULL DEFAULT 1".formatted(TABLE_NAME));
                 }
 
                 rs.close();
             } else if (plugin.getDatabaseLoader().getDatabaseType() == net.exylia.commons.database.enums.DatabaseType.SQLITE) {
                 ResultSet rs = executor.query("PRAGMA table_info(%s)".formatted(TABLE_NAME));
 
-                boolean hasCreatedAt = false;
-                boolean hasUpdatedAt = false;
+                boolean hasNotifications = false;
 
                 while (rs.next()) {
                     String columnName = rs.getString("name");
-                    if ("created_at".equals(columnName)) {
-                        hasCreatedAt = true;
-                    } else if ("updated_at".equals(columnName)) {
-                        hasUpdatedAt = true;
+                    if ("notifications".equals(columnName)) {
+                        hasNotifications = true;
+                        break;
                     }
                 }
 
                 rs.close();
 
-                if (!hasCreatedAt) {
-                    executor.update("ALTER TABLE %s ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP".formatted(TABLE_NAME));
-                }
-
-                if (!hasUpdatedAt) {
-                    executor.update("ALTER TABLE %s ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP".formatted(TABLE_NAME));
+                if (!hasNotifications) {
+                    executor.update("ALTER TABLE %s ADD COLUMN notifications INTEGER NOT NULL DEFAULT 1".formatted(TABLE_NAME));
                 }
             }
 
@@ -147,19 +128,21 @@ public class StaffPlayerTable implements DatabaseTable {
             if (playerExists) {
                 if (hasTimestampColumns) {
                     rows = executor.update("""
-                        UPDATE %s SET 
-                            vanished = ?, 
-                            staff_mode = ?, 
-                            inventory = ?, 
-                            armor = ?, 
-                            offhand = ?, 
-                            exp = ?, 
-                            level = ?,
-                            updated_at = CURRENT_TIMESTAMP
-                        WHERE uuid = ?
-                    """.formatted(TABLE_NAME),
+                    UPDATE %s SET 
+                        vanished = ?, 
+                        staff_mode = ?, 
+                        notifications = ?,
+                        inventory = ?, 
+                        armor = ?, 
+                        offhand = ?, 
+                        exp = ?, 
+                        level = ?,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE uuid = ?
+                """.formatted(TABLE_NAME),
                             player.isVanished() ? 1 : 0,
                             player.isInStaffMode() ? 1 : 0,
+                            player.hasNotificationsEnabled() ? 1 : 0,
                             inventoryBase64,
                             armorBase64,
                             offhandBase64,
@@ -301,13 +284,14 @@ public class StaffPlayerTable implements DatabaseTable {
              SQLExecutor executor = new SQLExecutor(conn)) {
 
             ResultSet rs = executor.query("""
-                SELECT vanished, staff_mode, inventory, armor, offhand, exp, level 
-                FROM %s WHERE uuid = ?
-            """.formatted(TABLE_NAME), uuid.toString());
+            SELECT vanished, staff_mode, notifications, inventory, armor, offhand, exp, level 
+            FROM %s WHERE uuid = ?
+        """.formatted(TABLE_NAME), uuid.toString());
 
             if (rs.next()) {
                 boolean vanished = rs.getInt("vanished") == 1;
                 boolean staffMode = rs.getInt("staff_mode") == 1;
+                boolean notifications = rs.getInt("notifications") == 1;
 
                 String inventoryBase64 = rs.getString("inventory");
                 String armorBase64 = rs.getString("armor");
@@ -325,7 +309,7 @@ public class StaffPlayerTable implements DatabaseTable {
                     offHandItem = SerializationUtil.base64ToItemStack(offhandBase64);
                 }
 
-                return new StaffPlayer(uuid, vanished, staffMode, inventory, armor, offHandItem, exp, level);
+                return new StaffPlayer(uuid, vanished, staffMode, inventory, armor, offHandItem, exp, level, notifications);
             }
 
             return new StaffPlayer(uuid, false, false);

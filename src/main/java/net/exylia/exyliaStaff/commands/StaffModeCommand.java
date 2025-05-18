@@ -1,145 +1,122 @@
 package net.exylia.exyliaStaff.commands;
 
+import net.exylia.commons.command.types.ToggleCommand;
+import net.exylia.commons.config.ConfigManager;
 import net.exylia.exyliaStaff.ExyliaStaff;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
-import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.Command;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static net.exylia.commons.utils.ColorUtils.sendPlayerMessage;
 import static net.exylia.commons.utils.ColorUtils.sendSenderMessage;
 
-public class StaffModeCommand implements CommandExecutor, TabCompleter {
+/**
+ * Ejemplo de implementación de StaffModeCommand usando el nuevo sistema
+ */
+public class StaffModeCommand extends ToggleCommand {
 
     private final ExyliaStaff plugin;
     private final StaffModeManager staffModeManager;
+    private ConfigManager configManager;
 
-    public StaffModeCommand(ExyliaStaff plugin, StaffModeManager staffModeManager) {
+    /**
+     * Constructor
+     *
+     * @param plugin Instancia del plugin
+     * @param staffModeManager Gestor de StaffMode
+     * @param aliases Aliases para el comando
+     */
+    public StaffModeCommand(ExyliaStaff plugin, StaffModeManager staffModeManager, List<String> aliases) {
+        super(plugin, "staffmode", aliases,
+                "exyliastaff.staffmode", "exyliastaff.staffmode.others");
         this.plugin = plugin;
         this.staffModeManager = staffModeManager;
+        this.configManager = plugin.getConfigManager();
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
-        if (!(sender instanceof Player) && args.length == 0) {
-            sendSenderMessage(sender, plugin.getConfigManager().getMessage("system.only-players"));
-            return true;
-            
-        }
-
-        // /staffmode
-        if (args.length == 0) {
-            Player player = (Player) sender;
-
-            if (!player.hasPermission("exyliastaff.staffmode")) {
-                sendPlayerMessage(player, plugin.getConfigManager().getMessage("system.no-permission"));
-                return true;
-            }
-
-            staffModeManager.toggleStaffMode(player);
-            return true;
-        }
-
-        // /staffmode <on|off|toggle> [player]
-        String action = args[0].toLowerCase();
-        Player target;
-
-        if (args.length >= 2) {
-            if (!sender.hasPermission("exyliastaff.staffmode.others")) {
-                sendSenderMessage(sender, plugin.getConfigManager().getMessage("system.no-permission"));
-                return true;
-            }
-
-            target = Bukkit.getPlayer(args[1]);
-            if (target == null) {
-                sendSenderMessage(sender, plugin.getConfigManager().getMessage("system.player-not-found", "%player%", args[1]));
-                return true;
-            }
-        } else {
-            if (!(sender instanceof Player)) {
-                sendSenderMessage(sender, plugin.getConfigManager().getMessage("system.specify-player"));
-                return true;
-            }
-
-            if (!sender.hasPermission("exyliastaff.staffmode")) {
-                sendSenderMessage(sender, plugin.getConfigManager().getMessage("system.no-permission"));
-                return true;
-            }
-
-            target = (Player) sender;
-        }
-
-        switch (action) {
-            case "on":
-                staffModeManager.enableStaffMode(target);
-                if (sender != target) {
-                    sendSenderMessage(sender, plugin.getConfigManager().getMessage("actions.staff-mode.enabled-other", "%player%", target.getName()));
-                }
-                break;
-            case "off":
-                staffModeManager.disableStaffMode(target);
-                if (sender != target) {
-                    sendSenderMessage(sender, plugin.getConfigManager().getMessage("actions.staff-mode.enabled-other", "%player%", target.getName()));
-                }
-                break;
-            case "toggle":
-                staffModeManager.toggleStaffMode(target);
-                String status = staffModeManager.isInStaffMode(target) ? "enabled" : "disabled";
-                if (sender != target) {
-                    sendSenderMessage(sender, plugin.getConfigManager().getMessage("actions.staff-mode." + status + "-other", "%player%", target.getName()));
-                }
-                break;
-            case "reload":
-                if (!sender.hasPermission("exyliastaff.reload")) {
-                    sendSenderMessage(sender, plugin.getConfigManager().getMessage("system.no-permission"));
-                    return true;
-                }
-                plugin.getConfigManager().reloadAllConfigs();
-                sendSenderMessage(sender, plugin.getConfigManager().getMessage("system.reloaded"));
-                break;
-            default:
-                sendSenderMessage(sender, plugin.getConfigManager().getMessage("system.usage"));
-                break;
-        }
-
-        return true;
-
-    }
-
-    @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
-        List<String> completions = new ArrayList<>();
-
+    public List<String> onTabComplete(@NotNull CommandSender sender,
+                                      @NotNull Command command,
+                                      @NotNull String alias, @NotNull String[] args) {
         if (args.length == 1) {
-            List<String> actions = new ArrayList<>(Arrays.asList("on", "off", "toggle"));
+            List<String> completions = filterSuggestions(
+                    Arrays.asList("on", "off", "toggle"), args[0]
+            );
 
-            if (sender.hasPermission("exyliastaff.reload")) {
-                actions.add("reload");
+            // Añadir subcomando reload si tiene permiso
+            if (hasPermission(sender, "exyliastaff.reload")) {
+                completions.addAll(filterSuggestions(Arrays.asList("reload"), args[0]));
             }
 
-            String current = args[0].toLowerCase();
-            return actions.stream()
-                    .filter(s -> s.startsWith(current))
-                    .collect(Collectors.toList());
-        } else if (args.length == 2 && sender.hasPermission("exyliastaff.staffmode.others")) {
-            if (!args[0].equalsIgnoreCase("reload")) {
-                String current = args[1].toLowerCase();
-                return Bukkit.getOnlinePlayers().stream()
-                        .map(Player::getName)
-                        .filter(s -> s.toLowerCase().startsWith(current))
-                        .collect(Collectors.toList());
-            }
+            return completions;
         }
 
-        return completions;
+        return super.onTabComplete(sender, command, alias, args);
+    }
+
+    @Override
+    protected boolean onCommand(CommandSender sender, String label, String[] args) {
+        if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
+            if (!hasPermission(sender, "exyliastaff.reload")) {
+                onPermissionDenied(sender);
+                return true;
+            }
+
+            plugin.getConfigManager().reloadAllConfigs();
+            sender.sendMessage(configManager.getMessage("system.reloaded"));
+            return true;
+        }
+
+        return super.onCommand(sender, label, args);
+    }
+
+    @Override
+    protected void enableFeature(Player player) {
+        staffModeManager.enableStaffMode(player);
+    }
+
+    @Override
+    protected void disableFeature(Player player) {
+        staffModeManager.disableStaffMode(player);
+    }
+
+    @Override
+    protected boolean toggleFeature(Player player) {
+        staffModeManager.toggleStaffMode(player);
+        return staffModeManager.isInStaffMode(player);
+    }
+
+    @Override
+    protected void sendEnableMessage(Player player) {
+        sendSenderMessage(player, configManager.getMessage("actions.staff-mode.enabled"));
+    }
+
+    @Override
+    protected void sendDisableMessage(Player player) {
+        sendSenderMessage(player, configManager.getMessage("actions.staff-mode.disabled"));
+    }
+
+    @Override
+    protected void sendEnableOtherMessage(Player sender, Player target) {
+        sendSenderMessage(sender, configManager.getMessage("actions.staff-mode.enabled-other", "%player%", target.getName()));
+    }
+
+    @Override
+    protected void sendDisableOtherMessage(Player sender, Player target) {
+        sendSenderMessage(sender, configManager.getMessage("actions.staff-mode.disabled-other", "%player%", target.getName()));
+    }
+
+    @Override
+    protected void onPermissionDenied(CommandSender sender) {
+        sendSenderMessage(sender, configManager.getMessage("system.no-permission"));
+    }
+
+    @Override
+    protected void onPlayerNotFound(CommandSender sender, String name) {
+        sendSenderMessage(sender, configManager.getMessage("system.player-not-found", "%target%", name));
     }
 }

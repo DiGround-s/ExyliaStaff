@@ -16,6 +16,8 @@ import org.bukkit.scheduler.BukkitTask;
 import java.util.*;
 
 import static net.exylia.commons.utils.ColorUtils.sendPlayerMessage;
+import static net.exylia.commons.utils.DebugUtils.logWarn;
+import static net.exylia.commons.utils.TeleportUtils.teleportToGround;
 
 /**
  * Manages the freezing of players by staff members
@@ -62,6 +64,9 @@ public class FreezeManager {
         targetPlayer.setWalkSpeed(0);
         targetPlayer.setFlySpeed(0);
         targetPlayer.setInvulnerable(true);
+
+        teleportToGround(targetPlayer);
+        teleportToGround(staffPlayer);
 
         startFrozenPlayerTask(targetPlayer, staffPlayer);
 
@@ -166,7 +171,7 @@ public class FreezeManager {
                 player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.0f);
             }
         } catch (Exception e) {
-            plugin.getLogger().warning("Error al reproducir sonido para jugador congelado: " + e.getMessage());
+            logWarn("Error al reproducir sonido para jugador congelado: " + e.getMessage());
             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.0f);
         }
     }
@@ -188,7 +193,7 @@ public class FreezeManager {
                     }
                 }
             } catch (Exception e) {
-                plugin.getLogger().warning("Error al aplicar efecto de poción a jugador congelado: " + e.getMessage());
+                logWarn("Error al aplicar efecto de poción a jugador congelado: " + e.getMessage());
             }
         }
     }

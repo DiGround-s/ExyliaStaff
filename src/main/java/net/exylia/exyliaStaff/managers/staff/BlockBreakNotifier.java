@@ -2,6 +2,7 @@ package net.exylia.exyliaStaff.managers.staff;
 
 import net.exylia.commons.utils.SoundUtils;
 import net.exylia.exyliaStaff.ExyliaStaff;
+import net.exylia.exyliaStaff.models.StaffPlayer;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -12,6 +13,8 @@ import org.bukkit.entity.Player;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static net.exylia.commons.utils.DebugUtils.logWarn;
 
 public class BlockBreakNotifier {
 
@@ -43,7 +46,7 @@ public class BlockBreakNotifier {
                 Material material = Material.valueOf(parts[0]);
                 watchedBlocks.put(material, parts[1]);
             } catch (IllegalArgumentException e) {
-                plugin.getLogger().warning("Invalid material in block-break notifications: " + parts[0]);
+                logWarn("Invalid material in block-break notifications: " + parts[0]);
             }
         }
     }
@@ -57,9 +60,13 @@ public class BlockBreakNotifier {
 
         for (Player staff : Bukkit.getOnlinePlayers()) {
             if (staff.hasPermission("exyliastaff.notifications.block-break")) {
-                staff.sendMessage(message);
-                if (sound != null && !sound.isEmpty()) {
-                    SoundUtils.playSound(staff, sound);
+
+                StaffPlayer staffPlayer = plugin.getStaffModeManager().getStaffPlayer(staff.getUniqueId());
+                if (staffPlayer != null && staffPlayer.hasNotificationsEnabled()) {
+                    staff.sendMessage(message);
+                    if (sound != null && !sound.isEmpty()) {
+                        SoundUtils.playSound(staff, sound);
+                    }
                 }
             }
         }

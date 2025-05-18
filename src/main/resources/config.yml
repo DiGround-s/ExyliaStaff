@@ -1,6 +1,9 @@
 # ExyliaStaff - Configuración Principal
 
-debug: false
+# Modo debug (mensajes extra en la consola)
+debug: true
+
+# Configuración de la base de datos
 database:
   type: sqlite
   sqlite:
@@ -12,34 +15,33 @@ database:
     username: exylia_staff
     password: exylia_staff
 
+prefixes:
+  staff-mode: "<#59a4ff>Staff <dark_gray><bold>•<reset><#59a4ff>"
+  frozen: "<#aa76de>SS <dark_gray><bold>•<reset><#aa76de>"
+  vanish: "<#a1ffc3>V <dark_gray><bold>•<reset><#a1ffc3>"
+
 aliases:
   staff_mode: ["staffmode", "staff", "mod"]
   vanish: ["vanish", "v"]
+  notifications: ["mine-alerts", "staff-notifications"]
 
 staff-mode:
   gamemode: CREATIVE
+
   can-break-blocks: false
   can-place-blocks: false
   can-damage-entities: false
   phase-distance: 100
-
-miner-hub:
-  min-height: 10
-
-prefixes:
-  staff-mode: "<#ffc58f>Staff <dark_gray><bold>•<reset> <#ffd2a8>"
-  frozen: "<#ffc58f>SS <dark_gray><bold>•<reset> <#ffd2a8>"
-  vanish: "<#ffc58f>V <dark_gray><bold>•<reset> <#ffd2a8>"
 
 frozen:
   allowed-commands:
     - /msg
     - /r
     - /tell
-  task_delay: 100 # in ticks
+  task_delay: 100
   sound:
     enabled: true
-    sound: BLOCK_AMETHYST_CLUSTER_BREAK|0.2|0.4
+    sound: BLOCK_NOTE_BLOCK_CHIME|1.0|1.0
   effects:
     enabled: true
     effects:
@@ -64,6 +66,23 @@ staff-items:
     glow: false
     action: phase
     slot: 0
+
+  vanish:
+    material: GRAY_DYE
+    display-name: "<#FF0000>❌ ɪɴᴠɪsɪʙɪʟɪᴅᴀᴅ"
+    lore:
+      - "&7Right-click to enable vanish mode"
+    glow: true
+    action: vanish
+    slot: 8
+    un-vanish:
+      material: LIME_DYE
+      display-name: "<#8fffc1>✔ ɪɴᴠɪsɪʙɪʟɪᴅᴀᴅ"
+      lore:
+        - "&7Right-click to disable vanish mode"
+      glow: true
+      action: un_vanish
+      slot: 8
 
   freeze:
     material: PACKED_ICE
@@ -101,29 +120,25 @@ staff-items:
     action: random_player_tp
     slot: 7
 
-  vanish:
-    material: GRAY_DYE
-    display-name: "<#FF0000>❌ ɪɴᴠɪsɪʙɪʟɪᴅᴀᴅ"
-    lore:
-      - "&7Right-click to enable vanish mode"
-    glow: true
-    action: vanish
-    slot: 8
-    un-vanish:
-      material: LIME_DYE
-      display-name: "<#8fffc1>✔ ɪɴᴠɪsɪʙɪʟɪᴅᴀᴅ"
-      lore:
-        - "&7Right-click to disable vanish mode"
-      glow: true
-      action: un_vanish
-      slot: 8
-
 staff-scoreboard:
   enabled: true
-  title: "&6Staff Mode"
+  update-interval: 20
+  title: "&#8a51c4&lMODO STAFF"
   lines:
-    - "&7Players: %players%"
-    - "&7Commands: %commands%"
+    - "&f"
+    - "<#ffc58f>Staff"
+    - "<#ffc58f> | &fVanish: <#ffc58f>%exyliastaff_status_vanish%"
+    - "<#ffc58f> | &fNotifications: <#ffc58f>%exyliastaff_status_notifications%"
+    - "<#ffc58f> | &fStaff Activo: <#ffc58f>%exyliastaff_online_staff%"
+    - "&f"
+    - "<#59a4ff>Servidor"
+    - "<#59a4ff> | &fTPS: <#59a4ff>%kyorify_spark_tps_5s%"
+    - "<#59a4ff> | &fMSPT: <#59a4ff>%kyorify_spark_tickduration_10s%"
+    - "<#59a4ff> | &fSys CPU: <#59a4ff>%kyorify_spark_cpu_system_10s%"
+    - "<#59a4ff> | &fProc CPU: <#59a4ff>%kyorify_spark_cpu_process_10s%"
+    - "<#59a4ff> | &fPing: <#59a4ff>%player_ping%ms"
+    - "<#59a4ff> | &fConectados: <#59a4ff>%server_online%&8/<#59a4ff>%server_max_players%"
+    - "&f"
 
 staff-bossbars:
   enabled: true
@@ -136,7 +151,7 @@ staff-bossbars:
 staff-notifications:
   block-break:
     enabled: true
-    sound: BLOCK_AMETHYST_CLUSTER_BREAK|0.5|1.0
+    sound: BLOCK_AMETHYST_CLUSTER_BREAK|0.2|0.4
     blocks:
       - DIAMOND_ORE|&#7db7ff
       - DEEPSLATE_DIAMOND_ORE|&#59a4ff

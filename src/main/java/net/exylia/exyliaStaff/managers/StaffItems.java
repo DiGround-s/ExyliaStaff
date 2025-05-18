@@ -14,6 +14,8 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.*;
 
+import static net.exylia.commons.utils.DebugUtils.logWarn;
+
 public class StaffItems {
     private final ExyliaStaff plugin;
     private final NamespacedKey STAFF_ITEM_KEY;
@@ -41,7 +43,7 @@ public class StaffItems {
     private void loadItems() {
         ConfigurationSection itemsSection = plugin.getConfigManager().getConfig("config").getConfigurationSection("staff-items");
         if (itemsSection == null) {
-            plugin.getLogger().warning("No se encontró la sección 'staff-items' en config.yml");
+            logWarn("No se encontró la sección 'staff-items' en config.yml");
             return;
         }
 
@@ -66,7 +68,7 @@ public class StaffItems {
         String materialName = itemSection.getString("material", "COMPASS");
         Material material = Material.getMaterial(materialName);
         if (material == null) {
-            plugin.getLogger().warning("Material inválido: " + materialName + " para el ítem: " + key);
+            logWarn("Material inválido: " + materialName + " para el ítem: " + key);
             material = Material.COMPASS;
         }
 
@@ -109,7 +111,7 @@ public class StaffItems {
                 if (slot >= 0 && slot <= 8) {
                     itemSlots.put(key, slot);
                 } else {
-                    plugin.getLogger().warning("Slot inválido para el ítem " + key + ": " + slot);
+                    logWarn("Slot inválido para el ítem " + key + ": " + slot);
                 }
             }
 

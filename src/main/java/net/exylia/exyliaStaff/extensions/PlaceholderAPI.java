@@ -3,23 +3,21 @@ package net.exylia.exyliaStaff.extensions;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import net.exylia.exyliaStaff.ExyliaStaff;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
+import net.exylia.exyliaStaff.models.StaffPlayer;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Expansion for PlaceholderAPI that provides prefixes for staff mode, frozen, and vanish statuses.
+ * Expansion for PlaceholderAPI that provides placeholders for staff mode features.
  */
 public class PlaceholderAPI extends PlaceholderExpansion {
 
     private final ExyliaStaff plugin;
     private final StaffModeManager staffModeManager;
 
-    /**
-     * Constructor for the PlaceholderAPI expansion.
-     * @param plugin The ExyliaStaff plugin instance
-     */
     public PlaceholderAPI(ExyliaStaff plugin) {
         this.plugin = plugin;
         this.staffModeManager = plugin.getStaffModeManager();
@@ -42,11 +40,15 @@ public class PlaceholderAPI extends PlaceholderExpansion {
 
     @Override
     public boolean persist() {
-        return true; // This is required for the expansion to remain registered until the server stops
+        return true;
     }
 
     @Override
     public @Nullable String onRequest(OfflinePlayer player, @NotNull String params) {
+        if (params.equalsIgnoreCase("online_staff")) {
+            return String.valueOf(getOnlineStaffCount());
+        }
+
         if (player == null || !player.isOnline()) {
             return "";
         }
@@ -56,12 +58,10 @@ public class PlaceholderAPI extends PlaceholderExpansion {
             return "";
         }
 
-        // Handle different placeholder requests
         if (params.equalsIgnoreCase("prefix")) {
             return getPrefix(onlinePlayer);
         }
 
-        // Additional placeholders can be added here
         if (params.equalsIgnoreCase("instaff")) {
             return String.valueOf(staffModeManager.isInStaffMode(onlinePlayer));
         }
@@ -74,7 +74,15 @@ public class PlaceholderAPI extends PlaceholderExpansion {
             return String.valueOf(staffModeManager.getFreezeManager().isFrozen(onlinePlayer));
         }
 
-        return null; // Placeholder not found
+        if (params.equalsIgnoreCase("status_vanish")) {
+            return getVanishStatus(onlinePlayer);
+        }
+
+        if (params.equalsIgnoreCase("status_notifications")) {
+            return getNotificationsStatus(onlinePlayer);
+        }
+
+        return null;
     }
 
     /**
@@ -85,23 +93,65 @@ public class PlaceholderAPI extends PlaceholderExpansion {
      * @return The prefix string, or empty string if no prefix applies
      */
     private String getPrefix(Player player) {
-        // Check if player is frozen (highest priority)
         if (staffModeManager.getFreezeManager().isFrozen(player)) {
             return plugin.getConfigManager().getConfig("config").getString("prefixes.frozen", "<#ffc58f>SS <dark_gray><bold>•<reset> <#ffd2a8>");
         }
 
-        // Check if player is in staff mode (second priority)
         if (staffModeManager.isInStaffMode(player)) {
             return plugin.getConfigManager().getConfig("config").getString("prefixes.staff-mode", "<#ffc58f>Staff <dark_gray><bold>•<reset> <#ffd2a8>");
         }
 
-        // Check if player is vanished (third priority)
         if (staffModeManager.isVanished(player)) {
             return plugin.getConfigManager().getConfig("config").getString("prefixes.vanish", "<#ffc58f>V <dark_gray><bold>•<reset> <#ffd2a8>");
         }
 
-        // No prefix applies
         return "";
+    }
+
+    /**
+     * Gets the vanish status placeholder for a player.
+     *
+     * @param player The player to get the status for
+     * @return Active or Inactive text based on vanish status
+     */
+    private String getVanishStatus(Player player) {
+        boolean isVanished = staffModeManager.isVanished(player);
+        return isVanished ?
+                plugin.getConfigManager().getConfig("messages").getString("placeholders.active") :
+                plugin.getConfigManager().getConfig("messages").getString("placeholders.inactive");
+    }
+
+    /**
+     * Gets the notifications status placeholder for a player.
+     *
+     * @param player The player to get the status for
+     * @return Active or Inactive text based on notifications status
+     */
+    private String getNotificationsStatus(Player player) {
+        StaffPlayer staffPlayer = staffModeManager.getStaffPlayer(player.getUniqueId());
+        if (staffPlayer == null) {
+            return plugin.getConfigManager().getConfig("messages").getString("placeholders.inactive");
+        }
+
+        boolean notificationsEnabled = staffPlayer.hasNotificationsEnabled();
+        return notificationsEnabled ?
+                plugin.getConfigManager().getConfig("messages").getString("placeholders.active") :
+                plugin.getConfigManager().getConfig("messages").getString("placeholders.inactive");
+    }
+
+    /**
+     * Gets the count of online staff members.
+     *
+     * @return The number of online staff members
+     */
+    private int getOnlineStaffCount() {
+        int count = 0;
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.hasPermission("exyliastaff.staff")) {
+                count++;
+            }
+        }
+        return count;
     }
 
     @Override

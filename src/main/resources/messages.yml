@@ -3,6 +3,10 @@
 # Prefijo del plugin
 prefix: "<#8a51c4>&lSTAFF &8•&r"
 
+placeholders:
+  active: "<#8fffc1>Activado"
+  inactive: "<#a33b53>Desactivado"
+
 system:
   reloaded: "%prefix% <#8fffc1>El plugin ha sido recargado."
   no-players: "%prefix% <#a33b53>No hay jugadores en línea."
@@ -11,8 +15,16 @@ system:
   no-permission: "%prefix% <#a33b53>No tienes permiso para usar este comando."
   player-not-found: "%prefix% <#a33b53>No se ha encontrado al jugador %target%."
   specify-player: "%prefix% <#a33b53>Debes especificar un jugador."
+  invalid-arguments: "%prefix% <#a33b53>Los argumentos son inválidos."
 
 actions:
+  miner-hub:
+    no-players: "%prefix% <#a33b53>No se encontraron jugadores bajo la capa %height%."
+  notifications:
+    enabled: "%prefix% <#8fffc1>Has activado las notificaciones de staff."
+    disabled: "%prefix% <#a33b53>Has desactivado las notificaciones de staff."
+    enabled-other: "%prefix% <#8fffc1>Has activado las notificaciones de staff para %player%."
+    disabled-other: "%prefix% <#a33b53>Has desactivado las notificaciones de staff para %player%."
   staff-mode:
     enabled: "%prefix% <#8fffc1>Modo staff activado."
     disabled: "%prefix% <#a33b53>Modo staff desactivado."
@@ -49,8 +61,7 @@ actions:
     teleported: "%prefix% <#8fffc1>Has sido teletransportado a %player%."
 
 notifications:
-  block-break: "<click:run_command:/tp %player%>%prefix% <#ffc58f>%player% <#e7cfff>ha minado %color%%block%.</click>"
-
+  block-break: "%prefix% <hover:show_text:'<#8fffc1>Haz click para teletransportarte a <#59a4ff>%player%<#8fffc1>.'><click:run_command:/tp %player%><#ffc58f>%player% <#e7cfff>ha minado %color%%block%<#e7cfff>.</click>"
 
 extras:
   no-helmet: "<#a33b53>Sin casco"
