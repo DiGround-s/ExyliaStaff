@@ -1,13 +1,9 @@
 package net.exylia.exyliaStaff.managers.staff;
 
-import net.exylia.commons.scoreboard.ExyliaScoreboardManager;
-import net.exylia.commons.utils.ColorUtils;
+import net.exylia.commons.scoreboard.*;
 import net.exylia.commons.utils.DebugUtils;
 import net.exylia.exyliaStaff.ExyliaStaff;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,18 +12,63 @@ import java.util.UUID;
 
 /**
  * Gestor del scoreboard para miembros del staff
+ * Adaptado al nuevo sistema de scoreboards optimizado
  */
 public class ScoreboardManager {
 
     private final ExyliaStaff plugin;
     private final ExyliaScoreboardManager scoreboardManager;
-    private final Map<UUID, ExyliaScoreboardManager.ExyliaScoreboard> activeStaffScoreboards;
-    private final MiniMessage miniMessage = MiniMessage.miniMessage();
+    private final Map<UUID, PlayerScoreboard> activeStaffScoreboards;
+    private static final String STAFF_TEMPLATE_ID = "staff_scoreboard";
 
     public ScoreboardManager(ExyliaStaff plugin, ExyliaScoreboardManager scoreboardManager) {
         this.plugin = plugin;
         this.scoreboardManager = scoreboardManager;
         this.activeStaffScoreboards = new HashMap<>();
+
+        registerStaffScoreboardTemplate();
+    }
+
+    /**
+     * Registra el template del scoreboard de staff
+     * Solo necesitamos crearlo una vez, luego lo podemos usar para múltiples jugadores
+     */
+    private void registerStaffScoreboardTemplate() {
+        if (!isStaffScoreboardEnabled()) {
+            return;
+        }
+
+        DebugUtils.logDebug(plugin.isDebugMode(), "Registrando template del scoreboard de staff");
+
+        String titleString = plugin.getConfigManager().getConfig("config").getString("staff-scoreboard.title",
+                "<gradient:#00D6FF:#0080FF><bold>MODO STAFF</bold></gradient>");
+        List<String> lines = plugin.getConfigManager().getConfig("config").getStringList("staff-scoreboard.lines");
+        int updateInterval = plugin.getConfigManager().getConfig("config").getInt("staff-scoreboard.update-interval", 20);
+
+        ScoreboardTemplateBuilder builder = scoreboardManager.createTemplate(STAFF_TEMPLATE_ID)
+                .title(titleString)
+                .updateEvery(updateInterval);
+
+        int size = lines.size();
+        for (int i = 0; i < size; i++) {
+            builder.line(i, ContentProvider.placeholder(lines.get(i)), size - i - 1);
+        }
+
+        builder.build();
+
+        DebugUtils.logDebug(plugin.isDebugMode(), "Template del scoreboard de staff registrado correctamente");
+    }
+
+    /**
+     * Actualiza el template del scoreboard de staff
+     * Útil cuando cambia la configuración
+     */
+    public void updateStaffScoreboardTemplate() {
+        DebugUtils.logDebug(plugin.isDebugMode(), "Actualizando template del scoreboard de staff");
+
+        registerStaffScoreboardTemplate();
+
+        updateAllStaffScoreboards();
     }
 
     /**
@@ -46,36 +87,15 @@ public class ScoreboardManager {
             return false;
         }
 
-        String titleString = plugin.getConfigManager().getConfig("config").getString("staff-scoreboard.title", "<gradient:#00D6FF:#0080FF><bold>MODO STAFF</bold></gradient>");
-        List<String> lines = plugin.getConfigManager().getConfig("config").getStringList("staff-scoreboard.lines");
-        int updateInterval = plugin.getConfigManager().getConfig("config").getInt("staff-scoreboard.update-interval", 20);
-
-        Component title = ColorUtils.translateColors(titleString);
-
-        ExyliaScoreboardManager.ExyliaScoreboard scoreboard = scoreboardManager.getScoreboard(player);
-
-        if (scoreboard != null) {
-            scoreboard.destroy();
+        if (scoreboardManager.getTemplate(STAFF_TEMPLATE_ID) == null) {
+            registerStaffScoreboardTemplate();
         }
 
-        scoreboard = scoreboardManager.createScoreboard(player, title, updateInterval);
-
-        int size = lines.size();
-        for (int i = 0; i < size; i++) {
-            String lineContent = lines.get(i);
-            Component lineComponent = ColorUtils.translateColors(lineContent);
-            scoreboard.setLine(i, lineComponent, size - i - 1);
-        }
-
-        ExyliaScoreboardManager.ExyliaScoreboard finalScoreboard = scoreboard;
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                finalScoreboard.show();
-                activeStaffScoreboards.put(player.getUniqueId(), finalScoreboard);
-                DebugUtils.logDebug(plugin.isDebugMode(),"Staff scoreboard activado para " + player.getName());
-            }
-        }.runTaskLater(plugin, 2L);
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            PlayerScoreboard playerScoreboard = scoreboardManager.showScoreboard(player, STAFF_TEMPLATE_ID);
+            activeStaffScoreboards.put(player.getUniqueId(), playerScoreboard);
+            DebugUtils.logDebug(plugin.isDebugMode(), "Staff scoreboard activado para " + player.getName());
+        }, 2L);
 
         return true;
     }
@@ -92,9 +112,9 @@ public class ScoreboardManager {
             return false;
         }
 
-        ExyliaScoreboardManager.ExyliaScoreboard scoreboard = activeStaffScoreboards.remove(player.getUniqueId());
+        PlayerScoreboard scoreboard = activeStaffScoreboards.remove(player.getUniqueId());
 
-        scoreboard.hide();
+        scoreboardManager.hideScoreboard(player);
 
         DebugUtils.logDebug(plugin.isDebugMode(), "Staff scoreboard desactivado para " + player.getName());
 
@@ -131,6 +151,8 @@ public class ScoreboardManager {
      * Útil cuando cambia la configuración
      */
     public void updateAllStaffScoreboards() {
+        DebugUtils.logDebug(plugin.isDebugMode(), "Actualizando todos los scoreboards de staff activos");
+
         for (UUID playerId : new HashMap<>(activeStaffScoreboards).keySet()) {
             Player player = plugin.getServer().getPlayer(playerId);
             if (player != null && player.isOnline()) {
@@ -145,9 +167,15 @@ public class ScoreboardManager {
      * Útil al reiniciar o deshabilitar el plugin
      */
     public void cleanup() {
-        for (ExyliaScoreboardManager.ExyliaScoreboard scoreboard : activeStaffScoreboards.values()) {
-            scoreboard.destroy();
+        DebugUtils.logDebug(plugin.isDebugMode(), "Limpiando todos los scoreboards de staff");
+
+        for (UUID playerId : new HashMap<>(activeStaffScoreboards).keySet()) {
+            Player player = plugin.getServer().getPlayer(playerId);
+            if (player != null && player.isOnline()) {
+                hideStaffScoreboard(player);
+            }
         }
+
         activeStaffScoreboards.clear();
     }
 

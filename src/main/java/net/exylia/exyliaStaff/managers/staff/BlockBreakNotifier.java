@@ -1,5 +1,6 @@
 package net.exylia.exyliaStaff.managers.staff;
 
+import net.exylia.commons.utils.MessageUtils;
 import net.exylia.commons.utils.SoundUtils;
 import net.exylia.exyliaStaff.ExyliaStaff;
 import net.exylia.exyliaStaff.models.StaffPlayer;
@@ -63,7 +64,7 @@ public class BlockBreakNotifier {
 
                 StaffPlayer staffPlayer = plugin.getStaffModeManager().getStaffPlayer(staff.getUniqueId());
                 if (staffPlayer != null && staffPlayer.hasNotificationsEnabled()) {
-                    staff.sendMessage(message);
+                    MessageUtils.sendMessageAsync(staff, message);
                     if (sound != null && !sound.isEmpty()) {
                         SoundUtils.playSound(staff, sound);
                     }

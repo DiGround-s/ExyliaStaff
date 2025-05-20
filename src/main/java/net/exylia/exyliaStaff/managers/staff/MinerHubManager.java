@@ -3,6 +3,7 @@ package net.exylia.exyliaStaff.managers.staff;
 import net.exylia.commons.menu.MenuBuilder;
 import net.exylia.commons.menu.MenuItem;
 import net.exylia.commons.menu.PaginationMenu;
+import net.exylia.commons.utils.MessageUtils;
 import net.exylia.exyliaStaff.ExyliaStaff;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -28,7 +29,7 @@ public class MinerHubManager {
         if (minerHubMenu != null) {
             minerHubMenu.open(player);
         } else {
-            player.sendMessage(plugin.getConfigManager().getMessage("actions.miner-hub.no-players", "%height%", String.valueOf(plugin.getConfigManager().getConfig().getInt("miner-hub.min-height", 10))));
+            MessageUtils.sendMessageAsync(player, plugin.getConfigManager().getMessage("actions.miner-hub.no-players", "%height%", String.valueOf(plugin.getConfigManager().getConfig().getInt("miner-hub.min-height", 10))));
         }
     }
 

@@ -1,5 +1,6 @@
 package net.exylia.exyliaStaff.managers.staff;
 
+import net.exylia.commons.utils.MessageUtils;
 import net.exylia.exyliaStaff.ExyliaStaff;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
 import org.bukkit.Bukkit;
@@ -13,8 +14,6 @@ import org.bukkit.util.Vector;
 
 import javax.annotation.Nullable;
 import java.util.*;
-
-import static net.exylia.commons.utils.ColorUtils.sendPlayerMessage;
 
 /**
  * Handles staff player movement features like phasing and teleportation and also the teleport queue
@@ -163,7 +162,7 @@ public class MovementManager {
 
         if (target != null) {
             staffPlayer.teleport(target.getLocation());
-            sendPlayerMessage(staffPlayer, plugin.getConfigManager().getMessage("actions.random-tp.teleported", "%player%", target.getName()));
+            MessageUtils.sendMessageAsync(staffPlayer, plugin.getConfigManager().getMessage("actions.random-tp.teleported", "%player%", target.getName()));
         } else {
             teleportToRandomPlayer(staffPlayer);
         }

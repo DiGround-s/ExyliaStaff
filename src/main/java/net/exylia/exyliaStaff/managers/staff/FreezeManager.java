@@ -1,5 +1,6 @@
 package net.exylia.exyliaStaff.managers.staff;
 
+import net.exylia.commons.utils.MessageUtils;
 import net.exylia.exyliaStaff.ExyliaStaff;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
 import org.bukkit.Bukkit;
@@ -15,7 +16,6 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
 
-import static net.exylia.commons.utils.ColorUtils.sendPlayerMessage;
 import static net.exylia.commons.utils.DebugUtils.logWarn;
 import static net.exylia.commons.utils.TeleportUtils.teleportToGround;
 
@@ -54,7 +54,7 @@ public class FreezeManager {
         UUID targetUUID = targetPlayer.getUniqueId();
 
         if (staffModeManager.isInStaffMode(targetPlayer) || targetPlayer.hasPermission("exyliastaff.staff")) {
-            sendPlayerMessage(staffPlayer, plugin.getConfigManager().getMessage("actions.freeze.cannot-freeze-staff", "%player%", targetPlayer.getName()));
+            MessageUtils.sendMessageAsync(staffPlayer, plugin.getConfigManager().getMessage("actions.freeze.cannot-freeze-staff", "%player%", targetPlayer.getName()));
             return;
         }
 
@@ -70,8 +70,8 @@ public class FreezeManager {
 
         startFrozenPlayerTask(targetPlayer, staffPlayer);
 
-        sendPlayerMessage(targetPlayer, plugin.getConfigManager().getMessage("actions.freeze.frozen", "%staff%", staffPlayer.getName()));
-        sendPlayerMessage(staffPlayer, plugin.getConfigManager().getMessage("actions.freeze.frozen-staff", "%player%", targetPlayer.getName()));
+        MessageUtils.sendMessageAsync(targetPlayer, plugin.getConfigManager().getMessage("actions.freeze.frozen", "%staff%", staffPlayer.getName()));
+        MessageUtils.sendMessageAsync(staffPlayer, plugin.getConfigManager().getMessage("actions.freeze.frozen-staff", "%player%", targetPlayer.getName()));
 
         frozenPlayerHelmets.put(targetUUID, targetPlayer.getInventory().getHelmet());
         targetPlayer.getInventory().setHelmet(new ItemStack(Material.ICE, 1));
@@ -89,8 +89,8 @@ public class FreezeManager {
 
         stopFrozenPlayerTask(targetUUID);
 
-        sendPlayerMessage(targetPlayer, plugin.getConfigManager().getMessage("actions.freeze.un-frozen", "%staff%", staffPlayer.getName()));
-        sendPlayerMessage(staffPlayer, plugin.getConfigManager().getMessage("actions.freeze.un-frozen-staff", "%player%", targetPlayer.getName()));
+        MessageUtils.sendMessageAsync(targetPlayer, plugin.getConfigManager().getMessage("actions.freeze.un-frozen", "%staff%", staffPlayer.getName()));
+        MessageUtils.sendMessageAsync(staffPlayer, plugin.getConfigManager().getMessage("actions.freeze.un-frozen-staff", "%player%", targetPlayer.getName()));
 
         ItemStack helmet = frozenPlayerHelmets.get(targetUUID);
         targetPlayer.getInventory().setHelmet(helmet);
@@ -141,7 +141,7 @@ public class FreezeManager {
                     applyEffectsToFrozenPlayer(player);
                 }
 
-                sendPlayerMessage(player, plugin.getConfigManager().getMessage("actions.freeze.repetitive-to-target", "%staff%", staffName));
+                MessageUtils.sendMessageAsync(player, plugin.getConfigManager().getMessage("actions.freeze.repetitive-to-target", "%staff%", staffName));
             }
         }.runTaskTimer(plugin, 1, taskDelay);
 
@@ -219,7 +219,7 @@ public class FreezeManager {
 
             for (Player staffPlayer : Bukkit.getOnlinePlayers()) {
                 if (staffPlayer.hasPermission("exyliastaff.notify")) {
-                    sendPlayerMessage(staffPlayer, plugin.getConfigManager().getMessage("actions.freeze.disconnect", "%player%", playerName));
+                    MessageUtils.sendMessageAsync(staffPlayer, plugin.getConfigManager().getMessage("actions.freeze.disconnect", "%player%", playerName));
 
                     for (String cmd : staffCommands) {
                         String processedCmd = cmd.replace("%player%", playerName);

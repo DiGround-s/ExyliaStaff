@@ -2,6 +2,7 @@ package net.exylia.exyliaStaff.commands;
 
 import net.exylia.commons.command.types.ToggleCommand;
 import net.exylia.commons.config.ConfigManager;
+import net.exylia.commons.utils.MessageUtils;
 import net.exylia.exyliaStaff.ExyliaStaff;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
 import org.bukkit.entity.Player;
@@ -11,8 +12,6 @@ import org.bukkit.command.Command;
 
 import java.util.Arrays;
 import java.util.List;
-
-import static net.exylia.commons.utils.ColorUtils.sendSenderMessage;
 
 /**
  * Ejemplo de implementación de StaffModeCommand usando el nuevo sistema
@@ -67,7 +66,7 @@ public class StaffModeCommand extends ToggleCommand {
             }
 
             plugin.getConfigManager().reloadAllConfigs();
-            sender.sendMessage(configManager.getMessage("system.reloaded"));
+            MessageUtils.sendMessageAsync(sender, configManager.getMessage("system.reloaded"));
             return true;
         }
 
@@ -92,31 +91,31 @@ public class StaffModeCommand extends ToggleCommand {
 
     @Override
     protected void sendEnableMessage(Player player) {
-        sendSenderMessage(player, configManager.getMessage("actions.staff-mode.enabled"));
+        MessageUtils.sendMessageAsync(player, configManager.getMessage("actions.staff-mode.enabled"));
     }
 
     @Override
     protected void sendDisableMessage(Player player) {
-        sendSenderMessage(player, configManager.getMessage("actions.staff-mode.disabled"));
+        MessageUtils.sendMessageAsync(player, configManager.getMessage("actions.staff-mode.disabled"));
     }
 
     @Override
     protected void sendEnableOtherMessage(Player sender, Player target) {
-        sendSenderMessage(sender, configManager.getMessage("actions.staff-mode.enabled-other", "%player%", target.getName()));
+        MessageUtils.sendMessageAsync(sender, configManager.getMessage("actions.staff-mode.enabled-other", "%player%", target.getName()));
     }
 
     @Override
     protected void sendDisableOtherMessage(Player sender, Player target) {
-        sendSenderMessage(sender, configManager.getMessage("actions.staff-mode.disabled-other", "%player%", target.getName()));
+        MessageUtils.sendMessageAsync(sender, configManager.getMessage("actions.staff-mode.disabled-other", "%player%", target.getName()));
     }
 
     @Override
     protected void onPermissionDenied(CommandSender sender) {
-        sendSenderMessage(sender, configManager.getMessage("system.no-permission"));
+        MessageUtils.sendMessageAsync(sender, configManager.getMessage("system.no-permission"));
     }
 
     @Override
     protected void onPlayerNotFound(CommandSender sender, String name) {
-        sendSenderMessage(sender, configManager.getMessage("system.player-not-found", "%target%", name));
+        MessageUtils.sendMessageAsync(sender, configManager.getMessage("system.player-not-found", "%target%", name));
     }
 }

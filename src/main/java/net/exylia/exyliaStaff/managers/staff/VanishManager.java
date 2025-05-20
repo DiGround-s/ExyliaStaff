@@ -11,8 +11,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-import static net.exylia.commons.utils.ColorUtils.sendPlayerMessage;
-
 /**
  * Handles the vanish functionality for staff members
  */

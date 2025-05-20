@@ -2,14 +2,13 @@ package net.exylia.exyliaStaff.commands;
 
 import net.exylia.commons.command.types.ToggleCommand;
 import net.exylia.commons.config.ConfigManager;
+import net.exylia.commons.utils.MessageUtils;
 import net.exylia.exyliaStaff.ExyliaStaff;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
 import org.bukkit.entity.Player;
 import org.bukkit.command.CommandSender;
 
 import java.util.List;
-
-import static net.exylia.commons.utils.ColorUtils.sendSenderMessage;
 
 /**
  * Implementación de VanishCommand usando el nuevo sistema de comandos
@@ -57,31 +56,31 @@ public class VanishCommand extends ToggleCommand {
 
     @Override
     protected void sendEnableMessage(Player player) {
-        sendSenderMessage(player, configManager.getMessage("actions.vanish.enabled"));
+        MessageUtils.sendMessageAsync(player, configManager.getMessage("actions.vanish.enabled"));
     }
 
     @Override
     protected void sendDisableMessage(Player player) {
-        sendSenderMessage(player, configManager.getMessage("actions.vanish.disabled"));
+        MessageUtils.sendMessageAsync(player, configManager.getMessage("actions.vanish.disabled"));
     }
 
     @Override
     protected void sendEnableOtherMessage(Player sender, Player target) {
-        sendSenderMessage(sender, configManager.getMessage("actions.vanish.enabled-other", "%player%", target.getName()));
+        MessageUtils.sendMessageAsync(sender, configManager.getMessage("actions.vanish.enabled-other", "%player%", target.getName()));
     }
 
     @Override
     protected void sendDisableOtherMessage(Player sender, Player target) {
-        sendSenderMessage(sender, configManager.getMessage("actions.vanish.disabled-other", "%player%", target.getName()));
+        MessageUtils.sendMessageAsync(sender, configManager.getMessage("actions.vanish.disabled-other", "%player%", target.getName()));
     }
 
     @Override
     protected void onPermissionDenied(CommandSender sender) {
-        sendSenderMessage(sender, configManager.getMessage("system.no-permission"));
+        MessageUtils.sendMessageAsync(sender, configManager.getMessage("system.no-permission"));
     }
 
     @Override
     protected void onPlayerNotFound(CommandSender sender, String name) {
-        sendSenderMessage(sender, configManager.getMessage("system.player-not-found", "%target%", name));
+        MessageUtils.sendMessageAsync(sender, configManager.getMessage("system.player-not-found", "%target%", name));
     }
 }

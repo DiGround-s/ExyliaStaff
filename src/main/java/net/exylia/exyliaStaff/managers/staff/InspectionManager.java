@@ -4,6 +4,7 @@ import net.exylia.commons.menu.CustomPlaceholderManager;
 import net.exylia.commons.menu.Menu;
 import net.exylia.commons.menu.MenuBuilder;
 import net.exylia.commons.menu.MenuItem;
+import net.exylia.commons.utils.MessageUtils;
 import net.exylia.exyliaStaff.ExyliaStaff;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
 import org.bukkit.Bukkit;
@@ -13,7 +14,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import static net.exylia.commons.utils.ColorUtils.sendPlayerMessage;
 import static net.exylia.commons.utils.DebugUtils.logWarn;
 
 /**
@@ -36,7 +36,7 @@ public class InspectionManager {
             return "";
         });
 
-        sendPlayerMessage(staffPlayer, plugin.getConfigManager().getMessage("actions.inspect.opened", "%target%", targetPlayer.getName()));
+        MessageUtils.sendMessageAsync(staffPlayer, plugin.getConfigManager().getMessage("actions.inspect.opened", "%target%", targetPlayer.getName()));
 
         FileConfiguration config = plugin.getConfigManager().getConfig("menus/inspect");
         MenuBuilder menuBuilder = new MenuBuilder(plugin);
@@ -179,7 +179,7 @@ public class InspectionManager {
         }
 
         if (count > 0) {
-            sendPlayerMessage(staffPlayer, plugin.getConfigManager().getMessage("online-players.list",
+            MessageUtils.sendMessageAsync(staffPlayer, plugin.getConfigManager().getMessage("online-players.list",
                     "%count%", String.valueOf(count),
                     "%players%", playerList.toString()));
         } else {
