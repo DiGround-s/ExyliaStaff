@@ -77,11 +77,11 @@ public class StaffItems {
 
         if (meta != null) {
             String displayName = itemSection.getString("display-name", "&cStaff Item");
-            meta.displayName(ColorUtils.translateColors(displayName));
+            meta.displayName(ColorUtils.parse(displayName));
 
             List<String> lore = itemSection.getStringList("lore");
             if (!lore.isEmpty()) {
-                meta.lore(ColorUtils.translateColors(lore));
+                meta.lore(ColorUtils.parse(lore));
             }
 
             if (itemSection.getBoolean("glow", false)) {
@@ -108,11 +108,7 @@ public class StaffItems {
 
             if (itemSection.contains("slot")) {
                 int slot = itemSection.getInt("slot", -1);
-                if (slot >= 0 && slot <= 8) {
-                    itemSlots.put(key, slot);
-                } else {
-                    logWarn("Slot inválido para el ítem " + key + ": " + slot);
-                }
+                itemSlots.put(key, slot);
             }
 
             item.setItemMeta(meta);
@@ -134,9 +130,9 @@ public class StaffItems {
         ItemMeta meta = item.getItemMeta();
 
         if (meta != null) {
-            meta.displayName(ColorUtils.translateColors(displayName));
+            meta.displayName(ColorUtils.parse(displayName));
 
-            meta.lore(ColorUtils.translateColors(lore));
+            meta.lore(ColorUtils.parse(lore));
 
             if (glow) {
                 meta.addEnchant(Enchantment.DURABILITY, 1, true);

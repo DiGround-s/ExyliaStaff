@@ -156,7 +156,7 @@ public class InspectionManager {
     }
 
     public void openOnlinePlayersMenu(Player staffPlayer) {
-        staffPlayer.sendMessage(plugin.getConfigManager().getMessage("online-players.opened"));
+        MessageUtils.sendMessageAsync(staffPlayer, (plugin.getConfigManager().getMessage("online-players.opened")));
 
         StringBuilder playerList = new StringBuilder();
         int count = 0;
@@ -183,7 +183,7 @@ public class InspectionManager {
                     "%count%", String.valueOf(count),
                     "%players%", playerList.toString()));
         } else {
-            staffPlayer.sendMessage(plugin.getConfigManager().getMessage("system.no-players"));
+            MessageUtils.sendMessageAsync(staffPlayer, (plugin.getConfigManager().getMessage("system.no-players")));
         }
     }
 }

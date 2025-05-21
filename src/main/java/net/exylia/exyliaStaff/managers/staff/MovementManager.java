@@ -46,7 +46,7 @@ public class MovementManager {
         Block targetBlock = player.getTargetBlock(null, maxDistance);
 
         if (targetBlock == null || targetBlock.getType().isAir()) {
-            player.sendMessage(plugin.getConfigManager().getMessage("actions.phase.no-block-in-sight"));
+            MessageUtils.sendMessageAsync(player, (plugin.getConfigManager().getMessage("actions.phase.no-block-in-sight")));
             return;
         }
 
@@ -67,12 +67,12 @@ public class MovementManager {
                 safeLoc.setPitch(player.getLocation().getPitch());
 
                 player.teleport(safeLoc);
-                player.sendMessage(plugin.getConfigManager().getMessage("actions.phase.teleported"));
+                MessageUtils.sendMessageAsync(player, (plugin.getConfigManager().getMessage("actions.phase.teleported")));
                 return;
             }
         }
 
-        player.sendMessage(plugin.getConfigManager().getMessage("actions.phase.no-safe-location"));
+        MessageUtils.sendMessageAsync(player, (plugin.getConfigManager().getMessage("actions.phase.no-safe-location")));
     }
 
     private void phaseThrough(Player player, int maxDistance) {
@@ -123,15 +123,15 @@ public class MovementManager {
             safeLocation.setYaw(player.getLocation().getYaw());
 
             player.teleport(safeLocation);
-            player.sendMessage(plugin.getConfigManager().getMessage("actions.phase.phased-through"));
+            MessageUtils.sendMessageAsync(player, (plugin.getConfigManager().getMessage("actions.phase.phased-through")));
         } else if (safeLocation != null) {
             safeLocation.setPitch(player.getLocation().getPitch());
             safeLocation.setYaw(player.getLocation().getYaw());
 
             player.teleport(safeLocation);
-            player.sendMessage(plugin.getConfigManager().getMessage("actions.phase.phased-no-ground"));
+            MessageUtils.sendMessageAsync(player, (plugin.getConfigManager().getMessage("actions.phase.no-ground")));
         } else {
-            player.sendMessage(plugin.getConfigManager().getMessage("actions.phase.no-safe-location"));
+            MessageUtils.sendMessageAsync(player, (plugin.getConfigManager().getMessage("actions.phase.no-safe-location")));
         }
     }
 
@@ -149,7 +149,7 @@ public class MovementManager {
             }
 
             if (candidates.isEmpty()) {
-                staffPlayer.sendMessage(plugin.getConfigManager().getMessage("system.no-players"));
+                MessageUtils.sendMessageAsync(staffPlayer, (plugin.getConfigManager().getMessage("system.no-players")));
                 return;
             }
 

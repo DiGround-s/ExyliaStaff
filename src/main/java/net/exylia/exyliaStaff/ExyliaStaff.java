@@ -1,6 +1,7 @@
 package net.exylia.exyliaStaff;
 
 import net.exylia.commons.ExyliaCommons;
+import net.exylia.commons.ExyliaPlugin;
 import net.exylia.commons.command.CommandManager;
 import net.exylia.commons.config.ConfigManager;
 import net.exylia.commons.menu.MenuManager;
@@ -10,16 +11,15 @@ import net.exylia.exyliaStaff.commands.StaffModeCommand;
 import net.exylia.exyliaStaff.commands.VanishCommand;
 import net.exylia.exyliaStaff.database.StaffDatabaseLoader;
 import net.exylia.exyliaStaff.extensions.PlaceholderAPI;
-import net.exylia.exyliaStaff.listeners.StaffModeListener;
+import net.exylia.exyliaStaff.listeners.StaffModeListenerManager;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
 
 import static net.exylia.commons.utils.DebugUtils.logInfo;
 
-public final class ExyliaStaff extends JavaPlugin {
+public final class ExyliaStaff extends ExyliaPlugin {
 
     private ConfigManager configManager;
     private StaffDatabaseLoader databaseLoader;
@@ -27,7 +27,7 @@ public final class ExyliaStaff extends JavaPlugin {
     private CommandManager commandManager;
 
     @Override
-    public void onEnable() {
+    public void onExyliaEnable() {
         DebugUtils.setPrefix(getName());
         DebugUtils.sendPluginMOTD(getName());
 
@@ -42,7 +42,7 @@ public final class ExyliaStaff extends JavaPlugin {
     }
 
     @Override
-    public void onDisable() {
+    public void onExyliaDisable() {
         if (staffModeManager != null) {
             staffModeManager.saveAllPlayers();
             staffModeManager.disableAllStaffMode(false);
@@ -57,12 +57,12 @@ public final class ExyliaStaff extends JavaPlugin {
     }
 
     private void loadListeners() {
-        getServer().getPluginManager().registerEvents(new StaffModeListener(this, staffModeManager), this);
+        new StaffModeListenerManager(this, staffModeManager);
     }
 
     private void loadManagers() {
         MenuManager.initialize(this);
-        configManager = new ConfigManager(this, List.of("config", "messages", "menus/inspect", "menus/miner_hub"));
+        configManager = new ConfigManager(this, List.of("config", "messages", "punishments", "menus/inspect", "menus/miner_hub", "menus/punishments"));
 
         databaseLoader = new StaffDatabaseLoader(this);
         databaseLoader.load();

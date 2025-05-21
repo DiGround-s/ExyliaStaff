@@ -1,6 +1,7 @@
 package net.exylia.exyliaStaff.managers;
 
 import net.exylia.commons.scoreboard.ExyliaScoreboardManager;
+import net.exylia.commons.utils.MessageUtils;
 import net.exylia.exyliaStaff.ExyliaStaff;
 import net.exylia.exyliaStaff.database.tables.StaffPlayerTable;
 import net.exylia.exyliaStaff.managers.staff.*;
@@ -33,6 +34,7 @@ public class StaffModeManager {
     private final MovementManager movementManager;
     private final CommandManager commandManager;
     private final MinerHubManager minerHubManager;
+    private final PunishmentHubManager punishmentHubManager;
     private final BlockBreakNotifier blockBreakNotifier;
     private final ScoreboardManager scoreboardManager;
 
@@ -48,6 +50,7 @@ public class StaffModeManager {
         this.movementManager = new MovementManager(plugin, this);
         this.commandManager = new CommandManager(plugin, this);
         this.minerHubManager = new MinerHubManager(plugin);
+        this.punishmentHubManager = new PunishmentHubManager(plugin);
         this.blockBreakNotifier = new BlockBreakNotifier(plugin);
         this.scoreboardManager = new ScoreboardManager(plugin, new ExyliaScoreboardManager(plugin));
 
@@ -189,7 +192,7 @@ public class StaffModeManager {
         staffModeEnabled.add(uuid);
         vanishManager.enableVanish(player);
 
-        player.sendMessage(plugin.getConfigManager().getMessage("actions.staff-mode.enabled"));
+        MessageUtils.sendMessageAsync(player, (plugin.getConfigManager().getMessage("actions.staff-mode.enabled")));
         savePlayer(player);
 
         applyStaffMode(player);
@@ -215,7 +218,7 @@ public class StaffModeManager {
             vanishManager.disableVanish(player, async);
         }
 
-        player.sendMessage(plugin.getConfigManager().getMessage("actions.staff-mode.disabled"));
+        MessageUtils.sendMessageAsync(player, (plugin.getConfigManager().getMessage("actions.staff-mode.disabled")));
 
         restorePlayerInventory(player);
 
@@ -336,14 +339,14 @@ public class StaffModeManager {
                 if (targetPlayer != null) {
                     freezeManager.toggleFreezePlayer(staffPlayer, targetPlayer);
                 } else {
-                    staffPlayer.sendMessage(plugin.getConfigManager().getMessage("system.no-target"));
+                    MessageUtils.sendMessageAsync(staffPlayer, (plugin.getConfigManager().getMessage("system.no-target")));
                 }
                 break;
             case "inspect":
                 if (targetPlayer != null) {
                     inspectionManager.openInspectInventory(staffPlayer, targetPlayer);
                 } else {
-                    staffPlayer.sendMessage(plugin.getConfigManager().getMessage("system.no-target"));
+                    MessageUtils.sendMessageAsync(staffPlayer, (plugin.getConfigManager().getMessage("system.no-target")));
                 }
                 break;
             case "player_command":
@@ -361,6 +364,9 @@ public class StaffModeManager {
                 break;
             case "miner_hub":
                 minerHubManager.openMinerHubInventory(staffPlayer);
+                break;
+            case "punish_menu":
+                punishmentHubManager.openPunishmentInventory(staffPlayer, targetPlayer);
                 break;
             case "online_players":
                 inspectionManager.openOnlinePlayersMenu(staffPlayer);

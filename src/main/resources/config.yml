@@ -35,9 +35,9 @@ staff-mode:
 
 frozen:
   allowed-commands:
-    - /msg
-    - /r
-    - /tell
+    - msg
+    - r
+    - tell
   task_delay: 100
   sound:
     enabled: true
@@ -61,8 +61,8 @@ staff-items:
     material: CLOCK
     display-name: "<#b48fd9>• <#8a51c4>ᴛᴇʟᴇᴛʀᴀɴsᴘᴏʀᴛᴇ"
     lore:
-      - "&7Right-click to teleport to the target block"
-      - "&7Left-click on a player to teleport to them"
+      - "&7Haz clic derecho para teletransportarte al bloque objetivo"
+      - "&7Haz clic izquierdo sobre un jugador para teletransportarte a él"
     glow: false
     action: phase
     slot: 0
@@ -71,7 +71,7 @@ staff-items:
     material: GRAY_DYE
     display-name: "<#FF0000>❌ ɪɴᴠɪsɪʙɪʟɪᴅᴀᴅ"
     lore:
-      - "&7Right-click to enable vanish mode"
+      - "&7Haz clic derecho para activar el modo invisible"
     glow: true
     action: vanish
     slot: 8
@@ -79,7 +79,7 @@ staff-items:
       material: LIME_DYE
       display-name: "<#8fffc1>✔ ɪɴᴠɪsɪʙɪʟɪᴅᴀᴅ"
       lore:
-        - "&7Right-click to disable vanish mode"
+        - "&7Haz clic derecho para desactivar el modo invisible"
       glow: true
       action: un_vanish
       slot: 8
@@ -88,16 +88,56 @@ staff-items:
     material: PACKED_ICE
     display-name: "<#b48fd9>• <#8a51c4>ᴄᴏɴɢᴇʟᴀʀ ᴊᴜɢᴀᴅᴏʀ"
     lore:
-      - "&7Right-click on a player to freeze/unfreeze them"
+      - "&7Haz clic derecho sobre un jugador para congelarlo o descongelarlo"
     glow: false
     action: freeze
     slot: 1
+
+  punish:
+    material: MACE
+    display-name: "<#b48fd9>• <#8a51c4>sᴀɴᴄɪᴏɴᴀʀ ᴊᴜɢᴀᴅᴏʀ"
+    lore:
+      - "&7Haz clic derecho sobre un jugador para sancionarlo"
+    glow: false
+    action: punish_menu
+    slot: 2
+
+  coreprotect:
+    material: FIELD_MASONED_BANNER_PATTERN
+    display-name: "<#b48fd9>• <#8a51c4>ᴀʟᴛᴇʀɴᴀʀ ɪɴsᴘᴇᴄᴛᴏʀ"
+    lore:
+      - "&7Haz clic derecho sobre un jugador para alternar el inspector"
+    glow: false
+    action: player_command
+    slot: 9
+    commands:
+      - "co i"
+
+  notify:
+    material: BORDURE_INDENTED_BANNER_PATTERN
+    display-name: "<#b48fd9>• <#8a51c4>ᴀʟᴛᴇʀɴᴀʀ ɴᴏᴛɪғɪᴄᴀᴄɪᴏɴᴇs"
+    lore:
+      - "&7Haz clic derecho sobre un jugador para alternar las notificaciones"
+    glow: false
+    action: player_command
+    slot: 10
+    commands:
+      - "staff-notifications"
+
+  exit:
+    material: STRUCTURE_VOID
+    display-name: "<#b48fd9>• <#8fffc1>sᴀʟɪʀ ᴅᴇʟ ᴍᴏᴅᴏ sᴛᴀғғ"
+    lore:
+      - "&7Haz clic derecho para salir del modo staff"
+    glow: false
+    action: exit
+    slot: 17
 
   inspect:
     material: BOOK
     display-name: "<#b48fd9>• <#8a51c4>ᴠᴇʀ ɪɴᴠᴇɴᴛᴀʀɪᴏ"
     lore:
-      - "&7Right-click on a player to inspect their inventory"
+      - "&7Haz clic derecho sobre un jugador para ver su inventario"
     glow: false
     action: inspect
     slot: 4
@@ -106,16 +146,28 @@ staff-items:
     material: GOLDEN_PICKAXE
     display-name: "<#b48fd9>• <#8a51c4>ᴄᴇɴᴛʀᴏ ᴍɪɴᴇʀᴏ"
     lore:
-      - "&7Right-click to open the miner hub"
+      - "&7Haz clic derecho para abrir el centro minero"
     glow: false
     action: miner_hub
+    slot: 35
+
+  checker:
+    material: RECOVERY_COMPASS
+    display-name: "<#b48fd9>• <#8a51c4>ᴍᴜʟᴛɪꜱ ʏ ʜɪꜱᴛᴏʀɪᴀʟ"
+    lore:
+      - "&7Haz clic derecho para abrir el centro minero"
+    glow: false
+    action: player_command
     slot: 6
+    commands:
+      - "checkalts %target%"
+      - "history %target%"
 
   random_player_tp:
     material: MUSIC_DISC_13
     display-name: "<#b48fd9>• <#8a51c4>ᴛᴇʟᴇᴛʀᴀɴsᴘᴏʀᴛᴇ ᴀʟᴇᴀᴛᴏʀɪᴏ"
     lore:
-      - "&7Right-click to teleport to a random player"
+      - "&7Haz clic derecho para teletransportarte a un jugador aleatorio"
     glow: false
     action: random_player_tp
     slot: 7
