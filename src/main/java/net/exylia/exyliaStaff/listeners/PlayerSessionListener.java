@@ -4,6 +4,7 @@ import net.exylia.exyliaStaff.ExyliaStaff;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -35,5 +36,14 @@ public class PlayerSessionListener extends StaffModeListenerBase {
         Player player = event.getPlayer();
         staffModeManager.savePlayer(player);
         staffModeManager.unloadPlayer(player);
+    }
+
+    @EventHandler
+    public void onFoodLevelChange(FoodLevelChangeEvent event) {
+        if (!(event.getEntity() instanceof Player player)) return;
+
+        if (isInStaffMode(player) || isFrozen(player)) {
+            event.setCancelled(true);
+        }
     }
 }

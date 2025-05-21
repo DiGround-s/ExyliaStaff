@@ -200,6 +200,8 @@ public class StaffModeManager {
 
         applyStaffMode(player);
         player.closeInventory();
+        player.setHealth(20);
+        player.setFoodLevel(20);
     }
 
     public void disableStaffMode(Player player) {
