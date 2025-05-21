@@ -25,6 +25,6 @@ punishment_items:
   lore:
     - "&f%description%"
     - "&f"
-    - "&8| #e7cfffSancionar a #59a4ff%player_name%"
+    - "&8| <#e7cfff>Sancionar a <#59a4ff>%player_name%"
   use_placeholders: true
   hide_attributes: true

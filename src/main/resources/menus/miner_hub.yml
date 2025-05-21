@@ -23,9 +23,9 @@ players:
   material: PLAYER_HEAD
   name: "<#8a51c4>%player_name%"
   lore:
-    - "&8| #e7cfffAltura: #59a4ff%player_y%"
-    - "&8| #e7cfffMundo: #59a4ff%player_world%"
+    - "&8| <#e7cfff>Altura: <#59a4ff>%player_y%"
+    - "&8| <#e7cfff>Mundo: <#59a4ff>%player_world%"
     - "&f"
-    - "&8| #e7cfffTeletransportate a #59a4ff%player_name%"
+    - "&8| <#e7cfff>Teletransportate a <#59a4ff>%player_name%"
   use_placeholders: true
   hide_attributes: true
