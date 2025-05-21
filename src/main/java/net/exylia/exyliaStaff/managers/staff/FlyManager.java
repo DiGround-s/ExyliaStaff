@@ -29,9 +29,12 @@ public class FlyManager {
                 Player player = Bukkit.getPlayer(uuid);
                 if (player != null && staffModeManager.isInStaffMode(player)) {
                     checkAndRestoreFly(player);
+                    if (plugin.isEnabledExt("deluxecombat")) {
+                        plugin.getDeluxeCombatAPI().untag(player);
+                    }
                 }
             }
-        }, 5L, 5L);
+        }, 20L, 20L);
     }
 
     private void checkAndRestoreFly(Player player) {

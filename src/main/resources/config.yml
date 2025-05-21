@@ -142,6 +142,15 @@ staff-items:
     action: inspect
     slot: 4
 
+  toggle_spectator:
+    material: GLOW_INK_SAC
+    display-name: "<#b48fd9>• <#8a51c4>ᴀʟᴛᴇʀɴᴀʀ ᴍᴏᴅᴏ ᴇꜱᴘᴇᴄᴛᴀᴅᴏʀ"
+    lore:
+      - "&7Haz clic para alternar el modo de juego."
+    glow: false
+    action: toggle_spectator
+    slot: 27
+
   miner_hub:
     material: GOLDEN_PICKAXE
     display-name: "<#b48fd9>• <#8a51c4>ᴄᴇɴᴛʀᴏ ᴍɪɴᴇʀᴏ"

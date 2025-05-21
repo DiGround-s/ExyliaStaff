@@ -201,6 +201,8 @@ public class FreezeManager {
     private void handlePlayerDisconnectWhileFrozen(UUID playerUUID) {
         String playerName = Bukkit.getOfflinePlayer(playerUUID).getName();
         if (playerName == null) playerName = playerUUID.toString();
+        Player player = Bukkit.getPlayer(playerUUID);
+        unfreezePlayer(null, player);
 
         if (plugin.getConfigManager().getConfig("config").getBoolean("frozen.commands-on-disconnect.enabled", true)) {
             List<String> consoleCommands = plugin.getConfigManager().getConfig("config").getStringList("frozen.commands-on-disconnect.console_commands");

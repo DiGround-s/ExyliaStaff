@@ -13,6 +13,7 @@ import net.exylia.exyliaStaff.database.StaffDatabaseLoader;
 import net.exylia.exyliaStaff.extensions.PlaceholderAPI;
 import net.exylia.exyliaStaff.listeners.StaffModeListenerManager;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
+import nl.marido.deluxecombat.api.DeluxeCombatAPI;
 import org.bukkit.Bukkit;
 
 import java.util.List;
@@ -25,6 +26,8 @@ public final class ExyliaStaff extends ExyliaPlugin {
     private StaffDatabaseLoader databaseLoader;
     private StaffModeManager staffModeManager;
     private CommandManager commandManager;
+
+    private DeluxeCombatAPI deluxeCombatAPI;
 
     @Override
     public void onExyliaEnable() {
@@ -80,6 +83,10 @@ public final class ExyliaStaff extends ExyliaPlugin {
             logInfo("PlaceholderAPI encontrado, registrando expansión...");
             new PlaceholderAPI(this).register();
         }
+        if (Bukkit.getPluginManager().getPlugin("DeluxeCombat") != null) {
+            logInfo("DeluxeCombat encontrado...");
+            deluxeCombatAPI = new DeluxeCombatAPI();
+        }
     }
 
     private void loadCommands() {
@@ -114,5 +121,17 @@ public final class ExyliaStaff extends ExyliaPlugin {
 
     public StaffModeManager getStaffModeManager() {
         return staffModeManager;
+    }
+
+    public boolean isEnabledExt(String name) {
+        return switch (name.toLowerCase()) {
+            case "placeholderapi" -> Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null;
+            case "deluxecombat" -> deluxeCombatAPI != null;
+            default -> false;
+        };
+    }
+
+    public DeluxeCombatAPI getDeluxeCombatAPI() {
+        return deluxeCombatAPI;
     }
 }

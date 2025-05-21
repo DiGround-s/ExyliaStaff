@@ -18,7 +18,7 @@ public class EntityInteractionListener extends StaffModeListenerBase {
         super(plugin, staffModeManager);
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onEntityDamage(EntityDamageEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
 
@@ -27,7 +27,7 @@ public class EntityInteractionListener extends StaffModeListenerBase {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
         if (!(event.getDamager() instanceof Player damager)) return;
 

@@ -70,3 +70,6 @@ extras:
   no-boots: "<#a33b53>Sin botas"
   no-hand: "<#a33b53>Sin mano"
   no-offhand: "<#a33b53>Sin mano secundaria"
+
+inventories:
+  silent-inventory: "<#8a51c4>%type% <#a89ab5>[Silencioso]"

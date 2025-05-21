@@ -199,6 +199,7 @@ public class StaffModeManager {
         savePlayer(player);
 
         applyStaffMode(player);
+        player.closeInventory();
     }
 
     public void disableStaffMode(Player player) {
@@ -233,6 +234,7 @@ public class StaffModeManager {
 
         savePlayer(player, async);
         player.setGameMode(GameMode.SURVIVAL);
+        player.closeInventory();
     }
 
     private void storePlayerInventory(Player player) {
@@ -371,9 +373,27 @@ public class StaffModeManager {
             case "punish_menu":
                 punishmentHubManager.openPunishmentInventory(staffPlayer, targetPlayer);
                 break;
+            case "toggle_spectator":
+                toggleSpectator(staffPlayer);
+                break;
             case "online_players":
                 inspectionManager.openOnlinePlayersMenu(staffPlayer);
                 break;
+        }
+    }
+
+    public void toggleSpectator(Player player) {
+        if (player.getGameMode() == GameMode.SPECTATOR) {
+            GameMode staffGameMode = GameMode.CREATIVE;
+            String gameModeStr = plugin.getConfigManager().getConfig("config").getString("staff-mode.gamemode", "CREATIVE");
+            try {
+                staffGameMode = GameMode.valueOf(gameModeStr.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                logWarn("GameMode inválido en config.yml: " + gameModeStr);
+            }
+            player.setGameMode(staffGameMode);
+        } else {
+            player.setGameMode(GameMode.SPECTATOR);
         }
     }
 
