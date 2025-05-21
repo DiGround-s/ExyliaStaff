@@ -37,6 +37,9 @@ public class StaffModeManager {
     private final PunishmentHubManager punishmentHubManager;
     private final BlockBreakNotifier blockBreakNotifier;
     private final ScoreboardManager scoreboardManager;
+    private final FlyManager flyManager;
+
+    private final Map<UUID, Boolean> staffFlyingStates = new HashMap<>();
 
     public StaffModeManager(ExyliaStaff plugin) {
         this.plugin = plugin;
@@ -53,7 +56,7 @@ public class StaffModeManager {
         this.punishmentHubManager = new PunishmentHubManager(plugin);
         this.blockBreakNotifier = new BlockBreakNotifier(plugin);
         this.scoreboardManager = new ScoreboardManager(plugin, new ExyliaScoreboardManager(plugin));
-
+        this.flyManager = new FlyManager(plugin, this);
     }
 
     public void loadPlayer(Player player) {
@@ -374,12 +377,44 @@ public class StaffModeManager {
         }
     }
 
+    private void startFlyMonitor() {
+        Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            for (UUID uuid : staffPlayers.keySet()) {
+                Player player = Bukkit.getPlayer(uuid);
+                if (player != null) {
+                    checkAndRestoreFly(player);
+                }
+            }
+        }, 5L, 5L);
+    }
+
+    private void checkAndRestoreFly(Player player) {
+        UUID playerId = player.getUniqueId();
+        boolean currentAllowFlight = player.getAllowFlight();
+        boolean previousAllowFlight = staffFlyingStates.getOrDefault(playerId, false);
+
+        if (previousAllowFlight && !currentAllowFlight) {
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> {
+                if (player.isOnline() && isInStaffMode(player)) {
+                    player.setAllowFlight(true);
+                    player.setFlying(true);
+                }
+            }, 1L);
+        }
+
+        staffFlyingStates.put(playerId, player.getAllowFlight());
+    }
+
     public boolean isInStaffMode(Player player) {
         return staffModeEnabled.contains(player.getUniqueId());
     }
 
     public boolean isVanished(Player player) {
         return vanishManager.isVanished(player.getUniqueId());
+    }
+
+    public Map<UUID, StaffPlayer> getStaffPlayers() {
+        return staffPlayers;
     }
 
     public StaffItems getStaffItems() {
@@ -424,5 +459,9 @@ public class StaffModeManager {
 
     public ScoreboardManager getScoreboardManager() {
         return scoreboardManager;
+    }
+
+    public FlyManager getFlyManager() {
+        return flyManager;
     }
 }
