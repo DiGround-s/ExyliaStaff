@@ -44,7 +44,7 @@ public class InventoryActionListener extends StaffModeListenerBase {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onItemDrop(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
 
@@ -58,7 +58,7 @@ public class InventoryActionListener extends StaffModeListenerBase {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onItemPickup(EntityPickupItemEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
 

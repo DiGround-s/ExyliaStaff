@@ -16,6 +16,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import static net.exylia.commons.utils.DebugUtils.logError;
+
 /**
  * Handles all player interaction events related to staff mode
  */
@@ -25,7 +27,7 @@ public class PlayerInteractionListener extends StaffModeListenerBase {
         super(plugin, staffModeManager);
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
         if (isFrozen(player)) {
@@ -44,21 +46,16 @@ public class PlayerInteractionListener extends StaffModeListenerBase {
 
         Block clickedBlock = event.getClickedBlock();
         if (clickedBlock != null && isInteractableBlock(clickedBlock.getType())) {
-            event.setCancelled(true);
-            if (clickedBlock.getState() instanceof Container container) {
+            if (isAnimatedContainer(clickedBlock.getType())) {
                 event.setCancelled(true);
-
-                Inventory containerInventory = container.getInventory();
-                String containerType = getContainerTypeName(clickedBlock.getType());
-                Inventory viewInventory = Bukkit.createInventory(null, containerInventory.getSize(), plugin.getConfigManager().getMessage("inventories.silent-container", "%type%", containerType));
-                viewInventory.setContents(containerInventory.getContents());
-                player.openInventory(viewInventory);
+                openSilentContainer(player, clickedBlock);
+            } else {
+                event.setCancelled(false);
             }
         }
     }
 
-
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
         Player player = event.getPlayer();
         if (!isInStaffMode(player)) return;
@@ -70,7 +67,7 @@ public class PlayerInteractionListener extends StaffModeListenerBase {
         tryExecuteStaffItemAction(player, item, targetPlayer, null);
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerLeftClickPlayer(EntityDamageByEntityEvent event) {
         if (!(event.getDamager() instanceof Player player)) return;
         if (!(event.getEntity() instanceof Player targetPlayer)) return;
@@ -82,7 +79,7 @@ public class PlayerInteractionListener extends StaffModeListenerBase {
         tryExecuteStaffItemAction(player, item, targetPlayer, null);
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerInteractPhysical(PlayerInteractEvent event) {
         Player player = event.getPlayer();
         if (!isInStaffMode(player)) return;
@@ -93,10 +90,64 @@ public class PlayerInteractionListener extends StaffModeListenerBase {
     }
 
     /**
-     * Checks if a block type is considered "interactable" and should be blocked in staff mode
+     * Checks if a container has animations or sounds that should be bypassed in staff mode
      * @param material The block material to check
-     * @return true if the block is interactable
+     * @return true if the container has animations/sounds that need to be bypassed
      */
+    private boolean isAnimatedContainer(Material material) {
+        return switch (material) {
+            case CHEST, TRAPPED_CHEST, BARREL, ENDER_CHEST,
+                 SHULKER_BOX, BLACK_SHULKER_BOX, BLUE_SHULKER_BOX, BROWN_SHULKER_BOX, CYAN_SHULKER_BOX,
+                 GRAY_SHULKER_BOX, GREEN_SHULKER_BOX, LIGHT_BLUE_SHULKER_BOX, LIGHT_GRAY_SHULKER_BOX,
+                 LIME_SHULKER_BOX, MAGENTA_SHULKER_BOX, ORANGE_SHULKER_BOX, PINK_SHULKER_BOX,
+                 PURPLE_SHULKER_BOX, RED_SHULKER_BOX, WHITE_SHULKER_BOX, YELLOW_SHULKER_BOX -> true;
+            default -> false;
+        };
+    }
+
+    /**
+     * Opens a container silently for staff members (only for animated containers)
+     * @param player The staff player
+     * @param block The container block
+     */
+    private void openSilentContainer(Player player, Block block) {
+        Material material = block.getType();
+        String containerType = getContainerTypeName(material);
+
+        try {
+            Inventory containerInventory = null;
+
+            switch (material) {
+                case CHEST, TRAPPED_CHEST, BARREL -> {
+                    if (block.getState() instanceof Container container) {
+                        containerInventory = container.getInventory();
+                    }
+                }
+                case ENDER_CHEST -> {
+                    containerInventory = player.getEnderChest();
+                }
+                case SHULKER_BOX, BLACK_SHULKER_BOX, BLUE_SHULKER_BOX, BROWN_SHULKER_BOX, CYAN_SHULKER_BOX,
+                     GRAY_SHULKER_BOX, GREEN_SHULKER_BOX, LIGHT_BLUE_SHULKER_BOX, LIGHT_GRAY_SHULKER_BOX,
+                     LIME_SHULKER_BOX, MAGENTA_SHULKER_BOX, ORANGE_SHULKER_BOX, PINK_SHULKER_BOX,
+                     PURPLE_SHULKER_BOX, RED_SHULKER_BOX, WHITE_SHULKER_BOX, YELLOW_SHULKER_BOX -> {
+                    if (block.getState() instanceof Container container) {
+                        containerInventory = container.getInventory();
+                    }
+                }
+            }
+
+            if (containerInventory != null) {
+                Inventory viewInventory = Bukkit.createInventory(null, containerInventory.getSize(),
+                        plugin.getConfigManager().getMessage("inventories.silent-container", "%type%", containerType));
+
+                viewInventory.setContents(containerInventory.getContents());
+                player.openInventory(viewInventory);
+            }
+
+        } catch (Exception e) {
+            logError("Error al abrir el contenedor: " + containerType + " | Información del error: " + e.getMessage());
+        }
+    }
     private boolean isInteractableBlock(Material material) {
         return switch (material) {
             case ACACIA_DOOR, BIRCH_DOOR, DARK_OAK_DOOR, JUNGLE_DOOR, OAK_DOOR, SPRUCE_DOOR, CRIMSON_DOOR, WARPED_DOOR,
@@ -108,7 +159,11 @@ public class PlayerInteractionListener extends StaffModeListenerBase {
                  REPEATER, COMPARATOR, DAYLIGHT_DETECTOR, DISPENSER, DROPPER, HOPPER, BEACON, CHEST, TRAPPED_CHEST,
                  ENDER_CHEST, FURNACE, BLAST_FURNACE, SMOKER, BREWING_STAND, BARREL, ENCHANTING_TABLE, ANVIL,
                  CHIPPED_ANVIL, DAMAGED_ANVIL, LOOM, CARTOGRAPHY_TABLE, GRINDSTONE, STONECUTTER, SMITHING_TABLE,
-                 LECTERN, NOTE_BLOCK, JUKEBOX, CAMPFIRE, SOUL_CAMPFIRE, COMPOSTER, BELL, FLOWER_POT -> true;
+                 LECTERN, NOTE_BLOCK, JUKEBOX, CAMPFIRE, SOUL_CAMPFIRE, COMPOSTER, BELL, FLOWER_POT,
+                 SHULKER_BOX, BLACK_SHULKER_BOX, BLUE_SHULKER_BOX, BROWN_SHULKER_BOX, CYAN_SHULKER_BOX,
+                 GRAY_SHULKER_BOX, GREEN_SHULKER_BOX, LIGHT_BLUE_SHULKER_BOX, LIGHT_GRAY_SHULKER_BOX,
+                 LIME_SHULKER_BOX, MAGENTA_SHULKER_BOX, ORANGE_SHULKER_BOX, PINK_SHULKER_BOX,
+                 PURPLE_SHULKER_BOX, RED_SHULKER_BOX, WHITE_SHULKER_BOX, YELLOW_SHULKER_BOX -> true;
             default -> false;
         };
     }

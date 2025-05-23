@@ -30,6 +30,7 @@ public class FreezeManager {
     private final Map<UUID, BukkitTask> frozenPlayerTasks;
     private final Map<UUID, Location> frozenPlayerLocations;
     private final Map<UUID, ItemStack> frozenPlayerHelmets;
+    private final Map<UUID, UUID> frozenByStaff; // playerUUID -> staffUUID
 
     public FreezeManager(ExyliaStaff plugin, StaffModeManager staffModeManager) {
         this.plugin = plugin;
@@ -38,6 +39,7 @@ public class FreezeManager {
         this.frozenPlayerTasks = new HashMap<>();
         this.frozenPlayerLocations = new HashMap<>();
         this.frozenPlayerHelmets = new HashMap<>();
+        this.frozenByStaff = new HashMap<>();
     }
 
     public void toggleFreezePlayer(Player staffPlayer, Player targetPlayer) {
@@ -61,9 +63,7 @@ public class FreezeManager {
         if (frozenPlayers.contains(targetUUID)) return;
 
         frozenPlayers.add(targetUUID);
-        targetPlayer.setWalkSpeed(0);
-        targetPlayer.setFlySpeed(0);
-        targetPlayer.setInvulnerable(true);
+        frozenByStaff.put(targetUUID, staffPlayer.getUniqueId()); // Agregar esta línea
 
         teleportToGround(targetPlayer);
         teleportToGround(staffPlayer);
@@ -83,6 +83,7 @@ public class FreezeManager {
         if (!frozenPlayers.contains(targetUUID)) return;
 
         frozenPlayers.remove(targetUUID);
+        frozenByStaff.remove(targetUUID); // Agregar esta línea
         targetPlayer.setWalkSpeed(0.2f);
         targetPlayer.setFlySpeed(0.1f);
         targetPlayer.setInvulnerable(false);
@@ -118,7 +119,7 @@ public class FreezeManager {
 
                 if (player == null) {
                     if (plugin.getConfigManager().getConfig("config").getBoolean("frozen.commands-on-disconnect.enabled", true)) {
-                        handlePlayerDisconnectWhileFrozen(targetUUID);
+                        handlePlayerDisconnectWhileFrozen(targetUUID, staffPlayer);
                     }
 
                     frozenPlayers.remove(targetUUID);
@@ -129,9 +130,9 @@ public class FreezeManager {
                 }
 
                 Location savedLocation = frozenPlayerLocations.get(targetUUID);
-                if (savedLocation != null) {
-                    player.teleport(savedLocation);
-                }
+//                if (savedLocation != null) {
+//                    player.teleport(savedLocation);
+//                }
 
                 if (plugin.getConfigManager().getConfig("config").getBoolean("frozen.sound.enabled", true)) {
                     applySoundToFrozenPlayer(player);
@@ -198,44 +199,62 @@ public class FreezeManager {
         }
     }
 
-    private void handlePlayerDisconnectWhileFrozen(UUID playerUUID) {
+    public void handlePlayerDisconnectWhileFrozen(UUID playerUUID, Player staffPlayer) {
         String playerName = Bukkit.getOfflinePlayer(playerUUID).getName();
-        if (playerName == null) playerName = playerUUID.toString();
-        Player player = Bukkit.getPlayer(playerUUID);
-        unfreezePlayer(null, player);
+        if (playerName == null) {
+            playerName = playerUUID.toString();
+        }
 
-        if (plugin.getConfigManager().getConfig("config").getBoolean("frozen.commands-on-disconnect.enabled", true)) {
+        unfreezePlayer(staffPlayer, Bukkit.getPlayer(playerUUID));
+
+        boolean enabled = plugin.getConfigManager().getConfig("config").getBoolean("frozen.commands-on-disconnect.enabled", true);
+
+        if (enabled) {
             List<String> consoleCommands = plugin.getConfigManager().getConfig("config").getStringList("frozen.commands-on-disconnect.console_commands");
 
-            for (String cmd : consoleCommands) {
-                String processedCmd = cmd.replace("%player%", playerName);
-
-                if (processedCmd.startsWith("/")) {
-                    processedCmd = processedCmd.substring(1);
-                }
-
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), processedCmd);
-            }
-
-            List<String> staffCommands = plugin.getConfigManager().getConfig("config").getStringList("frozen.commands-on-disconnect.staff_commands");
-
-            for (Player staffPlayer : Bukkit.getOnlinePlayers()) {
-                if (staffPlayer.hasPermission("exyliastaff.notify")) {
-                    MessageUtils.sendMessageAsync(staffPlayer, plugin.getConfigManager().getMessage("actions.freeze.disconnect", "%player%", playerName));
-
-                    for (String cmd : staffCommands) {
+            if (!consoleCommands.isEmpty()) {
+                for (String cmd : consoleCommands) {
+                    if (cmd != null && !cmd.trim().isEmpty()) {
                         String processedCmd = cmd.replace("%player%", playerName);
-
                         if (processedCmd.startsWith("/")) {
                             processedCmd = processedCmd.substring(1);
                         }
 
-                        staffPlayer.performCommand(processedCmd);
+                        try {
+                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), processedCmd);
+                        } catch (Exception e) {
+                            logWarn("Error ejecutando comando de consola: " + processedCmd + " - " + e.getMessage());
+                        }
+                    }
+                }
+            }
+
+            // Verificar y ejecutar comandos del staff
+            List<String> staffCommands = plugin.getConfigManager().getConfig("config").getStringList("frozen.commands-on-disconnect.staff_commands");
+
+            if (staffPlayer != null && staffPlayer.isOnline()) {
+                MessageUtils.sendMessageAsync(staffPlayer, plugin.getConfigManager().getMessage("actions.freeze.disconnect", "%player%", playerName));
+
+                if (!staffCommands.isEmpty()) {
+                    for (String cmd : staffCommands) {
+                        if (cmd != null && !cmd.trim().isEmpty()) {
+                            String processedCmd = cmd.replace("%player%", playerName);
+                            if (processedCmd.startsWith("/")) {
+                                processedCmd = processedCmd.substring(1);
+                            }
+
+                            try {
+                                staffPlayer.performCommand(processedCmd);
+                            } catch (Exception e) {
+                                logWarn("Error ejecutando comando del staff: " + processedCmd + " - " + e.getMessage());
+                            }
+                        }
                     }
                 }
             }
         }
     }
+
 
     public boolean isFrozen(Player player) {
         return frozenPlayers.contains(player.getUniqueId());
@@ -243,8 +262,40 @@ public class FreezeManager {
 
     public void removeFromFrozenPlayers(UUID playerUuid) {
         frozenPlayers.remove(playerUuid);
+        frozenByStaff.remove(playerUuid);
         stopFrozenPlayerTask(playerUuid);
         frozenPlayerLocations.remove(playerUuid);
         frozenPlayerHelmets.remove(playerUuid);
+    }
+
+    public UUID getStaffWhoFroze(UUID playerUUID) {
+        return frozenByStaff.get(playerUUID);
+    }
+
+    public Player getStaffPlayerWhoFroze(UUID playerUUID) {
+        UUID staffUUID = frozenByStaff.get(playerUUID);
+        if (staffUUID != null) {
+            return Bukkit.getPlayer(staffUUID);
+        }
+        return null;
+    }
+
+    public String getStaffNameWhoFroze(UUID playerUUID) {
+        UUID staffUUID = frozenByStaff.get(playerUUID);
+        if (staffUUID != null) {
+            Player staffPlayer = Bukkit.getPlayer(staffUUID);
+            if (staffPlayer != null) {
+                return staffPlayer.getName();
+            } else {
+                // Si el staff no está online, obtener el nombre del OfflinePlayer
+                return Bukkit.getOfflinePlayer(staffUUID).getName();
+            }
+        }
+        return null;
+    }
+
+    public boolean wasFrozenBy(UUID playerUUID, UUID staffUUID) {
+        UUID frozenByUUID = frozenByStaff.get(playerUUID);
+        return frozenByUUID != null && frozenByUUID.equals(staffUUID);
     }
 }

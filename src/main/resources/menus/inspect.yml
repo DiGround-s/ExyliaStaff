@@ -15,7 +15,7 @@ enderchest:
   name: "<#8a51c4>&lCOFRE DEL END"
   material: ENDER_CHEST
   lore:
-    - "&8| <#e7cfffEntra al cofre del end de <#59a4ff>%player_name%"
+    - "&8| <#e7cfff>Entra al cofre del end de <#59a4ff>%player_name%"
   glow: true
 
 items:

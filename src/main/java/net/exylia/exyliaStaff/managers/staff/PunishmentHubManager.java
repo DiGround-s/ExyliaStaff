@@ -154,7 +154,6 @@ public class PunishmentHubManager {
 
             punishmentItem.usePlaceholders(usePlaceholders);
 
-            // Reemplazar placeholders específicos
             String finalItemName = itemName.replace("%punishment_name%", punishmentName);
             punishmentItem.setName(finalItemName);
 
@@ -173,25 +172,24 @@ public class PunishmentHubManager {
                 punishmentItem.hideAllAttributes();
             }
 
-            // Handler al hacer clic en la sanción
             punishmentItem.setClickHandler(e -> {
-                // Cerrar el inventario
                 staff.closeInventory();
 
-                // Reemplazar %player% con el nombre del jugador objetivo
                 String finalCommand = staffCommand.replace("%player%", target.getName());
 
-                // Buscar placeholder del scope personalizado
                 ConfigurationSection customPlaceholders = punishmentConfig.getConfigurationSection("custom_placeholders");
-                if (customPlaceholders != null && finalCommand.contains("%scope%")) {
-                    String scope = customPlaceholders.getString("scope", "unknown");
-                    finalCommand = finalCommand.replace("%scope%", scope);
+                if (customPlaceholders != null) {
+                    for (String placeholderKey : customPlaceholders.getKeys(false)) {
+                        String placeholderPattern = "%" + placeholderKey + "%";
+
+                        if (finalCommand.contains(placeholderPattern)) {
+                            String placeholderValue = customPlaceholders.getString(placeholderKey, "unknown");
+                            finalCommand = finalCommand.replace(placeholderPattern, placeholderValue);
+                        }
+                    }
                 }
 
-                // Ejecutar el comando como el staff
                 staff.performCommand(finalCommand);
-
-                // Enviar mensaje de confirmación
                 MessageUtils.sendMessageAsync(staff, plugin.getConfigManager().getMessage(
                         "actions.punishment-hub.punish-success",
                         "%target%", target.getName(),
@@ -201,7 +199,6 @@ public class PunishmentHubManager {
 
             return punishmentItem;
         } catch (IllegalArgumentException e) {
-            // Si el material no es válido, usar un material predeterminado
             plugin.getLogger().warning("Material inválido para la sanción " + punishmentKey + ": " + materialString);
             return createDefaultPunishmentItem(punishmentKey, punishmentName, description, staffCommand,
                     itemName, itemLore, usePlaceholders, hideAttributes,

@@ -17,6 +17,8 @@ import javax.annotation.Nullable;
 import java.util.*;
 
 import static net.exylia.commons.utils.DebugUtils.logWarn;
+import static net.exylia.commons.utils.EffectUtils.applyEffects;
+import static net.exylia.commons.utils.EffectUtils.removeEffects;
 
 /**
  * Main manager for Staff Mode functionality.
@@ -202,6 +204,8 @@ public class StaffModeManager {
         player.closeInventory();
         player.setHealth(20);
         player.setFoodLevel(20);
+        player.setInvulnerable(true);
+        applyEffects(player, plugin.getConfigManager().getConfig().getStringList("staff-mode.effects"));
     }
 
     public void disableStaffMode(Player player) {
@@ -237,6 +241,8 @@ public class StaffModeManager {
         savePlayer(player, async);
         player.setGameMode(GameMode.SURVIVAL);
         player.closeInventory();
+        player.setInvulnerable(false);
+        removeEffects(player, plugin.getConfigManager().getConfig().getStringList("staff-mode.effects"));
     }
 
     private void storePlayerInventory(Player player) {
@@ -485,5 +491,9 @@ public class StaffModeManager {
 
     public FlyManager getFlyManager() {
         return flyManager;
+    }
+
+    public PunishmentHubManager getPunishmentHubManager() {
+        return punishmentHubManager;
     }
 }

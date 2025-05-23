@@ -50,22 +50,13 @@ public abstract class StaffModeListenerBase implements Listener {
         staffModeManager.executeStaffItemAction(player, item, targetPlayer, action);
         return true;
     }
-
-    /**
-     * Checks if the player is in staff mode
-     * @param player The player to check
-     * @return true if player is in staff mode
-     */
     protected boolean isInStaffMode(Player player) {
         return staffModeManager.isInStaffMode(player);
     }
-
-    /**
-     * Checks if the player is frozen
-     * @param player The player to check
-     * @return true if player is frozen
-     */
     protected boolean isFrozen(Player player) {
         return staffModeManager.getFreezeManager().isFrozen(player);
+    }
+    protected void handlePlayerDisconnectWhileFrozen(UUID playerUUID) {
+        staffModeManager.getFreezeManager().handlePlayerDisconnectWhileFrozen(playerUUID, staffModeManager.getFreezeManager().getStaffPlayerWhoFroze(playerUUID));
     }
 }

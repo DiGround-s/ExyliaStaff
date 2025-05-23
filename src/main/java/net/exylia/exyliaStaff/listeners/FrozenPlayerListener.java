@@ -3,12 +3,16 @@ package net.exylia.exyliaStaff.listeners;
 import net.exylia.commons.utils.MessageUtils;
 import net.exylia.exyliaStaff.ExyliaStaff;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+
+import java.util.UUID;
 
 /**
  * Handles all events specific to frozen players
@@ -62,6 +66,16 @@ public class FrozenPlayerListener extends StaffModeListenerBase {
         Player player = event.getPlayer();
         if (isFrozen(player) && !event.getCause().equals(PlayerTeleportEvent.TeleportCause.PLUGIN)) {
             event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onDisconnect(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+        UUID playerUUID = player.getUniqueId();
+
+        if (isFrozen(player)) {
+            handlePlayerDisconnectWhileFrozen(playerUUID);
         }
     }
 }

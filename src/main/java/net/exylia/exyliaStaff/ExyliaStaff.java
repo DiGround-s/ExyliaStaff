@@ -6,14 +6,11 @@ import net.exylia.commons.command.CommandManager;
 import net.exylia.commons.config.ConfigManager;
 import net.exylia.commons.menu.MenuManager;
 import net.exylia.commons.utils.DebugUtils;
-import net.exylia.exyliaStaff.commands.NotificationsCommand;
-import net.exylia.exyliaStaff.commands.StaffModeCommand;
-import net.exylia.exyliaStaff.commands.VanishCommand;
+import net.exylia.exyliaStaff.commands.*;
 import net.exylia.exyliaStaff.database.StaffDatabaseLoader;
 import net.exylia.exyliaStaff.extensions.PlaceholderAPI;
 import net.exylia.exyliaStaff.listeners.StaffModeListenerManager;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
-import nl.marido.deluxecombat.api.DeluxeCombatAPI;
 import org.bukkit.Bukkit;
 
 import java.util.List;
@@ -26,8 +23,6 @@ public final class ExyliaStaff extends ExyliaPlugin {
     private StaffDatabaseLoader databaseLoader;
     private StaffModeManager staffModeManager;
     private CommandManager commandManager;
-
-    private DeluxeCombatAPI deluxeCombatAPI;
 
     @Override
     public void onExyliaEnable() {
@@ -83,25 +78,27 @@ public final class ExyliaStaff extends ExyliaPlugin {
             logInfo("PlaceholderAPI encontrado, registrando expansión...");
             new PlaceholderAPI(this).register();
         }
-        if (Bukkit.getPluginManager().getPlugin("DeluxeCombat") != null) {
-            logInfo("DeluxeCombat encontrado...");
-            deluxeCombatAPI = new DeluxeCombatAPI();
-        }
     }
 
     private void loadCommands() {
         List<String> staffAliases = configManager.getConfig("config").getStringList("aliases.staff_mode");
         List<String> vanishAliases = configManager.getConfig("config").getStringList("aliases.vanish");
         List<String> notificationsAliases = configManager.getConfig("config").getStringList("aliases.notifications");
+        List<String> freezeAliases = configManager.getConfig("config").getStringList("aliases.freeze");
+        List<String> punishAliases = configManager.getConfig("config").getStringList("aliases.punish");
 
         StaffModeCommand staffModeCommand = new StaffModeCommand(this, staffModeManager, staffAliases);
         VanishCommand vanishCommand = new VanishCommand(this, staffModeManager, vanishAliases);
         NotificationsCommand notificationsCommand = new NotificationsCommand(this, staffModeManager, notificationsAliases);
+        FreezeCommand freezeCommand = new FreezeCommand(this, staffModeManager, freezeAliases);
+        PunishCommand punishCommand = new PunishCommand(this, staffModeManager, punishAliases);
 
         commandManager.registerCommands(
                 staffModeCommand,
                 vanishCommand,
-                notificationsCommand
+                notificationsCommand,
+                freezeCommand,
+                punishCommand
         );
 
         logInfo("Se han cargado " + commandManager.getCommands().size() + " comandos correctamente.");
@@ -126,12 +123,7 @@ public final class ExyliaStaff extends ExyliaPlugin {
     public boolean isEnabledExt(String name) {
         return switch (name.toLowerCase()) {
             case "placeholderapi" -> Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null;
-            case "deluxecombat" -> deluxeCombatAPI != null;
             default -> false;
         };
-    }
-
-    public DeluxeCombatAPI getDeluxeCombatAPI() {
-        return deluxeCombatAPI;
     }
 }

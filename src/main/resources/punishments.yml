@@ -1,65 +1,130 @@
 custom_placeholders:
   scope: "SurvivalPvP"
-  global: "__ALL__"
+  global: "global"
 
 punishments:
+  flood:
+    name: "<#59a4ff>Mensajes excesivos"
+    description: "Si el jugador inunda el chat"
+    material: BORDURE_INDENTED_BANNER_PATTERN
+    staff_command: "mute %player% flood server:%scope%"
+  spam:
+    name: "<#59a4ff>Publicidad Externa"
+    description: "Si el jugador promocionó algo externo al servidor"
+    material: CHARCOAL
+    staff_command: "mute %player% spam server:%global%"
+  encourage:
+    name: "<#59a4ff>Fomentar el mal uso del chat"
+    description: "Si el jugador fomentó el mal uso del chat"
+    material: DRIED_KELP
+    staff_command: "mute %player% encourage server:%scope%"
+  toxic:
+    name: "<#59a4ff>Toxicidad"
+    description: "Si el jugador escribió comentarios tóxicos"
+    material: POISONOUS_POTATO
+    staff_command: "mute %player% toxic server:%scope%"
+  harass:
+    name: "<#59a4ff>Acoso"
+    description: "Si el jugador acosó a otro jugador"
+    material: PUFFERFISH
+    staff_command: "mute %player% harass server:%global%"
+  discussion:
+    name: "<#59a4ff>Discución"
+    description: "Si el jugador estaba discutiendo"
+    material: MUSHROOM_STEW
+    staff_command: "mute %player% discussion server:%scope%"
+  questioning:
+    name: "<#59a4ff>Cuestionamiento al Staff"
+    description: "Si el jugador estaba cuestionando al staff"
+    material: WRITABLE_BOOK
+    staff_command: "mute %player% questioning server:%global%"
+  bad_command_usage:
+    name: "<#59a4ff>Mal uso de Comandos"
+    description: "Si el jugador estaba dando un mal uso a comandos"
+    material: COMMAND_BLOCK
+    staff_command: "mute %player% bad_command_usage server:%global%"
+  mention_another_server:
+    name: "<#59a4ff>Mencionar otro Servidor"
+    description: "Si el jugador mencionó otro servidor"
+    material: LIGHT
+    staff_command: "mute %player% mention_another_server server:%global%"
+  another_server_ip:
+    name: "<#59a4ff>Mandar IP de otro Servidor"
+    description: "Si el jugador mandó la IP a otro Servidor"
+    material: STRUCTURE_BLOCK
+    staff_command: "mute %player% another_server_ip server:%global%"
   xray:
-    name: "Uso de X-Ray"
+    name: "<#a33b53>Uso de X-Ray"
     description: "Si el jugador usó X-Ray"
-    material: DIAMOND_ORE
+    material: DIAMOND_BLOCK
     staff_command: "ban %player% xray server:%scope%"
+  xray_admitted:
+    name: "<#a33b53>Uso de X-Ray (Admitido)"
+    description: "Si el jugador usó X-Ray y admitió"
+    material: DIAMOND_ORE
+    staff_command: "ban %player% xray_admitted server:%scope%"
+  xray_in_ss:
+    name: "<#a33b53>Uso de X-Ray (Encontrado en SS)"
+    description: "Si el jugador usó X-Ray encontrado en SS"
+    material: NETHERITE_BLOCK
+    staff_command: "ban %player% xray_in_ss server:%scope%"
   bugs:
-    name: "Abuso de Bugs"
+    name: "<#a33b53>Abuso de Bugs"
     description: "Si el jugador abusó de Bugs"
     material: LILY_PAD
     staff_command: "ban %player% bugs server:%scope%"
+  hacks:
+    name: "<#a33b53>Uso de Ventajas Ilegales"
+    description: "El jugador tenia Ventajas Ilegales &lMUY OBVIAS"
+    material: BARRIER
+    staff_command: "ban %player% hacks server:%global%"
   hacks_admitted:
-    name: "Uso de Ventajas Ilegales (Admitido)"
+    name: "<#a33b53>Uso de Ventajas Ilegales (Admitido)"
     description: "El jugador dijo claramente que tenia Ventajas Ilegales"
     material: GOLDEN_SWORD
     staff_command: "ban %player% hacks_admitted server:%global%"
   hacks_in_ss:
-    name: "Uso de Ventajas Ilegales (Encontrado en SS)"
+    name: "<#a33b53>Uso de Ventajas Ilegales (Encontrado en SS)"
     description: "Encontraste un jugador usando Ventajas Ilegales en SS"
     material: NETHERITE_SWORD
     staff_command: "ban %player% hacks_in_ss server:%global%"
   disconnect_in_ss:
-    name: "Desconectarse en SS"
+    name: "<#a33b53>Desconectarse en SS"
     description: "El jugador se desconecto en SS o Congelado"
     material: PACKED_ICE
     staff_command: "ban %player% disconnect_in_ss server:%global%"
   refuse_in_ss:
-    name: "Rehusarse a SS"
+    name: "<#a33b53>Rehusarse a SS"
     description: "Se rehúsa y evita la SS"
     material: JUKEBOX
     staff_command: "ban %player% refuse_in_ss server:%global%"
   multi_accounts:
-    name: "Mal uso de Multi-cuentas"
+    name: "<#a33b53>Mal uso de Multi-cuentas"
     description: "El jugador abusó de Multi-cuentas"
     material: ITEM_FRAME
     staff_command: "ban %player% multi_accounts server:%global%"
   farm_kill:
-    name: "Farmeo de Kills"
+    name: "<#a33b53>Farmeo de Kills"
     description: "El jugador mató muchas veces al mismo jugador"
     material: CAMPFIRE
     staff_command: "ban %player% farm_kill server:%scope%"
   leve_grief:
-    name: "Grifeo (Leve)"
+    name: "<#a33b53>Grifeo (Leve)"
     description: "El jugador hizo un grifeo leve"
     material: WATER_BUCKET
     staff_command: "ban %player% leve_grief server:%scope%"
   grave_grief:
-    name: "Grifeo (Grave)"
+    name: "<#a33b53>Grifeo (Grave)"
     description: "El jugador hizo un grifeo grave"
     material: LAVA_BUCKET
     staff_command: "ban %player% grave_grief server:%scope%"
   dupe:
-    name: "Duplicación de Objetos"
+    name: "<#a33b53>Duplicación de Objetos"
     description: "El jugador estaba duplicando objetos"
     material: NETHERITE_SCRAP
     staff_command: "ban %player% dupe server:%global%"
   give_hacker:
-    name: "Dar Objetos a Jugador Ilegal"
+    name: "<#a33b53>Dar Objetos a Jugador Ilegal"
     description: "El jugador estaba dando objetos a jugadores ilegales"
     material: CAKE
     staff_command: "ban %player% give_hacker server:%global%"

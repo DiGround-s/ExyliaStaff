@@ -23,15 +23,19 @@ prefixes:
 aliases:
   staff_mode: ["staffmode", "staff", "mod"]
   vanish: ["vanish", "v"]
-  notifications: ["mine-alerts", "staff-notifications"]
+  notifications: ["staff-notifications", "mine-alerts"]
+  freeze: ["freeze", "ss"]
+  punish: ["punish", "punishment"]
 
 staff-mode:
-  gamemode: CREATIVE
-
+  gamemode: ADVENTURE
   can-break-blocks: false
   can-place-blocks: false
   can-damage-entities: false
   phase-distance: 100
+  effects:
+    - NIGHT_VISION|1|-1
+    - SPEED|2|-1
 
 frozen:
   allowed-commands:
@@ -45,15 +49,15 @@ frozen:
   effects:
     enabled: true
     effects:
-      - GLOWING|1|100
-      - BLINDNESS|1|100
-      - DARKNESS|1|100
+      - GLOWING|1|110
+      - BLINDNESS|1|110
+      - DARKNESS|1|110
   commands-on-disconnect:
     enabled: true
     console_commands:
-      - "/say %player% disconnected in frozen mode"
+      - ""
     staff_commands:
-      - "/ban %player% 14d Desconectarse en SS"
+      - "ban %player% disconnect_in_ss server:global"
 
 # Configuración de los ítems de modo staff
 staff-items:
@@ -97,7 +101,7 @@ staff-items:
     material: MACE
     display-name: "<#b48fd9>• <#8a51c4>sᴀɴᴄɪᴏɴᴀʀ ᴊᴜɢᴀᴅᴏʀ"
     lore:
-      - "&7Haz clic derecho sobre un jugador para sancionarlo"
+      - "&7Haz clic sobre un jugador para sancionarlo"
     glow: false
     action: punish_menu
     slot: 2
@@ -106,7 +110,7 @@ staff-items:
     material: FIELD_MASONED_BANNER_PATTERN
     display-name: "<#b48fd9>• <#8a51c4>ᴀʟᴛᴇʀɴᴀʀ ɪɴsᴘᴇᴄᴛᴏʀ"
     lore:
-      - "&7Haz clic derecho sobre un jugador para alternar el inspector"
+      - "&7Clic para alternar el inspector"
     glow: false
     action: player_command
     slot: 9
@@ -117,7 +121,7 @@ staff-items:
     material: BORDURE_INDENTED_BANNER_PATTERN
     display-name: "<#b48fd9>• <#8a51c4>ᴀʟᴛᴇʀɴᴀʀ ɴᴏᴛɪғɪᴄᴀᴄɪᴏɴᴇs"
     lore:
-      - "&7Haz clic derecho sobre un jugador para alternar las notificaciones"
+      - "&7Clic para alternar notificaciones"
     glow: false
     action: player_command
     slot: 10
@@ -128,7 +132,7 @@ staff-items:
     material: STRUCTURE_VOID
     display-name: "<#b48fd9>• <#8fffc1>sᴀʟɪʀ ᴅᴇʟ ᴍᴏᴅᴏ sᴛᴀғғ"
     lore:
-      - "&7Haz clic derecho para salir del modo staff"
+      - "&7Clic para salir del modo staff"
     glow: false
     action: exit
     slot: 17
@@ -155,7 +159,7 @@ staff-items:
     material: GOLDEN_PICKAXE
     display-name: "<#b48fd9>• <#8a51c4>ᴄᴇɴᴛʀᴏ ᴍɪɴᴇʀᴏ"
     lore:
-      - "&7Haz clic derecho para abrir el centro minero"
+      - "&7Clic para abrir el centro minero"
     glow: false
     action: miner_hub
     slot: 35
@@ -164,7 +168,7 @@ staff-items:
     material: RECOVERY_COMPASS
     display-name: "<#b48fd9>• <#8a51c4>ᴍᴜʟᴛɪꜱ ʏ ʜɪꜱᴛᴏʀɪᴀʟ"
     lore:
-      - "&7Haz clic derecho para abrir el centro minero"
+      - "&7Haz clic derecho a un jugador para ver información"
     glow: false
     action: player_command
     slot: 6
@@ -188,8 +192,8 @@ staff-scoreboard:
   lines:
     - "&f"
     - "<#ffc58f>Staff"
-    - "<#ffc58f> | &fVanish: <#ffc58f>%exyliastaff_status_vanish%"
-    - "<#ffc58f> | &fNotifications: <#ffc58f>%exyliastaff_status_notifications%"
+    - "<#ffc58f> | &fInvisibilidad: <#ffc58f>%exyliastaff_status_vanish%"
+    - "<#ffc58f> | &fNotificaciones: <#ffc58f>%exyliastaff_status_notifications%"
     - "<#ffc58f> | &fStaff Activo: <#ffc58f>%exyliastaff_online_staff%"
     - "&f"
     - "<#59a4ff>Servidor"
