@@ -1,4 +1,4 @@
-title: "<#8a51c4>&lCENTRO MINERO"
+title: "<#8a51c4>&lCENTRO DE SANCIONES"
 rows: 4
 prev_button:
   slot: 27
@@ -19,8 +19,8 @@ next_button:
 filler:
   material: BLACK_STAINED_GLASS_PANE
 punishment_items:
-  slots: 10-26
-  material: %material%
+  slots: 10-16,19-25
+  material: "%material%"
   name: "<#8a51c4>%punishment_name%"
   lore:
     - "&f%description%"

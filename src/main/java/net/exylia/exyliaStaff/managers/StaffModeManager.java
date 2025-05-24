@@ -379,7 +379,7 @@ public class StaffModeManager {
                 minerHubManager.openMinerHubInventory(staffPlayer);
                 break;
             case "punish_menu":
-                punishmentHubManager.openPunishmentInventory(staffPlayer, targetPlayer);
+                punishmentHubManager.openPunishmentInventory(staffPlayer, targetPlayer.getName());
                 break;
             case "toggle_spectator":
                 toggleSpectator(staffPlayer);

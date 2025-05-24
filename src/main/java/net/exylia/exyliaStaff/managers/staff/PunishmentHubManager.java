@@ -46,16 +46,16 @@ public class PunishmentHubManager {
      * Abre el inventario de sanciones para un staff sobre un jugador objetivo
      *
      * @param staff El miembro del staff que aplica la sanción
-     * @param target El jugador objetivo que será sancionado
+     * @param targetName El jugador objetivo que será sancionado
      */
-    public void openPunishmentInventory(Player staff, Player target) {
-        if (target == null) return;
-        PaginationMenu punishmentMenu = createPunishmentInventory(staff, target);
+    public void openPunishmentInventory(Player staff, String targetName) {
+        if (targetName == null || targetName.isEmpty()) return;
+        PaginationMenu punishmentMenu = createPunishmentInventory(staff, targetName);
 
         if (punishmentMenu != null) {
             punishmentMenu.open(staff);
         } else {
-            MessageUtils.sendMessageAsync(staff, plugin.getConfigManager().getMessage("actions.punishment-hub.error", "%target%", target.getName()));
+            MessageUtils.sendMessageAsync(staff, plugin.getConfigManager().getMessage("actions.punishment-hub.error", "%target%", targetName));
         }
     }
 
@@ -63,10 +63,10 @@ public class PunishmentHubManager {
      * Crea el inventario de sanciones
      *
      * @param staff El miembro del staff que aplica la sanción
-     * @param target El jugador objetivo que será sancionado
+     * @param targetName El jugador objetivo que será sancionado
      * @return El menú de sanciones
      */
-    private PaginationMenu createPunishmentInventory(Player staff, Player target) {
+    private PaginationMenu createPunishmentInventory(Player staff, String targetName) {
         String punishmentSlotsString = menuConfig.getString("punishment_items.slots", "10-26");
         int rows = menuConfig.getInt("rows", 4);
         int[] punishmentSlots = parseSlots(punishmentSlotsString, rows);
@@ -74,7 +74,7 @@ public class PunishmentHubManager {
         MenuBuilder menuBuilder = new MenuBuilder(plugin);
         PaginationMenu punishmentMenu = menuBuilder.buildPaginationMenu(menuConfig, staff, punishmentSlots);
 
-        addPunishmentItems(punishmentMenu, staff, target);
+        addPunishmentItems(punishmentMenu, staff, targetName);
 
         return punishmentMenu;
     }
@@ -84,9 +84,9 @@ public class PunishmentHubManager {
      *
      * @param paginationMenu El menú donde se añadirán las sanciones
      * @param staff El miembro del staff que aplica la sanción
-     * @param target El jugador objetivo que será sancionado
+     * @param targetName El jugador objetivo que será sancionado
      */
-    private void addPunishmentItems(PaginationMenu paginationMenu, Player staff, Player target) {
+    private void addPunishmentItems(PaginationMenu paginationMenu, Player staff, String targetName) {
         boolean usePlaceholders = menuConfig.getBoolean("punishment_items.use_placeholders", true);
         boolean hideAttributes = menuConfig.getBoolean("punishment_items.hide_attributes", true);
         String itemName = menuConfig.getString("punishment_items.name", "<#8a51c4>%punishment_name%");
@@ -108,20 +108,20 @@ public class PunishmentHubManager {
             String name = punishmentSection.getString("name", "Unknown");
             String description = punishmentSection.getString("description", "");
             String materialString = punishmentSection.getString("material", "BARRIER");
-            String staffCommand = punishmentSection.getString("staff_command", "");
+            List<String> commands = punishmentSection.getStringList("commands");
 
             MenuItem punishmentItem = createPunishmentItem(
                     key,
                     name,
                     description,
                     materialString,
-                    staffCommand,
+                    commands,
                     itemName,
                     new ArrayList<>(itemLore),
                     usePlaceholders,
                     hideAttributes,
                     staff,
-                    target
+                    targetName
             );
 
             paginationMenu.addItem(punishmentItem);
@@ -135,19 +135,19 @@ public class PunishmentHubManager {
      * @param punishmentName El nombre de la sanción
      * @param description La descripción de la sanción
      * @param materialString El material del ítem
-     * @param staffCommand El comando que se ejecutará
+     * @param commands Los comandos que se ejecutarán
      * @param itemName El nombre del ítem (puede contener placeholders)
      * @param itemLore El lore del ítem (puede contener placeholders)
      * @param usePlaceholders Si se deben usar placeholders
      * @param hideAttributes Si se deben ocultar los atributos del ítem
      * @param staff El miembro del staff que aplica la sanción
-     * @param target El jugador objetivo que será sancionado
+     * @param targetName El jugador objetivo que será sancionado
      * @return El ítem de menú creado
      */
     private MenuItem createPunishmentItem(String punishmentKey, String punishmentName, String description,
-                                          String materialString, String staffCommand, String itemName,
+                                          String materialString, List<String> commands, String itemName,
                                           List<String> itemLore, boolean usePlaceholders,
-                                          boolean hideAttributes, Player staff, Player target) {
+                                          boolean hideAttributes, Player staff, String targetName) {
         try {
             Material material = Material.valueOf(materialString);
             MenuItem punishmentItem = new MenuItem(material);
@@ -161,7 +161,7 @@ public class PunishmentHubManager {
             for (String line : itemLore) {
                 finalLore.add(line
                         .replace("%description%", description)
-                        .replace("%player_name%", target.getName())
+                        .replace("%player_name%", targetName)
                         .replace("%punishment_key%", punishmentKey)
                 );
             }
@@ -172,37 +172,38 @@ public class PunishmentHubManager {
                 punishmentItem.hideAllAttributes();
             }
 
+
             punishmentItem.setClickHandler(e -> {
                 staff.closeInventory();
+            });
 
-                String finalCommand = staffCommand.replace("%player%", target.getName());
+            List<String> translatedCommands = new ArrayList<>();
+            for (String command : commands) {
+                String translatedCommand = command.replace("%player%", targetName);
 
                 ConfigurationSection customPlaceholders = punishmentConfig.getConfigurationSection("custom_placeholders");
                 if (customPlaceholders != null) {
                     for (String placeholderKey : customPlaceholders.getKeys(false)) {
                         String placeholderPattern = "%" + placeholderKey + "%";
 
-                        if (finalCommand.contains(placeholderPattern)) {
+                        if (translatedCommand.contains(placeholderPattern)) {
                             String placeholderValue = customPlaceholders.getString(placeholderKey, "unknown");
-                            finalCommand = finalCommand.replace(placeholderPattern, placeholderValue);
+                            translatedCommand = translatedCommand.replace(placeholderPattern, placeholderValue);
                         }
                     }
                 }
 
-                staff.performCommand(finalCommand);
-                MessageUtils.sendMessageAsync(staff, plugin.getConfigManager().getMessage(
-                        "actions.punishment-hub.punish-success",
-                        "%target%", target.getName(),
-                        "%punishment%", punishmentName
-                ));
-            });
+                translatedCommands.add(translatedCommand);
+            }
+
+            punishmentItem.setCommands(translatedCommands);
 
             return punishmentItem;
         } catch (IllegalArgumentException e) {
             plugin.getLogger().warning("Material inválido para la sanción " + punishmentKey + ": " + materialString);
-            return createDefaultPunishmentItem(punishmentKey, punishmentName, description, staffCommand,
+            return createDefaultPunishmentItem(punishmentKey, punishmentName, description, commands,
                     itemName, itemLore, usePlaceholders, hideAttributes,
-                    staff, target);
+                    staff, targetName);
         }
     }
 
@@ -210,9 +211,9 @@ public class PunishmentHubManager {
      * Crea un ítem de sanción predeterminado para cuando el material definido no es válido
      */
     private MenuItem createDefaultPunishmentItem(String punishmentKey, String punishmentName, String description,
-                                                 String staffCommand, String itemName,
+                                                 List<String> commands, String itemName,
                                                  List<String> itemLore, boolean usePlaceholders,
-                                                 boolean hideAttributes, Player staff, Player target) {
+                                                 boolean hideAttributes, Player staff, String targetName) {
         MenuItem defaultItem = new MenuItem(Material.BARRIER);
 
         defaultItem.usePlaceholders(usePlaceholders);
@@ -224,7 +225,7 @@ public class PunishmentHubManager {
         for (String line : itemLore) {
             finalLore.add(line
                     .replace("%description%", description)
-                    .replace("%player_name%", target.getName())
+                    .replace("%player_name%", targetName)
                     .replace("%punishment_key%", punishmentKey)
             );
         }
@@ -236,25 +237,30 @@ public class PunishmentHubManager {
             defaultItem.hideAllAttributes();
         }
 
-        // Mismo handler que el normal, solo que con error visual
         defaultItem.setClickHandler(e -> {
             staff.closeInventory();
-            String finalCommand = staffCommand.replace("%player%", target.getName());
+        });
 
-            // Buscar placeholder del scope personalizado
+        List<String> translatedCommands = new ArrayList<>();
+        for (String command : commands) {
+            String translatedCommand = command.replace("%player%", targetName);
+
             ConfigurationSection customPlaceholders = punishmentConfig.getConfigurationSection("custom_placeholders");
-            if (customPlaceholders != null && finalCommand.contains("%scope%")) {
-                String scope = customPlaceholders.getString("scope", "unknown");
-                finalCommand = finalCommand.replace("%scope%", scope);
+            if (customPlaceholders != null) {
+                for (String placeholderKey : customPlaceholders.getKeys(false)) {
+                    String placeholderPattern = "%" + placeholderKey + "%";
+
+                    if (translatedCommand.contains(placeholderPattern)) {
+                        String placeholderValue = customPlaceholders.getString(placeholderKey, "unknown");
+                        translatedCommand = translatedCommand.replace(placeholderPattern, placeholderValue);
+                    }
+                }
             }
 
-            staff.performCommand(finalCommand);
-            MessageUtils.sendMessageAsync(staff, plugin.getConfigManager().getMessage(
-                    "actions.punishment-hub.punish-success",
-                    "%target%", target.getName(),
-                    "%punishment%", punishmentName
-            ));
-        });
+            translatedCommands.add(translatedCommand);
+        }
+
+        defaultItem.setCommands(translatedCommands);
 
         return defaultItem;
     }

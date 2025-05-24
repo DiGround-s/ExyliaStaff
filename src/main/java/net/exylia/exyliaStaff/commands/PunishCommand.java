@@ -38,14 +38,8 @@ public class PunishCommand extends SimpleCommand {
         }
 
         Player executor = (Player) sender;
-        Player target = plugin.getServer().getPlayer(args[0]);
 
-        if (target == null) {
-            MessageUtils.sendMessage(executor,
-                    configManager.getMessage("system.player-not-found", "%target%", args[0]));
-            return true;
-        }
-        staffModeManager.getPunishmentHubManager().openPunishmentInventory(executor, target);
+        staffModeManager.getPunishmentHubManager().openPunishmentInventory(executor, args[0]);
         return true;
     }
 
