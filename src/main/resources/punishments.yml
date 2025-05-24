@@ -11,10 +11,16 @@ punishments:
       - "bungee: as_player:mute %player% flood server:%scope%"
   spam:
     name: "<#59a4ff>Publicidad Externa"
-    description: "Si el jugador promocionó algo externo al servidor"
+    description: "Si el jugador repitió muchas veces el mismo mensaje"
     material: CHARCOAL
-    commands: 
+    commands:
       - "bungee: as_player:mute %player% spam server:%global%"
+  publicity:
+    name: "<#59a4ff>Publicidad Externa"
+    description: "Si el jugador hizo publicidad externa"
+    material: FIRE_CHARGE
+    commands:
+      - "bungee: as_player:mute %player% publicity server:%global%"
   encourage:
     name: "<#59a4ff>Fomentar el mal uso del chat"
     description: "Si el jugador fomentó el mal uso del chat"
