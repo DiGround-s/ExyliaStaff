@@ -91,7 +91,6 @@ public class StaffModeCommand extends ToggleCommand {
 
     @Override
     protected void sendEnableMessage(Player player) {
-        MessageUtils.sendMessageAsync(player, configManager.getMessage("actions.staff-mode.enabled"));
     }
 
     @Override

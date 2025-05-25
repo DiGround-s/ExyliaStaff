@@ -27,7 +27,7 @@ public class PlayerInteractionListener extends StaffModeListenerBase {
         super(plugin, staffModeManager);
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
         if (isFrozen(player)) {

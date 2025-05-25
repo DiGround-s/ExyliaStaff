@@ -1,5 +1,6 @@
 package net.exylia.exyliaStaff.managers.staff;
 
+import net.exylia.commons.command.CommandExecutor;
 import net.exylia.commons.utils.MessageUtils;
 import net.exylia.exyliaStaff.ExyliaStaff;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
@@ -200,58 +201,21 @@ public class FreezeManager {
     }
 
     public void handlePlayerDisconnectWhileFrozen(UUID playerUUID, Player staffPlayer) {
-        String playerName = Bukkit.getOfflinePlayer(playerUUID).getName();
-        if (playerName == null) {
-            playerName = playerUUID.toString();
-        }
+        Player player = Bukkit.getPlayer(playerUUID);
 
-        unfreezePlayer(staffPlayer, Bukkit.getPlayer(playerUUID));
+        unfreezePlayer(staffPlayer, player);
 
         boolean enabled = plugin.getConfigManager().getConfig("config").getBoolean("frozen.commands-on-disconnect.enabled", true);
 
         if (enabled) {
-            List<String> consoleCommands = plugin.getConfigManager().getConfig("config").getStringList("frozen.commands-on-disconnect.console_commands");
+            List<String> commands = plugin.getConfigManager().getConfig("config").getStringList("frozen.commands-on-disconnect.commands");
 
-            if (!consoleCommands.isEmpty()) {
-                for (String cmd : consoleCommands) {
-                    if (cmd != null && !cmd.trim().isEmpty()) {
-                        String processedCmd = cmd.replace("%player%", playerName);
-                        if (processedCmd.startsWith("/")) {
-                            processedCmd = processedCmd.substring(1);
-                        }
-
-                        try {
-                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), processedCmd);
-                        } catch (Exception e) {
-                            logWarn("Error ejecutando comando de consola: " + processedCmd + " - " + e.getMessage());
-                        }
-                    }
-                }
+            if (!commands.isEmpty()) {
+                CommandExecutor.builder(staffPlayer)
+                        .withPlaceholderPlayer(player)
+                        .execute(commands);
             }
 
-            // Verificar y ejecutar comandos del staff
-            List<String> staffCommands = plugin.getConfigManager().getConfig("config").getStringList("frozen.commands-on-disconnect.staff_commands");
-
-            if (staffPlayer != null && staffPlayer.isOnline()) {
-                MessageUtils.sendMessageAsync(staffPlayer, plugin.getConfigManager().getMessage("actions.freeze.disconnect", "%player%", playerName));
-
-                if (!staffCommands.isEmpty()) {
-                    for (String cmd : staffCommands) {
-                        if (cmd != null && !cmd.trim().isEmpty()) {
-                            String processedCmd = cmd.replace("%player%", playerName);
-                            if (processedCmd.startsWith("/")) {
-                                processedCmd = processedCmd.substring(1);
-                            }
-
-                            try {
-                                staffPlayer.performCommand(processedCmd);
-                            } catch (Exception e) {
-                                logWarn("Error ejecutando comando del staff: " + processedCmd + " - " + e.getMessage());
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 

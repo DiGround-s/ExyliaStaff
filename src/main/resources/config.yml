@@ -54,10 +54,8 @@ frozen:
       - DARKNESS|1|110
   commands-on-disconnect:
     enabled: true
-    console_commands:
-      - ""
-    staff_commands:
-      - "ban %player% disconnect_in_ss server:global"
+    commands:
+      - "bungee: as_player:ban %player_name% disconnect_in_ss server:global"
 
 # Configuración de los ítems de modo staff
 staff-items:
@@ -112,10 +110,10 @@ staff-items:
     lore:
       - "&7Clic para alternar el inspector"
     glow: false
-    action: player_command
+    action: commands
     slot: 9
     commands:
-      - "co i"
+      - "player: co i"
 
   notify:
     material: BORDURE_INDENTED_BANNER_PATTERN
@@ -123,10 +121,10 @@ staff-items:
     lore:
       - "&7Clic para alternar notificaciones"
     glow: false
-    action: player_command
+    action: commands
     slot: 10
     commands:
-      - "staff-notifications"
+      - "player: staff-notifications"
 
   exit:
     material: STRUCTURE_VOID
@@ -170,11 +168,11 @@ staff-items:
     lore:
       - "&7Haz clic derecho a un jugador para ver información"
     glow: false
-    action: player_command
+    action: commands
     slot: 6
     commands:
-      - "checkalts %target%"
-      - "history %target%"
+      - "bungee: as_player:checkalts %target%"
+      - "bungee: as_player:history %target%"
 
   random_player_tp:
     material: MUSIC_DISC_13

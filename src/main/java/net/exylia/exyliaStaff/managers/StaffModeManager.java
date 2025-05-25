@@ -1,5 +1,6 @@
 package net.exylia.exyliaStaff.managers;
 
+import net.exylia.commons.command.CommandExecutor;
 import net.exylia.commons.scoreboard.ExyliaScoreboardManager;
 import net.exylia.commons.utils.MessageUtils;
 import net.exylia.exyliaStaff.ExyliaStaff;
@@ -19,6 +20,7 @@ import java.util.*;
 import static net.exylia.commons.utils.DebugUtils.logWarn;
 import static net.exylia.commons.utils.EffectUtils.applyEffects;
 import static net.exylia.commons.utils.EffectUtils.removeEffects;
+import static net.exylia.exyliaStaff.managers.staff.CommandManager.processCommandVariables;
 
 /**
  * Main manager for Staff Mode functionality.
@@ -34,7 +36,6 @@ public class StaffModeManager {
     private final FreezeManager freezeManager;
     private final InspectionManager inspectionManager;
     private final MovementManager movementManager;
-    private final CommandManager commandManager;
     private final MinerHubManager minerHubManager;
     private final PunishmentHubManager punishmentHubManager;
     private final BlockBreakNotifier blockBreakNotifier;
@@ -53,7 +54,6 @@ public class StaffModeManager {
         this.freezeManager = new FreezeManager(plugin, this);
         this.inspectionManager = new InspectionManager(plugin, this);
         this.movementManager = new MovementManager(plugin, this);
-        this.commandManager = new CommandManager(plugin, this);
         this.minerHubManager = new MinerHubManager(plugin);
         this.punishmentHubManager = new PunishmentHubManager(plugin);
         this.blockBreakNotifier = new BlockBreakNotifier(plugin);
@@ -362,14 +362,16 @@ public class StaffModeManager {
                     MessageUtils.sendMessageAsync(staffPlayer, (plugin.getConfigManager().getMessage("system.no-target")));
                 }
                 break;
-            case "player_command":
+            case "commands":
                 if (staffItems.hasCommands(itemKey)) {
-                    commandManager.executePlayerCommands(staffPlayer, targetPlayer, itemKey);
-                }
-                break;
-            case "console_command":
-                if (staffItems.hasCommands(itemKey)) {
-                    commandManager.executeConsoleCommands(staffPlayer, targetPlayer, itemKey);
+                    List<String> commands = staffItems.getItemCommands(itemKey);
+                    for (String cmd : commands) {
+                        String processedCmd = processCommandVariables(cmd, staffPlayer, targetPlayer);
+                        if (processedCmd.startsWith("/")) {
+                            processedCmd = processedCmd.substring(1);
+                        }
+                        CommandExecutor.builder(staffPlayer).withPlaceholderPlayer(staffPlayer).execute(processedCmd);
+                    }
                 }
                 break;
             case "random_player_tp":
@@ -384,7 +386,7 @@ public class StaffModeManager {
             case "toggle_spectator":
                 toggleSpectator(staffPlayer);
                 break;
-            case "online_players":
+            case "teleporter":
                 inspectionManager.openOnlinePlayersMenu(staffPlayer);
                 break;
         }
@@ -471,10 +473,6 @@ public class StaffModeManager {
 
     public MovementManager getMovementManager() {
         return movementManager;
-    }
-
-    public CommandManager getCommandManager() {
-        return commandManager;
     }
 
     public MinerHubManager getMinerHubManager() {
