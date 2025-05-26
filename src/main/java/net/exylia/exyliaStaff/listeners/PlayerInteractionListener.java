@@ -27,7 +27,7 @@ public class PlayerInteractionListener extends StaffModeListenerBase {
         super(plugin, staffModeManager);
     }
 
-    @EventHandler(priority = EventPriority.NORMAL)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
         if (isFrozen(player)) {
@@ -49,9 +49,7 @@ public class PlayerInteractionListener extends StaffModeListenerBase {
             if (isAnimatedContainer(clickedBlock.getType())) {
                 event.setCancelled(true);
                 openSilentContainer(player, clickedBlock);
-            } else {
-                event.setCancelled(false);
-            }
+            } else event.setCancelled(!isNotAnimatedContainer(clickedBlock.getType()));
         }
     }
 
@@ -101,6 +99,13 @@ public class PlayerInteractionListener extends StaffModeListenerBase {
                  GRAY_SHULKER_BOX, GREEN_SHULKER_BOX, LIGHT_BLUE_SHULKER_BOX, LIGHT_GRAY_SHULKER_BOX,
                  LIME_SHULKER_BOX, MAGENTA_SHULKER_BOX, ORANGE_SHULKER_BOX, PINK_SHULKER_BOX,
                  PURPLE_SHULKER_BOX, RED_SHULKER_BOX, WHITE_SHULKER_BOX, YELLOW_SHULKER_BOX -> true;
+            default -> false;
+        };
+    }
+    private boolean isNotAnimatedContainer(Material material) {
+        return switch (material) {
+            case FURNACE, BLAST_FURNACE, SMOKER, BREWING_STAND,
+                 DISPENSER, DROPPER, HOPPER -> true;
             default -> false;
         };
     }
