@@ -1,6 +1,7 @@
 package net.exylia.exyliaStaff.managers.staff;
 
 import net.exylia.exyliaStaff.ExyliaStaff;
+import net.exylia.exyliaStaff.managers.StaffManager;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
 import net.exylia.exyliaStaff.managers.enums.FlyState;
 import org.bukkit.Bukkit;
@@ -15,19 +16,19 @@ import java.util.UUID;
 public class FlyManager {
     private final Map<UUID, FlyState> staffFlyStates = new HashMap<>();
     private final ExyliaStaff plugin;
-    private final StaffModeManager staffModeManager;
+    private final StaffManager staffManager;
 
-    public FlyManager(ExyliaStaff plugin, StaffModeManager staffModeManager) {
+    public FlyManager(ExyliaStaff plugin, StaffManager staffManager) {
         this.plugin = plugin;
-        this.staffModeManager = staffModeManager;
+        this.staffManager = staffManager;
         startFlyMonitor();
     }
 
     private void startFlyMonitor() {
         Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-            for (UUID uuid : staffModeManager.getStaffPlayers().keySet()) {
+            for (UUID uuid : staffManager.getStaffPlayers().keySet()) {
                 Player player = Bukkit.getPlayer(uuid);
-                if (player != null && staffModeManager.isInStaffMode(player)) {
+                if (player != null && staffManager.getStaffModeManager().isInStaffMode(player)) {
                     checkAndRestoreFly(player);
                 }
             }
@@ -41,7 +42,7 @@ public class FlyManager {
 
         if ((flyState == FlyState.AUTO || flyState == FlyState.ENABLED) && !currentAllowFlight) {
             Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> {
-                if (player.isOnline() && staffModeManager.isInStaffMode(player)) {
+                if (player.isOnline() && staffManager.getStaffModeManager().isInStaffMode(player)) {
                     player.setAllowFlight(true);
                     player.setFlying(true);
                     sendFlyStatusMessage(player, true);
@@ -55,7 +56,7 @@ public class FlyManager {
     }
 
     public void enableStaffFly(Player player) {
-        if (!staffModeManager.isInStaffMode(player)) return;
+        if (!staffManager.getStaffModeManager().isInStaffMode(player)) return;
 
         UUID playerId = player.getUniqueId();
         staffFlyStates.put(playerId, FlyState.ENABLED);
@@ -65,7 +66,7 @@ public class FlyManager {
     }
 
     public void disableStaffFly(Player player) {
-        if (!staffModeManager.isInStaffMode(player)) return;
+        if (!staffManager.getStaffModeManager().isInStaffMode(player)) return;
 
         UUID playerId = player.getUniqueId();
         staffFlyStates.put(playerId, FlyState.DISABLED);
@@ -75,7 +76,7 @@ public class FlyManager {
     }
 
     public void setAutoStaffFly(Player player) {
-        if (!staffModeManager.isInStaffMode(player)) return;
+        if (!staffManager.getStaffModeManager().isInStaffMode(player)) return;
 
         UUID playerId = player.getUniqueId();
         staffFlyStates.put(playerId, FlyState.AUTO);
@@ -85,7 +86,7 @@ public class FlyManager {
     }
 
     public void toggleFlyState(Player player) {
-        if (!staffModeManager.isInStaffMode(player)) return;
+        if (!staffManager.getStaffModeManager().isInStaffMode(player)) return;
 
         UUID playerId = player.getUniqueId();
         FlyState currentState = staffFlyStates.getOrDefault(playerId, FlyState.AUTO);

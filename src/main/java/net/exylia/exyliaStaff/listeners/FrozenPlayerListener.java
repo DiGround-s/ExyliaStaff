@@ -2,6 +2,7 @@ package net.exylia.exyliaStaff.listeners;
 
 import net.exylia.commons.utils.MessageUtils;
 import net.exylia.exyliaStaff.ExyliaStaff;
+import net.exylia.exyliaStaff.managers.StaffManager;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -19,8 +20,8 @@ import java.util.UUID;
  */
 public class FrozenPlayerListener extends StaffModeListenerBase {
 
-    public FrozenPlayerListener(ExyliaStaff plugin, StaffModeManager staffModeManager) {
-        super(plugin, staffModeManager);
+    public FrozenPlayerListener(ExyliaStaff plugin, StaffManager staffManager) {
+        super(plugin, staffManager);
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -47,7 +48,7 @@ public class FrozenPlayerListener extends StaffModeListenerBase {
             String command = event.getMessage().split(" ")[0].toLowerCase();
 
             boolean allowed = false;
-            for (String allowedCmd : plugin.getConfigManager().getConfig("config").getStringList("frozen.allowed-commands")) {
+            for (String allowedCmd : plugin.getConfigManager().getConfig("modules/freeze").getStringList("allowed-commands")) {
                 if (command.equalsIgnoreCase("/" + allowedCmd)) {
                     allowed = true;
                     break;

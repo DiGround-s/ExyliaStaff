@@ -1,7 +1,7 @@
 package net.exylia.exyliaStaff.listeners;
 
 import net.exylia.exyliaStaff.ExyliaStaff;
-import net.exylia.exyliaStaff.managers.StaffModeManager;
+import net.exylia.exyliaStaff.managers.StaffManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -16,8 +16,8 @@ import org.bukkit.inventory.ItemStack;
  */
 public class InventoryActionListener extends StaffModeListenerBase {
 
-    public InventoryActionListener(ExyliaStaff plugin, StaffModeManager staffModeManager) {
-        super(plugin, staffModeManager);
+    public InventoryActionListener(ExyliaStaff plugin, StaffManager staffManager) {
+        super(plugin, staffManager);
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -33,7 +33,7 @@ public class InventoryActionListener extends StaffModeListenerBase {
             event.setCancelled(true);
 
             ItemStack clickedItem = event.getCurrentItem();
-            if (clickedItem != null && staffModeManager.getStaffItems().isStaffItem(clickedItem)) {
+            if (clickedItem != null && staffManager.getStaffModeManager().getStaffItems().isStaffItem(clickedItem)) {
                 tryExecuteStaffItemAction(player, clickedItem, null, null);
             }
 

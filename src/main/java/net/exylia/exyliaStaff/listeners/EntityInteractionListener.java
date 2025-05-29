@@ -1,7 +1,7 @@
 package net.exylia.exyliaStaff.listeners;
 
 import net.exylia.exyliaStaff.ExyliaStaff;
-import net.exylia.exyliaStaff.managers.StaffModeManager;
+import net.exylia.exyliaStaff.managers.StaffManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -14,8 +14,8 @@ import org.bukkit.event.entity.EntityTargetEvent;
  */
 public class EntityInteractionListener extends StaffModeListenerBase {
 
-    public EntityInteractionListener(ExyliaStaff plugin, StaffModeManager staffModeManager) {
-        super(plugin, staffModeManager);
+    public EntityInteractionListener(ExyliaStaff plugin, StaffManager staffManager) {
+        super(plugin, staffManager);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -36,8 +36,7 @@ public class EntityInteractionListener extends StaffModeListenerBase {
             return;
         }
 
-        if (isInStaffMode(damager) &&
-                !plugin.getConfigManager().getConfig("config").getBoolean("staff-mode.can-damage-entities", false)) {
+        if (isInStaffMode(damager)) {
             event.setCancelled(true);
         }
     }

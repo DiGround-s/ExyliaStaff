@@ -1,6 +1,7 @@
 package net.exylia.exyliaStaff.listeners;
 
 import net.exylia.exyliaStaff.ExyliaStaff;
+import net.exylia.exyliaStaff.managers.StaffManager;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -23,8 +24,8 @@ import static net.exylia.commons.utils.DebugUtils.logError;
  */
 public class PlayerInteractionListener extends StaffModeListenerBase {
 
-    public PlayerInteractionListener(ExyliaStaff plugin, StaffModeManager staffModeManager) {
-        super(plugin, staffModeManager);
+    public PlayerInteractionListener(ExyliaStaff plugin, StaffManager staffManager) {
+        super(plugin, staffManager);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -38,7 +39,7 @@ public class PlayerInteractionListener extends StaffModeListenerBase {
         if (!isInStaffMode(player)) return;
 
         ItemStack item = event.getItem();
-        if (item != null && staffModeManager.getStaffItems().isStaffItem(item)) {
+        if (item != null && staffManager.getStaffModeManager().getStaffItems().isStaffItem(item)) {
             event.setCancelled(true);
             tryExecuteStaffItemAction(player, item, null, event.getAction());
             return;

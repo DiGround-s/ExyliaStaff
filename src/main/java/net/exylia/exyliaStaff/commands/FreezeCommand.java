@@ -5,6 +5,7 @@ import net.exylia.commons.command.types.SimpleCommand;
 import net.exylia.commons.config.ConfigManager;
 import net.exylia.commons.utils.MessageUtils;
 import net.exylia.exyliaStaff.ExyliaStaff;
+import net.exylia.exyliaStaff.managers.StaffManager;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
 import net.exylia.exyliaStaff.models.StaffPlayer;
 import org.bukkit.entity.Player;
@@ -20,13 +21,13 @@ import java.util.List;
 public class FreezeCommand extends SimpleCommand {
 
     private final ExyliaStaff plugin;
-    private final StaffModeManager staffModeManager;
+    private final StaffManager staffManager;
     private final ConfigManager configManager;
 
-    public FreezeCommand(ExyliaStaff plugin, StaffModeManager staffModeManager, List<String> aliases) {
+    public FreezeCommand(ExyliaStaff plugin, StaffManager staffManager, List<String> aliases) {
         super(plugin, "freeze", aliases, "exyliastaff.command.freeze", false);
         this.plugin = plugin;
-        this.staffModeManager = staffModeManager;
+        this.staffManager = staffManager;
         this.configManager = plugin.getConfigManager();
     }
 
@@ -46,10 +47,10 @@ public class FreezeCommand extends SimpleCommand {
             return true;
         }
 
-        if (staffModeManager.getFreezeManager().isFrozen(target)) {
-            staffModeManager.getFreezeManager().unfreezePlayer(executor, target);
+        if (staffManager.getFreezeManager().isFrozen(target)) {
+            staffManager.getFreezeManager().unfreezePlayer(executor, target);
         } else {
-            staffModeManager.getFreezeManager().freezePlayer(executor, target);
+            staffManager.getFreezeManager().freezePlayer(executor, target);
         }
 
         return true;
@@ -60,7 +61,7 @@ public class FreezeCommand extends SimpleCommand {
         if (args.length == 1) {
             List<String> playerNames = new ArrayList<>();
             for (Player player : plugin.getServer().getOnlinePlayers()) {
-                if (!player.equals(sender) && !player.hasPermission("exyliastaff.staff")) {
+                if (!player.equals(sender) && !player.hasPermission("exyliastaff.staff.freeze")) {
                     playerNames.add(player.getName());
                 }
             }

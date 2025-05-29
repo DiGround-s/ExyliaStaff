@@ -6,6 +6,7 @@ import net.exylia.commons.menu.MenuBuilder;
 import net.exylia.commons.menu.MenuItem;
 import net.exylia.commons.utils.MessageUtils;
 import net.exylia.exyliaStaff.ExyliaStaff;
+import net.exylia.exyliaStaff.managers.StaffManager;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -21,11 +22,11 @@ import static net.exylia.commons.utils.DebugUtils.logWarn;
  */
 public class InspectionManager {
     private final ExyliaStaff plugin;
-    private final StaffModeManager staffModeManager;
+    private final StaffManager staffManager;
 
-    public InspectionManager(ExyliaStaff plugin, StaffModeManager staffModeManager) {
+    public InspectionManager(ExyliaStaff plugin, StaffManager staffManager) {
         this.plugin = plugin;
-        this.staffModeManager = staffModeManager;
+        this.staffManager = staffManager;
     }
 
     public void openInspectInventory(Player staffPlayer, Player targetPlayer) {
@@ -166,13 +167,13 @@ public class InspectionManager {
                 count++;
                 playerList.append("\n").append(count).append(". ").append(online.getName());
 
-                if (staffModeManager.isInStaffMode(online)) {
+                if (staffManager.getStaffModeManager().isInStaffMode(online)) {
                     playerList.append(" (Staff)");
                 }
-                if (staffModeManager.isVanished(online)) {
+                if (staffManager.getVanishManager().isVanished(online.getUniqueId())) {
                     playerList.append(" (Vanished)");
                 }
-                if (staffModeManager.getFreezeManager().isFrozen(online)) {
+                if (staffManager.getFreezeManager().isFrozen(online)) {
                     playerList.append(" (Frozen)");
                 }
             }

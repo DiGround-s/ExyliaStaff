@@ -3,6 +3,7 @@ package net.exylia.exyliaStaff.managers.staff;
 import net.exylia.commons.command.CommandExecutor;
 import net.exylia.commons.utils.MessageUtils;
 import net.exylia.exyliaStaff.ExyliaStaff;
+import net.exylia.exyliaStaff.managers.StaffManager;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -25,7 +26,7 @@ import static net.exylia.commons.utils.TeleportUtils.teleportToGround;
  */
 public class FreezeManager {
     private final ExyliaStaff plugin;
-    private final StaffModeManager staffModeManager;
+    private final StaffManager staffManager;
     private final Set<UUID> frozenPlayers;
 
     private final Map<UUID, BukkitTask> frozenPlayerTasks;
@@ -33,9 +34,9 @@ public class FreezeManager {
     private final Map<UUID, ItemStack> frozenPlayerHelmets;
     private final Map<UUID, UUID> frozenByStaff; // playerUUID -> staffUUID
 
-    public FreezeManager(ExyliaStaff plugin, StaffModeManager staffModeManager) {
+    public FreezeManager(ExyliaStaff plugin, StaffManager staffManager) {
         this.plugin = plugin;
-        this.staffModeManager = staffModeManager;
+        this.staffManager = staffManager;
         this.frozenPlayers = new HashSet<>();
         this.frozenPlayerTasks = new HashMap<>();
         this.frozenPlayerLocations = new HashMap<>();
@@ -56,7 +57,7 @@ public class FreezeManager {
     public void freezePlayer(Player staffPlayer, Player targetPlayer) {
         UUID targetUUID = targetPlayer.getUniqueId();
 
-        if (staffModeManager.isInStaffMode(targetPlayer) || targetPlayer.hasPermission("exyliastaff.staff")) {
+        if (staffManager.getStaffModeManager().isInStaffMode(targetPlayer) || targetPlayer.hasPermission("exyliastaff.staff")) {
             MessageUtils.sendMessageAsync(staffPlayer, plugin.getConfigManager().getMessage("actions.freeze.cannot-freeze-staff", "%player%", targetPlayer.getName()));
             return;
         }
@@ -111,7 +112,7 @@ public class FreezeManager {
             frozenPlayerTasks.get(targetUUID).cancel();
         }
 
-        int taskDelay = plugin.getConfigManager().getConfig("config").getInt("frozen.task_delay", 100);
+        int taskDelay = plugin.getConfigManager().getConfig("modules/freeze").getInt("task_delay", 100);
 
         BukkitTask task = new BukkitRunnable() {
             @Override
@@ -119,7 +120,7 @@ public class FreezeManager {
                 Player player = Bukkit.getPlayer(targetUUID);
 
                 if (player == null) {
-                    if (plugin.getConfigManager().getConfig("config").getBoolean("frozen.commands-on-disconnect.enabled", true)) {
+                    if (plugin.getConfigManager().getConfig("modules/freeze").getBoolean("commands-on-disconnect.enabled", true)) {
                         handlePlayerDisconnectWhileFrozen(targetUUID, staffPlayer);
                     }
 
@@ -135,11 +136,11 @@ public class FreezeManager {
 //                    player.teleport(savedLocation);
 //                }
 
-                if (plugin.getConfigManager().getConfig("config").getBoolean("frozen.sound.enabled", true)) {
+                if (plugin.getConfigManager().getConfig("modules/freeze").getBoolean("sound.enabled", true)) {
                     applySoundToFrozenPlayer(player);
                 }
 
-                if (plugin.getConfigManager().getConfig("config").getBoolean("frozen.effects.enabled", true)) {
+                if (plugin.getConfigManager().getConfig("modules/freeze").getBoolean("effects.enabled", true)) {
                     applyEffectsToFrozenPlayer(player);
                 }
 
@@ -159,7 +160,7 @@ public class FreezeManager {
     }
 
     private void applySoundToFrozenPlayer(Player player) {
-        String soundConfig = plugin.getConfigManager().getConfig("config").getString("frozen.sound.sound", "BLOCK_NOTE_BLOCK_CHIME|1.0|1.0");
+        String soundConfig = plugin.getConfigManager().getConfig("modules/freeze").getString("sound.sound", "BLOCK_NOTE_BLOCK_CHIME|1.0|1.0");
 
         try {
             String[] parts = soundConfig.split("\\|");
@@ -179,7 +180,7 @@ public class FreezeManager {
     }
 
     private void applyEffectsToFrozenPlayer(Player player) {
-        List<String> effectsList = plugin.getConfigManager().getConfig("config").getStringList("frozen.effects.effects");
+        List<String> effectsList = plugin.getConfigManager().getConfig("modules/freeze").getStringList("effects.effects");
 
         for (String effectString : effectsList) {
             try {
@@ -205,10 +206,10 @@ public class FreezeManager {
 
         unfreezePlayer(staffPlayer, player);
 
-        boolean enabled = plugin.getConfigManager().getConfig("config").getBoolean("frozen.commands-on-disconnect.enabled", true);
+        boolean enabled = plugin.getConfigManager().getConfig("modules/freeze").getBoolean("commands-on-disconnect.enabled", true);
 
         if (enabled) {
-            List<String> commands = plugin.getConfigManager().getConfig("config").getStringList("frozen.commands-on-disconnect.commands");
+            List<String> commands = plugin.getConfigManager().getConfig("modules/freeze").getStringList("commands-on-disconnect.commands");
 
             if (!commands.isEmpty()) {
                 CommandExecutor.builder(staffPlayer)

@@ -2,6 +2,7 @@ package net.exylia.exyliaStaff.managers.staff;
 
 import net.exylia.commons.utils.MessageUtils;
 import net.exylia.exyliaStaff.ExyliaStaff;
+import net.exylia.exyliaStaff.managers.StaffManager;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
 import net.exylia.exyliaStaff.models.StaffPlayer;
 import org.bukkit.Bukkit;
@@ -17,18 +18,18 @@ import java.util.UUID;
  */
 public class VanishManager {
     private final ExyliaStaff plugin;
-    private final StaffModeManager staffModeManager;
+    private final StaffManager staffManager;
     private final Set<UUID> vanished;
 
-    public VanishManager(ExyliaStaff plugin, StaffModeManager staffModeManager) {
+    public VanishManager(ExyliaStaff plugin, StaffManager staffManager) {
         this.plugin = plugin;
-        this.staffModeManager = staffModeManager;
+        this.staffManager = staffManager;
         this.vanished = new HashSet<>();
     }
 
     public void toggleVanish(Player player) {
         UUID uuid = player.getUniqueId();
-        StaffPlayer staffPlayer = staffModeManager.getStaffPlayer(uuid);
+        StaffPlayer staffPlayer = staffManager.getStaffPlayer(uuid);
 
         if (staffPlayer == null) return;
 
@@ -41,7 +42,7 @@ public class VanishManager {
 
     public void enableVanish(Player player) {
         UUID uuid = player.getUniqueId();
-        StaffPlayer staffPlayer = staffModeManager.getStaffPlayer(uuid);
+        StaffPlayer staffPlayer = staffManager.getStaffPlayer(uuid);
 
         if (staffPlayer == null) return;
         if (staffPlayer.isVanished()) return;
@@ -51,12 +52,12 @@ public class VanishManager {
 
         applyVanishEffect(uuid, player);
 
-        if (staffModeManager.isInStaffMode(player)) {
+        if (staffManager.getStaffModeManager().isInStaffMode(player)) {
             updateVanishItem(player, true);
         }
 
         MessageUtils.sendMessageAsync(player, (plugin.getConfigManager().getMessage("actions.vanish.enabled")));
-        staffModeManager.savePlayer(player);
+        staffManager.savePlayer(player);
     }
 
     public void disableVanish(Player player) {
@@ -65,7 +66,7 @@ public class VanishManager {
 
     public void disableVanish(Player player, boolean async) {
         UUID uuid = player.getUniqueId();
-        StaffPlayer staffPlayer = staffModeManager.getStaffPlayer(uuid);
+        StaffPlayer staffPlayer = staffManager.getStaffPlayer(uuid);
 
         if (staffPlayer == null) return;
         if (!staffPlayer.isVanished()) return;
@@ -77,34 +78,34 @@ public class VanishManager {
             online.showPlayer(plugin, player);
         }
 
-        if (staffModeManager.isInStaffMode(player)) {
+        if (staffManager.getStaffModeManager().isInStaffMode(player)) {
             updateVanishItem(player, false);
         }
 
         MessageUtils.sendMessageAsync(player, (plugin.getConfigManager().getMessage("actions.vanish.disabled")));
-        staffModeManager.savePlayer(player, async);
+        staffManager.savePlayer(player, async);
     }
 
     public void applyVanishEffect(UUID uuid, Player player) {
         vanished.add(uuid);
         for (Player online : Bukkit.getOnlinePlayers()) {
-            if (!online.hasPermission("exyliastaff.see-vanished")) {
+            if (!online.hasPermission("exyliastaff.vanish.see-others")) {
                 online.hidePlayer(plugin, player);
             }
         }
     }
 
     private void updateVanishItem(Player player, boolean vanished) {
-        if (!staffModeManager.getStaffItems().hasAlternateState("vanish")) return;
+        if (!staffManager.getStaffModeManager().getStaffItems().hasAlternateState("vanish")) return;
 
-        int slot = staffModeManager.getStaffItems().getSlot("vanish");
+        int slot = staffManager.getStaffModeManager().getStaffItems().getSlot("vanish");
         if (slot == -1) return;
 
         ItemStack vanishItem;
         if (vanished) {
-            vanishItem = staffModeManager.getStaffItems().getAlternateStateItem("vanish");
+            vanishItem = staffManager.getStaffModeManager().getStaffItems().getAlternateStateItem("vanish");
         } else {
-            vanishItem = staffModeManager.getStaffItems().getItem("vanish");
+            vanishItem = staffManager.getStaffModeManager().getStaffItems().getItem("vanish");
         }
 
         if (vanishItem != null) {
@@ -114,6 +115,9 @@ public class VanishManager {
     }
 
     public boolean isVanished(UUID playerUuid) {
+        if (!plugin.isModuleEnabled("vanish")) {
+            return false;
+        }
         return vanished.contains(playerUuid);
     }
 

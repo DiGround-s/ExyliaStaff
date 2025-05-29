@@ -8,9 +8,10 @@ placeholders:
   inactive: "<#a33b53>Desactivado"
 
 system:
+  module-disabled: "<#a33b53>Este módulo está deshabilitado."
+  no-target: "<#a33b53>No se encontró un objetivo válido."
   reloaded: "%prefix% <#8fffc1>El plugin ha sido recargado."
   no-players: "%prefix% <#a33b53>No hay jugadores en línea."
-  no-target: "%prefix% <#a33b53>No se ha seleccionado ningún jugador."
   only-players: "%prefix% <#a33b53>Este comando solo puede ser usado por jugadores."
   no-permission: "%prefix% <#a33b53>No tienes permiso para usar este comando."
   player-not-found: "%prefix% <#a33b53>No se ha encontrado al jugador %target%."

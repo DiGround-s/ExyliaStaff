@@ -41,7 +41,7 @@ public class StaffItems {
     }
 
     private void loadItems() {
-        ConfigurationSection itemsSection = plugin.getConfigManager().getConfig("config").getConfigurationSection("staff-items");
+        ConfigurationSection itemsSection = plugin.getConfigManager().getConfig("modules/staff-mode").getConfigurationSection("staff-items");
         if (itemsSection == null) {
             logWarn("No se encontró la sección 'staff-items' en config.yml");
             return;

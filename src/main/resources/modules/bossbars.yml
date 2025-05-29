@@ -1,0 +1,7 @@
+staff-bossbars:
+  enabled: true
+  example:
+    title: "&6Staff Mode"
+    color: BLUE
+    progress: 0
+    style: PROGRESS

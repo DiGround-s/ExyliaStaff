@@ -4,6 +4,7 @@ import net.exylia.commons.command.types.ToggleCommand;
 import net.exylia.commons.config.ConfigManager;
 import net.exylia.commons.utils.MessageUtils;
 import net.exylia.exyliaStaff.ExyliaStaff;
+import net.exylia.exyliaStaff.managers.StaffManager;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
 import net.exylia.exyliaStaff.models.StaffPlayer;
 import org.bukkit.Bukkit;
@@ -18,52 +19,52 @@ import java.util.List;
 public class NotificationsCommand extends ToggleCommand {
 
     private final ExyliaStaff plugin;
-    private final StaffModeManager staffModeManager;
+    private final StaffManager staffManager;
     private ConfigManager configManager;
 
     /**
      * Constructor
      *
      * @param plugin Instancia del plugin
-     * @param staffModeManager Gestor de StaffMode
+     * @param staffManager Gestor de StaffMode
      * @param aliases Aliases para el comando
      */
-    public NotificationsCommand(ExyliaStaff plugin, StaffModeManager staffModeManager, List<String> aliases) {
+    public NotificationsCommand(ExyliaStaff plugin, StaffManager staffManager, List<String> aliases) {
         super(plugin, "staffnotifications", aliases,
                 "exyliastaff.notifications", "exyliastaff.notifications.others");
         this.plugin = plugin;
-        this.staffModeManager = staffModeManager;
+        this.staffManager = staffManager;
         this.configManager = plugin.getConfigManager();
     }
 
     @Override
     protected void enableFeature(Player player) {
-        StaffPlayer staffPlayer = staffModeManager.getStaffPlayer(player.getUniqueId());
+        StaffPlayer staffPlayer = staffManager.getStaffPlayer(player.getUniqueId());
         if (staffPlayer != null && !staffPlayer.hasNotificationsEnabled()) {
             staffPlayer.setNotifications(true);
-            staffModeManager.savePlayer(player);
+            staffManager.savePlayer(player);
         }
     }
 
     @Override
     protected void disableFeature(Player player) {
-        StaffPlayer staffPlayer = staffModeManager.getStaffPlayer(player.getUniqueId());
+        StaffPlayer staffPlayer = staffManager.getStaffPlayer(player.getUniqueId());
         if (staffPlayer != null && staffPlayer.hasNotificationsEnabled()) {
             staffPlayer.setNotifications(false);
-            staffModeManager.savePlayer(player);
+            staffManager.savePlayer(player);
         }
     }
 
     @Override
     protected boolean toggleFeature(Player player) {
-        StaffPlayer staffPlayer = staffModeManager.getStaffPlayer(player.getUniqueId());
+        StaffPlayer staffPlayer = staffManager.getStaffPlayer(player.getUniqueId());
         if (staffPlayer == null) {
             return false;
         }
 
         boolean newState = !staffPlayer.hasNotificationsEnabled();
         staffPlayer.setNotifications(newState);
-        staffModeManager.savePlayer(player);
+        staffManager.savePlayer(player);
         return newState;
     }
 

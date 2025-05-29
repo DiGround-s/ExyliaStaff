@@ -1,0 +1,18 @@
+allowed-commands:
+  - msg
+  - r
+  - tell
+task_delay: 100
+sound:
+  enabled: true
+  sound: BLOCK_NOTE_BLOCK_CHIME|1.0|1.0
+effects:
+  enabled: true
+  effects:
+    - GLOWING|1|110
+    - BLINDNESS|1|110
+    - DARKNESS|1|110
+commands-on-disconnect:
+  enabled: true
+  commands:
+    - "bungee: as_player:ban %player_name% disconnect_in_ss server:global"

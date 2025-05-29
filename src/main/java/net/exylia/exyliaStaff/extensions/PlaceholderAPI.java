@@ -2,6 +2,7 @@ package net.exylia.exyliaStaff.extensions;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import net.exylia.exyliaStaff.ExyliaStaff;
+import net.exylia.exyliaStaff.managers.StaffManager;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
 import net.exylia.exyliaStaff.models.StaffPlayer;
 import org.bukkit.Bukkit;
@@ -16,11 +17,11 @@ import org.jetbrains.annotations.Nullable;
 public class PlaceholderAPI extends PlaceholderExpansion {
 
     private final ExyliaStaff plugin;
-    private final StaffModeManager staffModeManager;
+    private final StaffManager staffManager;
 
     public PlaceholderAPI(ExyliaStaff plugin) {
         this.plugin = plugin;
-        this.staffModeManager = plugin.getStaffModeManager();
+        this.staffManager = plugin.getStaffManager();
     }
 
     @Override
@@ -63,15 +64,15 @@ public class PlaceholderAPI extends PlaceholderExpansion {
         }
 
         if (params.equalsIgnoreCase("instaff")) {
-            return String.valueOf(staffModeManager.isInStaffMode(onlinePlayer));
+            return String.valueOf(staffManager.getStaffModeManager().isInStaffMode(onlinePlayer));
         }
 
         if (params.equalsIgnoreCase("vanished")) {
-            return String.valueOf(staffModeManager.isVanished(onlinePlayer));
+            return String.valueOf(staffManager.getVanishManager().isVanished(onlinePlayer.getUniqueId()));
         }
 
         if (params.equalsIgnoreCase("frozen")) {
-            return String.valueOf(staffModeManager.getFreezeManager().isFrozen(onlinePlayer));
+            return String.valueOf(staffManager.getFreezeManager().isFrozen(onlinePlayer));
         }
 
         if (params.equalsIgnoreCase("status_vanish")) {
@@ -93,15 +94,15 @@ public class PlaceholderAPI extends PlaceholderExpansion {
      * @return The prefix string, or empty string if no prefix applies
      */
     private String getPrefix(Player player) {
-        if (staffModeManager.getFreezeManager().isFrozen(player)) {
+        if (staffManager.getFreezeManager().isFrozen(player)) {
             return plugin.getConfigManager().getConfig("config").getString("prefixes.frozen", "<#ffc58f>SS <dark_gray><bold>•<reset> <#ffd2a8>");
         }
 
-        if (staffModeManager.isInStaffMode(player)) {
+        if (staffManager.getStaffModeManager().isInStaffMode(player)) {
             return plugin.getConfigManager().getConfig("config").getString("prefixes.staff-mode", "<#ffc58f>Staff <dark_gray><bold>•<reset> <#ffd2a8>");
         }
 
-        if (staffModeManager.isVanished(player)) {
+        if (staffManager.getVanishManager().isVanished(player.getUniqueId())) {
             return plugin.getConfigManager().getConfig("config").getString("prefixes.vanish", "<#ffc58f>V <dark_gray><bold>•<reset> <#ffd2a8>");
         }
 
@@ -115,7 +116,7 @@ public class PlaceholderAPI extends PlaceholderExpansion {
      * @return Active or Inactive text based on vanish status
      */
     private String getVanishStatus(Player player) {
-        boolean isVanished = staffModeManager.isVanished(player);
+        boolean isVanished = staffManager.getVanishManager().isVanished(player.getUniqueId());
         return isVanished ?
                 plugin.getConfigManager().getConfig("messages").getString("placeholders.active") :
                 plugin.getConfigManager().getConfig("messages").getString("placeholders.inactive");
@@ -128,7 +129,7 @@ public class PlaceholderAPI extends PlaceholderExpansion {
      * @return Active or Inactive text based on notifications status
      */
     private String getNotificationsStatus(Player player) {
-        StaffPlayer staffPlayer = staffModeManager.getStaffPlayer(player.getUniqueId());
+        StaffPlayer staffPlayer = staffManager.getStaffPlayer(player.getUniqueId());
         if (staffPlayer == null) {
             return plugin.getConfigManager().getConfig("messages").getString("placeholders.inactive");
         }

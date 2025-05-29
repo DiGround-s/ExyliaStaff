@@ -1,0 +1,17 @@
+update-interval: 20
+title: "&#8a51c4&lMODO STAFF"
+lines:
+  - "&f"
+  - "<#ffc58f>Staff"
+  - "<#ffc58f> | &fInvisibilidad: <#ffc58f>%exyliastaff_status_vanish%"
+  - "<#ffc58f> | &fNotificaciones: <#ffc58f>%exyliastaff_status_notifications%"
+  - "<#ffc58f> | &fStaff Activo: <#ffc58f>%exyliastaff_online_staff%"
+  - "&f"
+  - "<#59a4ff>Servidor"
+  - "<#59a4ff> | &fTPS: <#59a4ff>%kyorify_spark_tps_5s%"
+  - "<#59a4ff> | &fMSPT: <#59a4ff>%kyorify_spark_tickduration_10s%"
+  - "<#59a4ff> | &fSys CPU: <#59a4ff>%kyorify_spark_cpu_system_10s%"
+  - "<#59a4ff> | &fProc CPU: <#59a4ff>%kyorify_spark_cpu_process_10s%"
+  - "<#59a4ff> | &fPing: <#59a4ff>%player_ping%ms"
+  - "<#59a4ff> | &fConectados: <#59a4ff>%server_online%&8/<#59a4ff>%server_max_players%"
+  - "&f"

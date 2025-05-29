@@ -10,10 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Gestor del scoreboard para miembros del staff
- * Adaptado al nuevo sistema de scoreboards optimizado
- */
 public class ScoreboardManager {
 
     private final ExyliaStaff plugin;
@@ -21,29 +17,25 @@ public class ScoreboardManager {
     private final Map<UUID, PlayerScoreboard> activeStaffScoreboards;
     private static final String STAFF_TEMPLATE_ID = "staff_scoreboard";
 
-    public ScoreboardManager(ExyliaStaff plugin, ExyliaScoreboardManager scoreboardManager) {
+    public ScoreboardManager(ExyliaStaff plugin) {
         this.plugin = plugin;
-        this.scoreboardManager = scoreboardManager;
+        this.scoreboardManager = new ExyliaScoreboardManager(plugin);
         this.activeStaffScoreboards = new HashMap<>();
 
         registerStaffScoreboardTemplate();
     }
 
-    /**
-     * Registra el template del scoreboard de staff
-     * Solo necesitamos crearlo una vez, luego lo podemos usar para múltiples jugadores
-     */
     private void registerStaffScoreboardTemplate() {
-        if (!isStaffScoreboardEnabled()) {
+        if (isStaffScoreboardEnabled()) {
             return;
         }
 
         DebugUtils.logDebug(plugin.isDebugMode(), "Registrando template del scoreboard de staff");
 
-        String titleString = plugin.getConfigManager().getConfig("config").getString("staff-scoreboard.title",
+        String titleString = plugin.getConfigManager().getConfig("modules/scoreboard").getString("title",
                 "<gradient:#00D6FF:#0080FF><bold>MODO STAFF</bold></gradient>");
-        List<String> lines = plugin.getConfigManager().getConfig("config").getStringList("staff-scoreboard.lines");
-        int updateInterval = plugin.getConfigManager().getConfig("config").getInt("staff-scoreboard.update-interval", 20);
+        List<String> lines = plugin.getConfigManager().getConfig("modules/scoreboard").getStringList("lines");
+        int updateInterval = plugin.getConfigManager().getConfig("modules/scoreboard").getInt("update-interval", 20);
 
         ScoreboardTemplateBuilder builder = scoreboardManager.createTemplate(STAFF_TEMPLATE_ID)
                 .title(titleString)
@@ -59,10 +51,6 @@ public class ScoreboardManager {
         DebugUtils.logDebug(plugin.isDebugMode(), "Template del scoreboard de staff registrado correctamente");
     }
 
-    /**
-     * Actualiza el template del scoreboard de staff
-     * Útil cuando cambia la configuración
-     */
     public void updateStaffScoreboardTemplate() {
         DebugUtils.logDebug(plugin.isDebugMode(), "Actualizando template del scoreboard de staff");
 
@@ -71,19 +59,13 @@ public class ScoreboardManager {
         updateAllStaffScoreboards();
     }
 
-    /**
-     * Muestra el scoreboard de staff a un jugador
-     *
-     * @param player El jugador al que mostrar el scoreboard
-     * @return true si se mostró correctamente, false si no está habilitado o ya estaba activo
-     */
     public boolean showStaffScoreboard(Player player) {
         if (hasActiveStaffScoreboard(player)) {
             DebugUtils.logDebug(plugin.isDebugMode(), "Staff scoreboard ya está activo para " + player.getName() + ", no es necesario volver a mostrarlo");
             return true;
         }
 
-        if (!isStaffScoreboardEnabled()) {
+        if (isStaffScoreboardEnabled()) {
             return false;
         }
 
@@ -100,16 +82,10 @@ public class ScoreboardManager {
         return true;
     }
 
-    /**
-     * Oculta el scoreboard de staff a un jugador
-     *
-     * @param player El jugador al que ocultar el scoreboard
-     * @return true si se ocultó correctamente, false si no estaba activo
-     */
-    public boolean hideStaffScoreboard(Player player) {
+    public void hideStaffScoreboard(Player player) {
         if (!hasActiveStaffScoreboard(player)) {
             DebugUtils.logDebug(plugin.isDebugMode(), "Staff scoreboard no está activo para " + player.getName() + ", no es necesario ocultarlo");
-            return false;
+            return;
         }
 
         PlayerScoreboard scoreboard = activeStaffScoreboards.remove(player.getUniqueId());
@@ -118,25 +94,12 @@ public class ScoreboardManager {
 
         DebugUtils.logDebug(plugin.isDebugMode(), "Staff scoreboard desactivado para " + player.getName());
 
-        return true;
     }
 
-    /**
-     * Verifica si un jugador tiene el scoreboard de staff activo
-     *
-     * @param player El jugador a verificar
-     * @return true si tiene el scoreboard activo, false si no
-     */
     public boolean hasActiveStaffScoreboard(Player player) {
         return activeStaffScoreboards.containsKey(player.getUniqueId());
     }
 
-    /**
-     * Alterna el estado del scoreboard de staff para un jugador
-     *
-     * @param player El jugador para alternar el scoreboard
-     * @return true si se activó, false si se desactivó
-     */
     public boolean toggleStaffScoreboard(Player player) {
         if (hasActiveStaffScoreboard(player)) {
             hideStaffScoreboard(player);
@@ -146,10 +109,6 @@ public class ScoreboardManager {
         }
     }
 
-    /**
-     * Actualiza el scoreboard de staff para todos los jugadores activos
-     * Útil cuando cambia la configuración
-     */
     public void updateAllStaffScoreboards() {
         DebugUtils.logDebug(plugin.isDebugMode(), "Actualizando todos los scoreboards de staff activos");
 
@@ -162,10 +121,6 @@ public class ScoreboardManager {
         }
     }
 
-    /**
-     * Limpia todos los scoreboards activos
-     * Útil al reiniciar o deshabilitar el plugin
-     */
     public void cleanup() {
         DebugUtils.logDebug(plugin.isDebugMode(), "Limpiando todos los scoreboards de staff");
 
@@ -179,12 +134,7 @@ public class ScoreboardManager {
         activeStaffScoreboards.clear();
     }
 
-    /**
-     * Verifica si el scoreboard de staff está habilitado en la configuración
-     *
-     * @return true si está habilitado, false si no
-     */
     private boolean isStaffScoreboardEnabled() {
-        return plugin.getConfigManager().getConfig("config").getBoolean("staff-scoreboard.enabled", true);
+        return !plugin.getConfigManager().getConfig("config").getBoolean("modules/scoreboard", true);
     }
 }

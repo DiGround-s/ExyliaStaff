@@ -32,7 +32,7 @@ public class BlockBreakNotifier {
     public void loadConfig() {
         watchedBlocks.clear();
 
-        ConfigurationSection section = plugin.getConfigManager().getConfig("config").getConfigurationSection("staff-notifications.block-break");
+        ConfigurationSection section = plugin.getConfigManager().getConfig("modules/notifications").getConfigurationSection("block-break");
         if (section == null) return;
 
         enabled = section.getBoolean("enabled", false);
@@ -62,7 +62,7 @@ public class BlockBreakNotifier {
         for (Player staff : Bukkit.getOnlinePlayers()) {
             if (staff.hasPermission("exyliastaff.notifications.block-break")) {
 
-                StaffPlayer staffPlayer = plugin.getStaffModeManager().getStaffPlayer(staff.getUniqueId());
+                StaffPlayer staffPlayer = plugin.getStaffManager().getStaffPlayer(staff.getUniqueId());
                 if (staffPlayer != null && staffPlayer.hasNotificationsEnabled()) {
                     MessageUtils.sendMessageAsync(staff, message);
                     if (sound != null && !sound.isEmpty()) {

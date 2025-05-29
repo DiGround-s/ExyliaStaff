@@ -26,7 +26,7 @@ public class PunishmentHubManager {
     public PunishmentHubManager(ExyliaStaff plugin) {
         this.plugin = plugin;
         this.menuConfig = plugin.getConfigManager().getConfig("menus/punishments");
-        this.punishmentConfig = plugin.getConfigManager().getConfig("punishments");
+        this.punishmentConfig = plugin.getConfigManager().getConfig("modules/punishments");
     }
 
     /**
@@ -35,7 +35,7 @@ public class PunishmentHubManager {
     public void reloadConfigurations() {
         try {
             this.menuConfig = plugin.getConfigManager().getConfig("menus/punishments");
-            this.punishmentConfig = plugin.getConfigManager().getConfig("punishments");
+            this.punishmentConfig = plugin.getConfigManager().getConfig("modules/punishments");
             logInfo("Configuraciones de sanciones recargadas");
         } catch (Exception e) {
             logError("Error al recargar las configuraciones de sanciones: " + e.getMessage());

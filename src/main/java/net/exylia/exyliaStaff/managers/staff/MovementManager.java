@@ -2,6 +2,7 @@ package net.exylia.exyliaStaff.managers.staff;
 
 import net.exylia.commons.utils.MessageUtils;
 import net.exylia.exyliaStaff.ExyliaStaff;
+import net.exylia.exyliaStaff.managers.StaffManager;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -20,20 +21,20 @@ import java.util.*;
  */
 public class MovementManager {
     private final ExyliaStaff plugin;
-    private final StaffModeManager staffModeManager;
+    private final StaffManager staffManager;
 
     private final Map<UUID, Queue<UUID>> playerTeleportQueues;
 
-    public MovementManager(ExyliaStaff plugin, StaffModeManager staffModeManager) {
+    public MovementManager(ExyliaStaff plugin, StaffManager staffManager) {
         this.plugin = plugin;
-        this.staffModeManager = staffModeManager;
+        this.staffManager = staffManager;
         this.playerTeleportQueues = new HashMap<>();
     }
 
     public void phasePlayer(Player staffPlayer, @Nullable Action action) {
         if (action == null) return;
 
-        int maxDistance = plugin.getConfigManager().getConfig("config").getInt("staff-mode.phase-distance", 100);
+        int maxDistance = plugin.getConfigManager().getConfig("modules/staff-mode").getInt("staff-mode.phase-distance", 100);
 
         if (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK) {
             teleportToTargetBlock(staffPlayer, maxDistance);
@@ -143,7 +144,7 @@ public class MovementManager {
             List<UUID> candidates = new ArrayList<>();
 
             for (Player online : Bukkit.getOnlinePlayers()) {
-                if (!online.equals(staffPlayer) && !staffModeManager.isInStaffMode(online)) {
+                if (!online.equals(staffPlayer) && !staffManager.getStaffModeManager().isInStaffMode(online)) {
                     candidates.add(online.getUniqueId());
                 }
             }
@@ -171,7 +172,7 @@ public class MovementManager {
     private boolean isQueueValid(Queue<UUID> queue) {
         for (UUID uuid : queue) {
             Player player = Bukkit.getPlayer(uuid);
-            if (player != null && !staffModeManager.isInStaffMode(player)) {
+            if (player != null && !staffManager.getStaffModeManager().isInStaffMode(player)) {
                 return true;
             }
         }

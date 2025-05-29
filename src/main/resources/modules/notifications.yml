@@ -1,0 +1,7 @@
+block-break:
+  enabled: true
+  sound: BLOCK_AMETHYST_CLUSTER_BREAK|0.2|0.4
+  blocks:
+    - DIAMOND_ORE|&#7db7ff
+    - DEEPSLATE_DIAMOND_ORE|&#59a4ff
+    - ANCIENT_DEBRIS|&#ffc58f

@@ -1,6 +1,7 @@
 package net.exylia.exyliaStaff.listeners;
 
 import net.exylia.exyliaStaff.ExyliaStaff;
+import net.exylia.exyliaStaff.managers.StaffManager;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -13,19 +14,18 @@ import org.bukkit.event.player.PlayerQuitEvent;
  */
 public class PlayerSessionListener extends StaffModeListenerBase {
 
-    public PlayerSessionListener(ExyliaStaff plugin, StaffModeManager staffModeManager) {
-        super(plugin, staffModeManager);
+    public PlayerSessionListener(ExyliaStaff plugin, StaffManager staffManager) {
+        super(plugin, staffManager);
     }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
 
-        staffModeManager.loadPlayer(player);
+        staffManager.loadPlayer(player);
 
-        // Hide vanished staff from the joining player if they don't have permission
         for (Player online : plugin.getServer().getOnlinePlayers()) {
-            if (staffModeManager.isVanished(online) && !player.hasPermission("exyliastaff.see-vanished")) {
+            if (staffManager.getVanishManager().isVanished(online.getUniqueId()) && !player.hasPermission("exyliastaff.vanish.see-others")) {
                 player.hidePlayer(plugin, online);
             }
         }
@@ -34,8 +34,8 @@ public class PlayerSessionListener extends StaffModeListenerBase {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        staffModeManager.savePlayer(player);
-        staffModeManager.unloadPlayer(player);
+        staffManager.savePlayer(player);
+        staffManager.unloadPlayer(player);
     }
 
     @EventHandler

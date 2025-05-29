@@ -3,6 +3,7 @@ package net.exylia.exyliaStaff;
 import net.exylia.commons.ExyliaCommons;
 import net.exylia.commons.ExyliaPlugin;
 import net.exylia.commons.command.CommandManager;
+import net.exylia.commons.command.ExyliaCommand;
 import net.exylia.commons.config.ConfigManager;
 import net.exylia.commons.menu.MenuManager;
 import net.exylia.commons.utils.DebugUtils;
@@ -10,18 +11,20 @@ import net.exylia.exyliaStaff.commands.*;
 import net.exylia.exyliaStaff.database.StaffDatabaseLoader;
 import net.exylia.exyliaStaff.extensions.PlaceholderAPI;
 import net.exylia.exyliaStaff.listeners.StaffModeListenerManager;
-import net.exylia.exyliaStaff.managers.StaffModeManager;
+import net.exylia.exyliaStaff.managers.StaffManager;
 import org.bukkit.Bukkit;
 
 import java.util.List;
+import java.util.ArrayList;
 
 import static net.exylia.commons.utils.DebugUtils.logInfo;
+import static net.exylia.commons.utils.DebugUtils.logWarn;
 
 public final class ExyliaStaff extends ExyliaPlugin {
 
     private ConfigManager configManager;
     private StaffDatabaseLoader databaseLoader;
-    private StaffModeManager staffModeManager;
+    private StaffManager staffManager;
     private CommandManager commandManager;
 
     @Override
@@ -41,9 +44,9 @@ public final class ExyliaStaff extends ExyliaPlugin {
 
     @Override
     public void onExyliaDisable() {
-        if (staffModeManager != null) {
-            staffModeManager.saveAllPlayers();
-            staffModeManager.disableAllStaffMode(false);
+        if (staffManager != null) {
+            staffManager.saveAllPlayers();
+            staffManager.disableAllStaffMode(false);
         }
 
         if (databaseLoader != null) {
@@ -55,12 +58,24 @@ public final class ExyliaStaff extends ExyliaPlugin {
     }
 
     private void loadListeners() {
-        new StaffModeListenerManager(this, staffModeManager);
+        new StaffModeListenerManager(this, staffManager);
     }
 
     private void loadManagers() {
         MenuManager.initialize(this);
-        configManager = new ConfigManager(this, List.of("config", "messages", "punishments", "menus/inspect", "menus/miner_hub", "menus/punishments"));
+        configManager = new ConfigManager(this, List.of(
+                "config",
+                "messages",
+                "menus/inspect",
+                "menus/miner_hub",
+                "menus/punishments",
+                "modules/notifications",
+                "modules/vanish",
+                "modules/freeze",
+                "modules/scoreboard",
+                "modules/staff-mode",
+                "modules/punishments",
+                "modules/staff-chat"));
 
         databaseLoader = new StaffDatabaseLoader(this);
         databaseLoader.load();
@@ -69,7 +84,7 @@ public final class ExyliaStaff extends ExyliaPlugin {
             DebugUtils.logDebug(true, "Base de datos inicializada usando: " + databaseLoader.getDatabaseType());
         }
 
-        staffModeManager = new StaffModeManager(this);
+        staffManager = new StaffManager(this);
         this.commandManager = new CommandManager(this);
     }
 
@@ -81,27 +96,119 @@ public final class ExyliaStaff extends ExyliaPlugin {
     }
 
     private void loadCommands() {
-        List<String> staffAliases = configManager.getConfig("config").getStringList("aliases.staff_mode");
-        List<String> vanishAliases = configManager.getConfig("config").getStringList("aliases.vanish");
-        List<String> notificationsAliases = configManager.getConfig("config").getStringList("aliases.notifications");
-        List<String> freezeAliases = configManager.getConfig("config").getStringList("aliases.freeze");
-        List<String> punishAliases = configManager.getConfig("config").getStringList("aliases.punish");
+        List<ExyliaCommand> commandsToRegister = new ArrayList<>();
+        int enabledCommands = 0;
+        int disabledCommands = 0;
+        if (isModuleEnabled("staff-mode")) {
+            List<String> staffAliases = configManager.getConfig("config").getStringList("aliases.staff_mode");
+            StaffModeCommand staffModeCommand = new StaffModeCommand(this, staffManager, staffAliases);
+            commandsToRegister.add(staffModeCommand);
+            enabledCommands++;
+            if (isDebugMode()) {
+                DebugUtils.logDebug(true, "Comando 'staff-mode' cargado con aliases: " + staffAliases);
+            }
+        } else {
+            disabledCommands++;
+            if (isDebugMode()) {
+                DebugUtils.logDebug(true, "Comando 'staff-mode' omitido - módulo deshabilitado");
+            }
+        }
+        if (isModuleEnabled("vanish")) {
+            List<String> vanishAliases = configManager.getConfig("config").getStringList("aliases.vanish");
+            VanishCommand vanishCommand = new VanishCommand(this, staffManager, vanishAliases);
+            commandsToRegister.add(vanishCommand);
+            enabledCommands++;
+            if (isDebugMode()) {
+                DebugUtils.logDebug(true, "Comando 'vanish' cargado con aliases: " + vanishAliases);
+            }
+        } else {
+            disabledCommands++;
+            if (isDebugMode()) {
+                DebugUtils.logDebug(true, "Comando 'vanish' omitido - módulo deshabilitado");
+            }
+        }
+        if (isModuleEnabled("notifications")) {
+            List<String> notificationsAliases = configManager.getConfig("config").getStringList("aliases.notifications");
+            NotificationsCommand notificationsCommand = new NotificationsCommand(this, staffManager, notificationsAliases);
+            commandsToRegister.add(notificationsCommand);
+            enabledCommands++;
+            if (isDebugMode()) {
+                DebugUtils.logDebug(true, "Comando 'notifications' cargado con aliases: " + notificationsAliases);
+            }
+        } else {
+            disabledCommands++;
+            if (isDebugMode()) {
+                DebugUtils.logDebug(true, "Comando 'notifications' omitido - módulo deshabilitado");
+            }
+        }
+        if (isModuleEnabled("freeze")) {
+            List<String> freezeAliases = configManager.getConfig("config").getStringList("aliases.freeze");
+            FreezeCommand freezeCommand = new FreezeCommand(this, staffManager, freezeAliases);
+            commandsToRegister.add(freezeCommand);
+            enabledCommands++;
+            if (isDebugMode()) {
+                DebugUtils.logDebug(true, "Comando 'freeze' cargado con aliases: " + freezeAliases);
+            }
+        } else {
+            disabledCommands++;
+            if (isDebugMode()) {
+                DebugUtils.logDebug(true, "Comando 'freeze' omitido - módulo deshabilitado");
+            }
+        }
 
-        StaffModeCommand staffModeCommand = new StaffModeCommand(this, staffModeManager, staffAliases);
-        VanishCommand vanishCommand = new VanishCommand(this, staffModeManager, vanishAliases);
-        NotificationsCommand notificationsCommand = new NotificationsCommand(this, staffModeManager, notificationsAliases);
-        FreezeCommand freezeCommand = new FreezeCommand(this, staffModeManager, freezeAliases);
-        PunishCommand punishCommand = new PunishCommand(this, staffModeManager, punishAliases);
+        // Punish Command
+        if (isModuleEnabled("punish")) {
+            List<String> punishAliases = configManager.getConfig("config").getStringList("aliases.punish");
+            PunishCommand punishCommand = new PunishCommand(this, staffManager, punishAliases);
+            commandsToRegister.add(punishCommand);
+            enabledCommands++;
+            if (isDebugMode()) {
+                DebugUtils.logDebug(true, "Comando 'punish' cargado con aliases: " + punishAliases);
+            }
+        } else {
+            disabledCommands++;
+            if (isDebugMode()) {
+                DebugUtils.logDebug(true, "Comando 'punish' omitido - módulo deshabilitado");
+            }
+        }
 
-        commandManager.registerCommands(
-                staffModeCommand,
-                vanishCommand,
-                notificationsCommand,
-                freezeCommand,
-                punishCommand
-        );
+        if (!commandsToRegister.isEmpty()) {
+            commandManager.registerCommands(commandsToRegister);
+        }
+        logInfo("Se han cargado " + enabledCommands + " comandos correctamente.");
 
-        logInfo("Se han cargado " + commandManager.getCommands().size() + " comandos correctamente.");
+        if (disabledCommands > 0) {
+            logWarn(disabledCommands + " comandos fueron omitidos por tener módulos deshabilitados.");
+        }
+        if (isDebugMode()) {
+            DebugUtils.logDebug(true, "Resumen de carga de comandos:");
+            DebugUtils.logDebug(true, "  - Comandos habilitados: " + enabledCommands);
+            DebugUtils.logDebug(true, "  - Comandos omitidos: " + disabledCommands);
+            DebugUtils.logDebug(true, "  - Total comandos registrados: " + commandManager.getCommands().size());
+        }
+    }
+
+    public void logModuleStatus() {
+        logInfo("Estado actual de los módulos:");
+        logInfo("  - staff-mode: " + (isModuleEnabled("staff-mode") ? "✓" : "✗"));
+        logInfo("  - vanish: " + (isModuleEnabled("vanish") ? "✓" : "✗"));
+        logInfo("  - freeze: " + (isModuleEnabled("freeze") ? "✓" : "✗"));
+        logInfo("  - notifications: " + (isModuleEnabled("notifications") ? "✓" : "✗"));
+        logInfo("  - scoreboard: " + (isModuleEnabled("scoreboard") ? "✓" : "✗"));
+        logInfo("  - staff-chat: " + (isModuleEnabled("staff-chat") ? "✓" : "✗"));
+        logInfo("  - punish: " + (isModuleEnabled("punish") ? "✓" : "✗"));
+    }
+
+    public void reload() {
+        logInfo("Recargando configuración...");
+        configManager.reloadAllConfigs();
+        commandManager.unregisterAll();
+        loadCommands();
+        if (isDebugMode()) {
+            logModuleStatus();
+        }
+
+        logInfo("Configuración recargada correctamente.");
     }
 
     public boolean isDebugMode() {
@@ -116,8 +223,12 @@ public final class ExyliaStaff extends ExyliaPlugin {
         return databaseLoader;
     }
 
-    public StaffModeManager getStaffModeManager() {
-        return staffModeManager;
+    public StaffManager getStaffManager() {
+        return staffManager;
+    }
+
+    public boolean isModuleEnabled(String moduleName) {
+        return configManager.getConfig("config").getBoolean("modules." + moduleName, true);
     }
 
     public boolean isEnabledExt(String name) {

@@ -1,7 +1,7 @@
 package net.exylia.exyliaStaff.listeners;
 
 import net.exylia.exyliaStaff.ExyliaStaff;
-import net.exylia.exyliaStaff.managers.StaffModeManager;
+import net.exylia.exyliaStaff.managers.StaffManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
@@ -18,13 +18,13 @@ import org.bukkit.event.block.Action;
 public abstract class StaffModeListenerBase implements Listener {
 
     protected final ExyliaStaff plugin;
-    protected final StaffModeManager staffModeManager;
+    protected final StaffManager staffManager;
     private final Map<UUID, Long> lastUse = new HashMap<>();
     private static final long COOLDOWN_MILLIS = 200;
 
-    public StaffModeListenerBase(ExyliaStaff plugin, StaffModeManager staffModeManager) {
+    public StaffModeListenerBase(ExyliaStaff plugin, StaffManager staffManager) {
         this.plugin = plugin;
-        this.staffModeManager = staffModeManager;
+        this.staffManager = staffManager;
     }
 
     /**
@@ -36,7 +36,7 @@ public abstract class StaffModeListenerBase implements Listener {
      * @return true if action was executed, false if on cooldown
      */
     protected boolean tryExecuteStaffItemAction(Player player, ItemStack item, Player targetPlayer, Action action) {
-        if (!staffModeManager.getStaffItems().isStaffItem(item)) {
+        if (!staffManager.getStaffModeManager().getStaffItems().isStaffItem(item)) {
             return false;
         }
 
@@ -47,16 +47,16 @@ public abstract class StaffModeListenerBase implements Listener {
         }
 
         lastUse.put(player.getUniqueId(), now);
-        staffModeManager.executeStaffItemAction(player, item, targetPlayer, action);
+        staffManager.getStaffModeManager().executeStaffItemAction(player, item, targetPlayer, action);
         return true;
     }
     protected boolean isInStaffMode(Player player) {
-        return staffModeManager.isInStaffMode(player);
+        return staffManager.getStaffModeManager().isInStaffMode(player);
     }
     protected boolean isFrozen(Player player) {
-        return staffModeManager.getFreezeManager().isFrozen(player);
+        return staffManager.getFreezeManager().isFrozen(player);
     }
     protected void handlePlayerDisconnectWhileFrozen(UUID playerUUID) {
-        staffModeManager.getFreezeManager().handlePlayerDisconnectWhileFrozen(playerUUID, staffModeManager.getFreezeManager().getStaffPlayerWhoFroze(playerUUID));
+        staffManager.getFreezeManager().handlePlayerDisconnectWhileFrozen(playerUUID, staffManager.getFreezeManager().getStaffPlayerWhoFroze(playerUUID));
     }
 }

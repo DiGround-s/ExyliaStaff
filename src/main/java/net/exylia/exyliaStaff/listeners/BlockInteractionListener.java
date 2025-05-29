@@ -1,6 +1,7 @@
 package net.exylia.exyliaStaff.listeners;
 
 import net.exylia.exyliaStaff.ExyliaStaff;
+import net.exylia.exyliaStaff.managers.StaffManager;
 import net.exylia.exyliaStaff.managers.StaffModeManager;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -14,8 +15,8 @@ import org.bukkit.event.block.BlockPlaceEvent;
  */
 public class BlockInteractionListener extends StaffModeListenerBase {
 
-    public BlockInteractionListener(ExyliaStaff plugin, StaffModeManager staffModeManager) {
-        super(plugin, staffModeManager);
+    public BlockInteractionListener(ExyliaStaff plugin, StaffManager staffManager) {
+        super(plugin, staffManager);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -27,8 +28,7 @@ public class BlockInteractionListener extends StaffModeListenerBase {
             return;
         }
 
-        if (isInStaffMode(player) &&
-                !plugin.getConfigManager().getConfig("config").getBoolean("staff-mode.can-break-blocks", false)) {
+        if (isInStaffMode(player)) {
             event.setCancelled(true);
         }
     }
@@ -42,8 +42,7 @@ public class BlockInteractionListener extends StaffModeListenerBase {
             return;
         }
 
-        if (isInStaffMode(player) &&
-                !plugin.getConfigManager().getConfig("config").getBoolean("staff-mode.can-place-blocks", false)) {
+        if (isInStaffMode(player)) {
             event.setCancelled(true);
         }
     }
@@ -55,8 +54,8 @@ public class BlockInteractionListener extends StaffModeListenerBase {
 
         if (isInStaffMode(player)) return;
 
-        if (staffModeManager.getBlockBreakNotifier().isWatchedBlock(block.getType())) {
-            staffModeManager.getBlockBreakNotifier().notifyStaff(player, block);
+        if (staffManager.getBlockBreakNotifier().isWatchedBlock(block.getType())) {
+            staffManager.getBlockBreakNotifier().notifyStaff(player, block);
         }
     }
 }

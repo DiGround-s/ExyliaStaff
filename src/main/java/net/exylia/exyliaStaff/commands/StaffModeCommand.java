@@ -4,7 +4,7 @@ import net.exylia.commons.command.types.ToggleCommand;
 import net.exylia.commons.config.ConfigManager;
 import net.exylia.commons.utils.MessageUtils;
 import net.exylia.exyliaStaff.ExyliaStaff;
-import net.exylia.exyliaStaff.managers.StaffModeManager;
+import net.exylia.exyliaStaff.managers.StaffManager;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.bukkit.command.CommandSender;
@@ -19,21 +19,21 @@ import java.util.List;
 public class StaffModeCommand extends ToggleCommand {
 
     private final ExyliaStaff plugin;
-    private final StaffModeManager staffModeManager;
+    private final StaffManager staffManager;
     private ConfigManager configManager;
 
     /**
      * Constructor
      *
      * @param plugin Instancia del plugin
-     * @param staffModeManager Gestor de StaffMode
+     * @param staffManager Gestor de StaffMode
      * @param aliases Aliases para el comando
      */
-    public StaffModeCommand(ExyliaStaff plugin, StaffModeManager staffModeManager, List<String> aliases) {
+    public StaffModeCommand(ExyliaStaff plugin, StaffManager staffManager, List<String> aliases) {
         super(plugin, "staffmode", aliases,
-                "exyliastaff.staffmode", "exyliastaff.staffmode.others");
+                "exyliastaff.staff.mode", "exyliastaff.staff.mode.others");
         this.plugin = plugin;
-        this.staffModeManager = staffModeManager;
+        this.staffManager = staffManager;
         this.configManager = plugin.getConfigManager();
     }
 
@@ -75,18 +75,18 @@ public class StaffModeCommand extends ToggleCommand {
 
     @Override
     protected void enableFeature(Player player) {
-        staffModeManager.enableStaffMode(player);
+        staffManager.getStaffModeManager().enableStaffMode(player);
     }
 
     @Override
     protected void disableFeature(Player player) {
-        staffModeManager.disableStaffMode(player);
+        staffManager.getStaffModeManager().disableStaffMode(player);
     }
 
     @Override
     protected boolean toggleFeature(Player player) {
-        staffModeManager.toggleStaffMode(player);
-        return staffModeManager.isInStaffMode(player);
+        staffManager.getStaffModeManager().toggleStaffMode(player);
+        return staffManager.getStaffModeManager().isInStaffMode(player);
     }
 
     @Override
