@@ -2,7 +2,6 @@ package net.exylia.exyliaStaff.managers.staff;
 
 import net.exylia.exyliaStaff.ExyliaStaff;
 import net.exylia.exyliaStaff.managers.StaffManager;
-import net.exylia.exyliaStaff.managers.StaffModeManager;
 import net.exylia.exyliaStaff.managers.enums.FlyState;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

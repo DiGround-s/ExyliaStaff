@@ -1,11 +1,9 @@
 package net.exylia.exyliaStaff.managers;
 
-import net.exylia.commons.scoreboard.ExyliaScoreboardManager;
 import net.exylia.exyliaStaff.ExyliaStaff;
 import net.exylia.exyliaStaff.database.tables.StaffPlayerTable;
 import net.exylia.exyliaStaff.managers.staff.*;
 import net.exylia.exyliaStaff.models.StaffPlayer;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 

@@ -3,7 +3,6 @@ package net.exylia.exyliaStaff.extensions;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import net.exylia.exyliaStaff.ExyliaStaff;
 import net.exylia.exyliaStaff.managers.StaffManager;
-import net.exylia.exyliaStaff.managers.StaffModeManager;
 import net.exylia.exyliaStaff.models.StaffPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;

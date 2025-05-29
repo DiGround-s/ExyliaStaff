@@ -1,8 +1,10 @@
-package net.exylia.exyliaStaff.managers;
+package net.exylia.exyliaStaff.managers.staff;
 
 import net.exylia.commons.command.CommandExecutor;
 import net.exylia.commons.utils.MessageUtils;
 import net.exylia.exyliaStaff.ExyliaStaff;
+import net.exylia.exyliaStaff.managers.StaffItems;
+import net.exylia.exyliaStaff.managers.StaffManager;
 import net.exylia.exyliaStaff.models.StaffPlayer;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
