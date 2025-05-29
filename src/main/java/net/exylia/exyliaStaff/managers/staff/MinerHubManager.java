@@ -55,7 +55,7 @@ public class MinerHubManager {
 
     private List<Player> getPlayersByHeight(int height) {
         return plugin.getServer().getOnlinePlayers().stream()
-                .filter(p -> p.getLocation().getY() < height)
+                .filter(p -> p.getLocation().getY() < height && !p.hasPermission("exylia.staff"))
                 .collect(Collectors.toList());
     }
 
