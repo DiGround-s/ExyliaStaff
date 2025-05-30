@@ -149,8 +149,7 @@ public class PunishmentHubManager {
                                           List<String> itemLore, boolean usePlaceholders,
                                           boolean hideAttributes, Player staff, String targetName) {
         try {
-            Material material = Material.valueOf(materialString);
-            MenuItem punishmentItem = new MenuItem(material);
+            MenuItem punishmentItem = new MenuItem(materialString);
 
             punishmentItem.usePlaceholders(usePlaceholders);
 
@@ -214,7 +213,7 @@ public class PunishmentHubManager {
                                                  List<String> commands, String itemName,
                                                  List<String> itemLore, boolean usePlaceholders,
                                                  boolean hideAttributes, Player staff, String targetName) {
-        MenuItem defaultItem = new MenuItem(Material.BARRIER);
+        MenuItem defaultItem = new MenuItem("BARRdIER");
 
         defaultItem.usePlaceholders(usePlaceholders);
 

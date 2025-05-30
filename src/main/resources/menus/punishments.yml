@@ -2,18 +2,18 @@ title: "<#8a51c4>&lCENTRO DE SANCIONES"
 rows: 4
 prev_button:
   slot: 27
-  material: ARROW
-  name: "<#ffd2a8>« <#ffc58f>Anterior"
+  material: "headbase-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGExZDU1YjNmOTg5NDEwYTM0NzUyNjUwZTI0OGM5YjZjMTc4M2E3ZWMyYWEzZmQ3Nzg3YmRjNGQwZTYzN2QzOSJ9fX0="
+  name: "<#8fffc1>⏪ <#8fffc1>Anterior"
   lore:
-    - "&8| <#e7cfff>Pulsa para ver jugadores anteriores."
+    - "&8⏵ <#e7cfff>Pulsa para ver sanciones anteriores."
   use_placeholders: false
   hide_attributes: true
 next_button:
   slot: 35
-  material: ARROW
-  name: "<#8fffc1>Siguiente <#a1ffc3>»"
+  material: "headurl-http://textures.minecraft.net/texture/fa87e3d96e1cfeb9ccfb3ba53a217faf5249e285533b271a2fb284c30dbd9829"
+  name: "<#8fffc1>Siguiente <#a1ffc3>⏩"
   lore:
-    - "&8| <#e7cfff>Pulsa para ver más jugadores."
+    - "&8⏵ <#e7cfff>Pulsa para ver más sanciones."
   use_placeholders: false
   hide_attributes: true
 filler:

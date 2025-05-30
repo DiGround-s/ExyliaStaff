@@ -102,7 +102,7 @@ public class MinerHubManager {
                                       boolean usePlaceholders, boolean dynamicUpdate,
                                       int updateInterval, boolean hideAttributes, Player staff) {
 
-        MenuItem playerItem = new MenuItem(Material.valueOf(material));
+        MenuItem playerItem = new MenuItem(material);
 
         playerItem.usePlaceholders(usePlaceholders);
         playerItem.setDynamicUpdate(dynamicUpdate);
