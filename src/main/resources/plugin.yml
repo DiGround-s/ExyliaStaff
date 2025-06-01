@@ -4,7 +4,7 @@ main: net.exylia.exyliaStaff.ExyliaStaff
 api-version: '1.18'
 author: DiGround
 website: https://discord.gg/85qjmgK2NS
-softdepend: [PlaceholderAPI]
+softdepend: [PlaceholderAPI, Apollo-Bukkit]
 
 libraries:
   - 'com.zaxxer:HikariCP:5.1.0'

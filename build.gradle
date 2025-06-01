@@ -17,6 +17,10 @@ repositories {
     }
     maven { url = uri("https://repo.codemc.io/repository/maven-releases/") }
     maven { url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/' }
+    maven {
+        name = 'lunarclient'
+        url = 'https://repo.lunarclient.dev'
+    }
 }
 
 dependencies {
@@ -25,12 +29,16 @@ dependencies {
     compileOnly 'mysql:mysql-connector-java:8.0.33'
     compileOnly("com.github.retrooper:packetevents-spigot:2.7.0")
     compileOnly 'me.clip:placeholderapi:2.11.6'
+    compileOnly("com.lunarclient:apollo-api:1.1.8")
+    compileOnly("com.lunarclient:apollo-extra-adventure4:1.1.8")
     implementation('net.exylia:exyliacommons:1.0.0') {
         exclude group: 'com.zaxxer', module: 'HikariCP'
         exclude group: 'org.xerial', module: 'sqlite-jdbc'
         exclude group: 'mysql', module: 'mysql-connector-java'
         exclude group: 'com.github.retrooper', module: 'packetevents-spigot'
         exclude group: 'me.clip', module: 'placeholderapi'
+        exclude group: 'com.lunarclient', module: 'apollo-api'
+        exclude group: 'com.lunarclient', module: 'apollo-extra-adventure4'
     }
 
     compileOnly 'io.papermc.paper:paper-api:1.19.4-R0.1-SNAPSHOT'

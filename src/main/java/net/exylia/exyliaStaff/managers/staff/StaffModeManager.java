@@ -5,6 +5,7 @@ import net.exylia.commons.utils.MessageUtils;
 import net.exylia.exyliaStaff.ExyliaStaff;
 import net.exylia.exyliaStaff.managers.StaffItems;
 import net.exylia.exyliaStaff.managers.StaffManager;
+import net.exylia.exyliaStaff.managers.clients.ApolloIntegration;
 import net.exylia.exyliaStaff.models.StaffPlayer;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
@@ -103,6 +104,9 @@ public class StaffModeManager {
 
         MessageUtils.sendMessageAsync(player, plugin.getConfigManager().getMessage("actions.staff-mode.enabled"));
         staffManager.savePlayer(player);
+        if (plugin.isEnabledExt("apollo-bukkit")) {
+            ApolloIntegration.enableStaffMods(player);
+        }
     }
 
     /**
@@ -141,6 +145,9 @@ public class StaffModeManager {
 
         MessageUtils.sendMessageAsync(player, plugin.getConfigManager().getMessage("actions.staff-mode.disabled"));
         staffManager.savePlayer(player, async);
+        if (plugin.isEnabledExt("apollo-bukkit")) {
+            ApolloIntegration.disableStaffMods(player);
+        }
     }
 
     /**

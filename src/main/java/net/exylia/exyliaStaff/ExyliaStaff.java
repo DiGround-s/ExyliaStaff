@@ -203,6 +203,7 @@ public final class ExyliaStaff extends ExyliaPlugin {
         logInfo("Recargando configuración...");
         configManager.reloadAllConfigs();
         commandManager.unregisterAll();
+//        staffManager.reloadAllModules();
         loadCommands();
         if (isDebugMode()) {
             logModuleStatus();
@@ -234,6 +235,7 @@ public final class ExyliaStaff extends ExyliaPlugin {
     public boolean isEnabledExt(String name) {
         return switch (name.toLowerCase()) {
             case "placeholderapi" -> Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null;
+            case "apollo-bukkit" -> Bukkit.getPluginManager().getPlugin("Apollo-Bukkit") != null;
             default -> false;
         };
     }
